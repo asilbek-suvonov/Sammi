@@ -1,12 +1,14 @@
 import { create } from 'zustand'
-import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
+const ACCESS_TOKEN_KEY = 'sammi_access_token'
+const AUTH_USER_KEY = 'sammi_auth_user'
 
 interface AuthUser {
   accountNo: string
+  firstName: string
+  lastName: string
   email: string
-  role: string[]
+  role: 'admin' | 'user'
   exp: number
 }
 
@@ -22,27 +24,34 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()((set) => {
-  const cookieState = getCookie(ACCESS_TOKEN)
-  const initToken = cookieState ? JSON.parse(cookieState) : ''
+  const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY) ?? ''
+  const storedUserRaw = localStorage.getItem(AUTH_USER_KEY)
+  const storedUser = storedUserRaw ? (JSON.parse(storedUserRaw) as AuthUser) : null
+
   return {
     auth: {
-      user: null,
+      user: storedUser,
       setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
-      accessToken: initToken,
+        set((state) => {
+          if (user) localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
+          else localStorage.removeItem(AUTH_USER_KEY)
+          return { ...state, auth: { ...state.auth, user } }
+        }),
+      accessToken: storedToken,
       setAccessToken: (accessToken) =>
         set((state) => {
-          setCookie(ACCESS_TOKEN, JSON.stringify(accessToken))
+          localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
           return { ...state, auth: { ...state.auth, accessToken } }
         }),
       resetAccessToken: () =>
         set((state) => {
-          removeCookie(ACCESS_TOKEN)
+          localStorage.removeItem(ACCESS_TOKEN_KEY)
           return { ...state, auth: { ...state.auth, accessToken: '' } }
         }),
       reset: () =>
         set((state) => {
-          removeCookie(ACCESS_TOKEN)
+          localStorage.removeItem(ACCESS_TOKEN_KEY)
+          localStorage.removeItem(AUTH_USER_KEY)
           return {
             ...state,
             auth: { ...state.auth, user: null, accessToken: '' },

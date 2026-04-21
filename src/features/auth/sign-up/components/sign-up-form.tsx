@@ -2,8 +2,11 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { IconFacebook, IconGithub } from '@/assets/brand-icons'
-import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth-store'
+import { cn, sleep } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -18,6 +21,8 @@ import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z
   .object({
+    firstName: z.string().min(2, 'First name is required'),
+    lastName: z.string().min(2, 'Last name is required'),
     email: z.email({
       error: (iss) =>
         iss.input === '' ? 'Please enter your email' : undefined,
@@ -38,24 +43,73 @@ export function SignUpForm({
   ...props
 }: React.HTMLAttributes<HTMLFormElement>) {
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+  const { auth } = useAuthStore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
+      firstName: '',
+      lastName: '',
       password: '',
       confirmPassword: '',
     },
   })
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
+    const usersRaw = localStorage.getItem('sammi_mock_users')
+    const users = usersRaw
+      ? (JSON.parse(usersRaw) as Array<{ email: string; password: string; role: 'user' | 'admin'; firstName: string; lastName: string }>)
+      : []
 
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 3000)
+    if (!users.some((item) => item.role === 'admin')) {
+      users.push({
+        email: 'admin@sammi.local',
+        password: 'admin1234',
+        role: 'admin',
+        firstName: 'Admin',
+        lastName: 'User',
+      })
+    }
+
+    if (users.some((item) => item.email === data.email)) {
+      form.setError('email', { message: 'This email is already registered' })
+      return
+    }
+
+    setIsLoading(true)
+    toast.promise(sleep(1500), {
+      loading: 'Creating account...',
+      success: () => {
+        users.push({
+          email: data.email,
+          password: data.password,
+          role: 'user',
+          firstName: data.firstName,
+          lastName: data.lastName,
+        })
+        localStorage.setItem('sammi_mock_users', JSON.stringify(users))
+
+        const mockUser = {
+          accountNo: 'ACC001',
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          role: 'user' as const,
+          exp: Date.now() + 24 * 60 * 60 * 1000,
+        }
+        auth.setUser(mockUser)
+        auth.setAccessToken('mock-access-token')
+        setIsLoading(false)
+        navigate({ to: '/dashboard/overview', replace: true })
+        return 'Account created successfully'
+      },
+      error: () => {
+        setIsLoading(false)
+        return 'Could not create account'
+      },
+    })
   }
 
   return (
@@ -65,6 +119,32 @@ export function SignUpForm({
         className={cn('grid gap-3', className)}
         {...props}
       >
+        <FormField
+          control={form.control}
+          name='firstName'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>First Name</FormLabel>
+              <FormControl>
+                <Input placeholder='John' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='lastName'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input placeholder='Doe' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name='email'

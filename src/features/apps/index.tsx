@@ -13,56 +13,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { getRouteApi } from '@tanstack/react-router'
 import { ArrowDownAZ, ArrowUpAZ, SlidersHorizontal } from 'lucide-react'
-import { type ChangeEvent, useState } from 'react'
-
-const route = getRouteApi('/_authenticated/apps/')
-
-type AppType = 'all' | 'connected' | 'notConnected'
-
-const appText = new Map<AppType, string>([
-  ['all', 'All Apps'],
-  ['connected', 'Connected'],
-  ['notConnected', 'Not Connected'],
-])
+import { useState } from 'react'
 
 export function Apps() {
-  const {
-    filter = '',
-    type = 'all',
-    sort: initSort = 'asc',
-  } = route.useSearch()
-  const navigate = route.useNavigate()
-
-  const [sort, setSort] = useState(initSort)
-  const [appType, setAppType] = useState(type)
-  const [searchTerm, setSearchTerm] = useState(filter)
-
-
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        filter: e.target.value || undefined,
-      }),
-    })
-  }
-
-  const handleTypeChange = (value: AppType) => {
-    setAppType(value)
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        type: value === 'all' ? undefined : value,
-      }),
-    })
-  }
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
 
   const handleSortChange = (sort: 'asc' | 'desc') => {
     setSort(sort)
-    navigate({ search: (prev) => ({ ...prev, sort }) })
   }
 
   return (
@@ -92,12 +50,12 @@ export function Apps() {
             <Input
               placeholder='Filter apps...'
               className='h-9 w-40 lg:w-[250px]'
-              value={searchTerm}
-              onChange={handleSearch}
+              value=''
+              readOnly
             />
-            <Select value={appType} onValueChange={handleTypeChange}>
+            <Select value='all'>
               <SelectTrigger className='w-36'>
-                <SelectValue>{appText.get(appType)}</SelectValue>
+                <SelectValue>All Apps</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='all'>All Apps</SelectItem>

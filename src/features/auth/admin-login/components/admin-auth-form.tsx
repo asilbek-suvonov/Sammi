@@ -5,9 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
-import { IconFacebook, IconGithub } from '@/assets/brand-icons'
 import { useAuthStore } from '@/stores/auth-store'
-import { sleep, cn } from '@/lib/utils'
+import { cn, sleep } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -30,15 +29,10 @@ const formSchema = z.object({
     .min(7, 'Password must be at least 7 characters long'),
 })
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
-  redirectTo?: string
-}
-
-export function UserAuthForm({
+export function AdminAuthForm({
   className,
-  redirectTo,
   ...props
-}: UserAuthFormProps) {
+}: React.HTMLAttributes<HTMLFormElement>) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const { auth } = useAuthStore()
@@ -51,7 +45,7 @@ export function UserAuthForm({
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     const usersRaw = localStorage.getItem('sammi_mock_users')
     const users = usersRaw
       ? (JSON.parse(usersRaw) as Array<{ email: string; password: string; role: 'user' | 'admin'; firstName: string; lastName: string }>)
@@ -68,50 +62,42 @@ export function UserAuthForm({
       localStorage.setItem('sammi_mock_users', JSON.stringify(users))
     }
 
-    const matchedUser = users.find(
+    const adminUser = users.find(
       (user) =>
-        user.role === 'user' &&
+        user.role === 'admin' &&
         user.email === data.email &&
         user.password === data.password
     )
 
-    if (!matchedUser) {
-      form.setError('email', { message: 'Invalid user credentials' })
+    if (!adminUser) {
+      form.setError('email', { message: 'Invalid admin credentials' })
       form.setError('password', { message: 'Please check email/password' })
       return
     }
 
     setIsLoading(true)
-
-    toast.promise(sleep(2000), {
-      loading: 'Signing in...',
+    toast.promise(sleep(1200), {
+      loading: 'Signing in as admin...',
       success: () => {
-        setIsLoading(false)
-
-        // Mock successful authentication with expiry computed at success time
         const mockUser = {
-          accountNo: 'ACC001',
-          firstName: matchedUser.firstName,
-          lastName: matchedUser.lastName,
-          email: matchedUser.email,
-          role: matchedUser.role,
-          exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
+          accountNo: 'ADMIN001',
+          firstName: adminUser.firstName,
+          lastName: adminUser.lastName,
+          email: adminUser.email,
+          role: 'admin' as const,
+          exp: Date.now() + 24 * 60 * 60 * 1000,
         }
 
-        // Set user and access token
         auth.setUser(mockUser)
         auth.setAccessToken('mock-access-token')
-
-        // Redirect to requested page after auth, otherwise default dashboard.
-        if (redirectTo?.startsWith('/')) {
-          window.location.assign(redirectTo)
-        } else {
-          navigate({ to: '/dashboard/overview', replace: true })
-        }
-
-        return `Welcome back, ${data.email}!`
+        setIsLoading(false)
+        navigate({ to: '/dashboard/overview', replace: true })
+        return 'Welcome back, admin!'
       },
-      error: 'Error',
+      error: () => {
+        setIsLoading(false)
+        return 'Could not sign in'
+      },
     })
   }
 
@@ -127,9 +113,9 @@ export function UserAuthForm({
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Admin Email</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input placeholder='admin@example.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -139,7 +125,7 @@ export function UserAuthForm({
           control={form.control}
           name='password'
           render={({ field }) => (
-            <FormItem className='relative'>
+            <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
                 <PasswordInput placeholder='********' {...field} />
@@ -150,28 +136,8 @@ export function UserAuthForm({
         />
         <Button className='mt-2' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
-          Sign in
+          Admin Sign In
         </Button>
-
-        <div className='relative my-2'>
-          <div className='absolute inset-0 flex items-center'>
-            <span className='w-full border-t' />
-          </div>
-          <div className='relative flex justify-center text-xs uppercase'>
-            <span className='bg-background px-2 text-muted-foreground'>
-              Or continue with
-            </span>
-          </div>
-        </div>
-
-        <div className='grid grid-cols-2 gap-2'>
-          <Button variant='outline' type='button' disabled={isLoading}>
-            <IconGithub className='h-4 w-4' /> GitHub
-          </Button>
-          <Button variant='outline' type='button' disabled={isLoading}>
-            <IconFacebook className='h-4 w-4' /> Facebook
-          </Button>
-        </div>
       </form>
     </Form>
   )

@@ -2,7 +2,7 @@ import { Logo } from '@/assets/logo'
 import { cn } from '@/lib/utils'
 import dashboardDark from './assets/dashboard-dark.png'
 import dashboardLight from './assets/dashboard-light.png'
-import { UserAuthForm } from './components/user-auth-form'
+import { AdminAuthForm } from '../admin-login/components/admin-auth-form'
 
 export function SignIn2() {
   return (
@@ -16,13 +16,13 @@ export function SignIn2() {
         </div>
         <div className='mx-auto flex w-full max-w-sm flex-col justify-center space-y-2'>
           <div className='flex flex-col space-y-2 text-start'>
-            <h2 className='text-lg font-semibold tracking-tight'>Sign in</h2>
+            <h2 className='text-lg font-semibold tracking-tight'>Admin Sign In</h2>
             <p className='text-sm text-muted-foreground'>
-              Enter your email and password below <br />
-              to log into your account
+              Enter admin email and password below <br />
+              to log into admin dashboard
             </p>
           </div>
-          <UserAuthForm />
+          <AdminAuthForm />
           <p className='px-8 text-center text-sm text-muted-foreground'>
             By clicking sign in, you agree to our{' '}
             <a

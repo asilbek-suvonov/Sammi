@@ -10,6 +10,7 @@ type Team = {
   name: string
   logo: React.ElementType
   plan: string
+  homeUrl: LinkProps['to'] | (string & {})
 }
 
 type BaseNavItem = {
