@@ -392,51 +392,81 @@ function LandingPage() {
         </section>
 
         {/* Projects */}
-        <section id='projects' className='space-y-6'>
-          <div className='flex items-end justify-between'>
-            <div className='space-y-0.5'>
-              <h2 className='text-xl font-semibold tracking-tight'>Loyihalar</h2>
-              <p className='text-sm text-muted-foreground'>Amaliy loyihalar orqali portfolio tashkil qiling</p>
-            </div>
-            <Button variant='ghost' size='sm' className='hidden gap-1.5 text-xs text-muted-foreground md:flex'>
-              Barchasi <ExternalLink className='size-3' />
-            </Button>
-          </div>
+       <section id="projects" className="space-y-8">
+  
+  {/* 🔹 Header */}
+  <div className="flex items-end justify-between">
+    <div className="space-y-1">
+      <h2 className="text-2xl font-semibold tracking-tight">
+        Loyihalar
+      </h2>
+      <p className="text-sm text-muted-foreground">
+        Amaliy loyihalar orqali portfolio tashkil qiling
+      </p>
+    </div>
 
-          <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-3'>
-            {projects.map((project) => (
-              <Card
-                key={project.title}
-                className='group cursor-pointer gap-0 overflow-hidden p-0 transition-shadow duration-200 hover:shadow-md'
+    <Button
+      variant="ghost"
+      size="sm"
+      className="hidden items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground md:flex"
+    >
+      Barchasi
+      <ExternalLink className="size-3" />
+    </Button>
+  </div>
+
+  {/* 🔹 Grid */}
+  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    {projects.map((project) => (
+      <Card
+        key={project.title}
+        className="group relative gap-3 overflow-hidden border p-0 backdrop-blur transition-all duration-300 bg-neutral-800/40 hover:shadow-md "
+      >
+        
+        {/* 🔸 Image */}
+        <div className="relative overflow-hidden">
+          <img
+            src={project.image}
+            alt={project.title}
+            className="h-44 w-full object-cover transition duration-500 group-hover:scale-105"
+          />
+
+          {/* Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+          {/* Type badge */}
+          <span className="absolute right-3 top-3 rounded-md border border-white/20 bg-black/40 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+            {project.type}
+          </span>
+
+          {/* Title */}
+        </div>
+          <p className=" text-sm font-semibold text-white px-4 py-0">
+            {project.title}
+          </p>
+
+        {/* 🔸 Content */}
+        <CardContent className="space-y-2 p-4 pt-0">
+          
+          {/* Tech stack */}
+          <div className="flex flex-wrap gap-2">
+            {project.tech.map((item) => (
+              <Badge
+                key={item}
+                variant="secondary"
+                className="rounded-md px-2 py-0.5 text-[11px]"
               >
-                <div className='relative overflow-hidden'>
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className='h-40 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]'
-                  />
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/55 to-transparent' />
-                  <span className='absolute right-2.5 top-2.5 rounded-md border border-white/20 bg-black/40 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm'>
-                    {project.type}
-                  </span>
-                  <p className='absolute bottom-3 left-3 right-3 text-[13px] font-medium leading-snug text-white'>
-                    {project.title}
-                  </p>
-                </div>
-
-                <CardContent className='p-3.5'>
-                  <div className='flex flex-wrap gap-1.5'>
-                    {project.tech.map((item) => (
-                      <Badge key={item} variant='secondary' className='rounded-md px-2 py-0.5 text-[11px] font-normal'>
-                        {item}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                {item}
+              </Badge>
             ))}
           </div>
-        </section>
+
+          
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+</section>
 
         {/* Sources */}
         <section id='sources' className='space-y-6'>
