@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectIdRouteImport } from './routes/project.$id'
+import { Route as CourseIdRouteImport } from './routes/course.$id'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -47,6 +49,16 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectIdRoute = ProjectIdRouteImport.update({
+  id: '/project/$id',
+  path: '/project/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseIdRoute = CourseIdRouteImport.update({
+  id: '/course/$id',
+  path: '/course/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const errors503Route = errors503RouteImport.update({
@@ -187,6 +199,8 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/course/$id': typeof CourseIdRoute
+  '/project/$id': typeof ProjectIdRoute
   '/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
@@ -211,6 +225,8 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/course/$id': typeof CourseIdRoute
+  '/project/$id': typeof ProjectIdRoute
   '/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
@@ -239,6 +255,8 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
+  '/course/$id': typeof CourseIdRoute
+  '/project/$id': typeof ProjectIdRoute
   '/_authenticated/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/_authenticated/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/_authenticated/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
@@ -267,6 +285,8 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/course/$id'
+    | '/project/$id'
     | '/dashboard/courses'
     | '/dashboard/overview'
     | '/dashboard/projects'
@@ -291,6 +311,8 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/course/$id'
+    | '/project/$id'
     | '/dashboard/courses'
     | '/dashboard/overview'
     | '/dashboard/projects'
@@ -318,6 +340,8 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/course/$id'
+    | '/project/$id'
     | '/_authenticated/dashboard/courses'
     | '/_authenticated/dashboard/overview'
     | '/_authenticated/dashboard/projects'
@@ -344,6 +368,8 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  CourseIdRoute: typeof CourseIdRoute
+  ProjectIdRoute: typeof ProjectIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -367,6 +393,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/project/$id': {
+      id: '/project/$id'
+      path: '/project/$id'
+      fullPath: '/project/$id'
+      preLoaderRoute: typeof ProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/$id': {
+      id: '/course/$id'
+      path: '/course/$id'
+      fullPath: '/course/$id'
+      preLoaderRoute: typeof CourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(errors)/503': {
@@ -600,6 +640,8 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  CourseIdRoute: CourseIdRoute,
+  ProjectIdRoute: ProjectIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

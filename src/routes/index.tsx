@@ -4,13 +4,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -18,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -28,9 +20,7 @@ import {
 } from '@/components/ui/select'
 import { useTheme } from '@/context/theme-provider'
 import { useAuthStore } from '@/stores/auth-store'
-import { IconGoogle } from '@/assets/brand-icons/icon-google'
-import { IconGithub } from '@/assets/brand-icons'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Check,
   Clock3,
@@ -51,7 +41,6 @@ import {
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/i18n'
-import { toast } from 'sonner'
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
@@ -195,9 +184,6 @@ function LandingPage() {
   const [language, setLanguage] = useState(
     () => localStorage.getItem(LANGUAGE_STORAGE_KEY) ?? 'en'
   )
-  const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const [emailInput, setEmailInput] = useState('')
-
   const navigate = useNavigate()
   const { auth } = useAuthStore()
   const { theme, setTheme } = useTheme()
@@ -206,9 +192,9 @@ function LandingPage() {
   const { t } = useTranslation()
 
   const navLinks = [
-    { id: 'courses', label: t('navCourses') },
-    { id: 'projects', label: t('navProjects') },
-    { id: 'sources', label: t('navSources') },
+    { id: 'courses', label: t("navCourses") },
+    { id: 'projects', label: t("navProjects") },
+    { id: 'sources', label: t("navSources") },
   ]
 
   const linkClass = useMemo(
@@ -226,51 +212,11 @@ function LandingPage() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  // ✅ til o'zgarganda i18n.changeLanguage ham chaqiriladi
   const handleLanguageChange = (value: string) => {
     setLanguage(value)
     localStorage.setItem(LANGUAGE_STORAGE_KEY, value)
     i18n.changeLanguage(value)
-  }
-
-  const handleGoogleAuth = () => {
-    const mockUser = {
-      accountNo: `GOOGLE_${Date.now()}`,
-      firstName: 'Google',
-      lastName: 'User',
-      email: 'google.user@gmail.com',
-      role: 'user' as const,
-      exp: Date.now() + 24 * 60 * 60 * 1000,
-    }
-    auth.setUser(mockUser)
-    auth.setAccessToken('mock-google-token')
-    setAuthDialogOpen(false)
-    setEmailInput('')
-    toast.success('Google orqali muvaffaqiyatli kirildi!')
-  }
-
-  const handleGitHubAuth = () => {
-    const mockUser = {
-      accountNo: `GITHUB_${Date.now()}`,
-      firstName: 'GitHub',
-      lastName: 'User',
-      email: 'github.user@github.com',
-      role: 'user' as const,
-      exp: Date.now() + 24 * 60 * 60 * 1000,
-    }
-    auth.setUser(mockUser)
-    auth.setAccessToken('mock-github-token')
-    setAuthDialogOpen(false)
-    setEmailInput('')
-    toast.success('GitHub orqali muvaffaqiyatli kirildi!')
-  }
-
-  const handleEmailContinue = () => {
-    const trimmed = emailInput.trim()
-    if (!trimmed) return
-    sessionStorage.setItem('sammi_otp_email', trimmed)
-    setAuthDialogOpen(false)
-    setEmailInput('')
-    navigate({ to: '/otp', search: { email: trimmed } })
   }
 
   const initials = (user?.firstName?.[0] ?? user?.email?.[0] ?? 'U').toUpperCase()
@@ -283,72 +229,6 @@ function LandingPage() {
 
   return (
     <div className='min-h-screen bg-background text-foreground'>
-
-      {/* ─── Auth Dialog ─────────────────────────────────────────────────── */}
-      <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
-        <DialogContent className='sm:max-w-sm'>
-          <DialogHeader>
-            <DialogTitle className='text-center text-lg'>Platformaga kirish</DialogTitle>
-            <DialogDescription className='text-center text-sm'>
-              Quyidagi usullardan birini tanlang
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className='flex flex-col gap-3 py-2'>
-            {/* Social auth */}
-            <Button
-              variant='outline'
-              className='w-full gap-2.5'
-              onClick={handleGoogleAuth}
-            >
-              <IconGoogle className='size-4' />
-              Google orqali kirish
-            </Button>
-
-            <Button
-              variant='outline'
-              className='w-full gap-2.5'
-              onClick={handleGitHubAuth}
-            >
-              <IconGithub className='size-4' />
-              GitHub orqali kirish
-            </Button>
-
-            {/* Divider */}
-            <div className='relative my-1'>
-              <div className='absolute inset-0 flex items-center'>
-                <span className='w-full border-t' />
-              </div>
-              <div className='relative flex justify-center text-xs'>
-                <span className='bg-background px-2 text-muted-foreground'>yoki</span>
-              </div>
-            </div>
-
-            {/* Email input */}
-            <div className='flex flex-col gap-2'>
-              <label htmlFor='landing-email' className='text-sm font-medium'>
-                Email manzil
-              </label>
-              <Input
-                id='landing-email'
-                type='email'
-                placeholder='name@example.com'
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleEmailContinue()}
-                autoComplete='email'
-              />
-              <Button
-                className='w-full'
-                disabled={!emailInput.trim()}
-                onClick={handleEmailContinue}
-              >
-                Davom etish →
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* ─── Header ─────────────────────────────────────────────────────── */}
       <header className='sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
@@ -421,13 +301,9 @@ function LandingPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end' className='w-56'>
                   <DropdownMenuLabel>
-                    <p className='truncate text-sm font-medium'>
-                      {[user.firstName, user.lastName].filter(Boolean).join(' ') || user.email.split('@')[0]}
-                    </p>
-                    <p className='truncate text-xs text-muted-foreground'>{user.email}</p>
-                    <p className='text-xs text-muted-foreground capitalize'>
-                      {user.role === 'admin' ? 'Admin' : 'Foydalanuvchi'}
-                    </p>
+                    <p className='truncate text-sm'>{`${user.firstName} ${user.lastName}`}</p>
+                    <p className='text-xs text-muted-foreground'>{user.email}</p>
+                    <p className='text-xs text-muted-foreground'>Role: {user.role}</p>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate({ to: '/dashboard/overview' })}>
@@ -443,12 +319,8 @@ function LandingPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button
-                size='sm'
-                className='h-8 rounded-lg text-xs'
-                onClick={() => setAuthDialogOpen(true)}
-              >
-                {t('sign')}
+              <Button asChild size='sm' className='h-8 rounded-lg text-xs'>
+                <Link to='/login'>{t('sign')}</Link>
               </Button>
             )}
           </div>
@@ -517,54 +389,79 @@ function LandingPage() {
         </section>
 
         {/* Projects */}
-        <section id='projects' className='space-y-6'>
-          <div className='flex items-end justify-between'>
-            <div className='space-y-0.5'>
-              <h2 className='text-xl font-semibold tracking-tight'>{t('projectsTitle')}</h2>
-              <p className='text-sm text-muted-foreground'>{t('projectsSubtitle')}</p>
-            </div>
-            <Button variant='ghost' size='sm' className='hidden gap-1.5 text-xs text-muted-foreground md:flex'>
-              {t('projectsAll')} <ExternalLink className='size-3' />
-            </Button>
-          </div>
+<section id='projects' className='space-y-6'>
+  <div className='flex items-end justify-between'>
+    <div className='space-y-0.5'>
+      <h2 className='text-xl font-semibold tracking-tight'>{t('projectsTitle')}</h2>
+      <p className='text-sm text-muted-foreground'>{t('projectsSubtitle')}</p>
+    </div>
+    <Button variant='ghost' size='sm' className='hidden gap-1.5 text-xs text-muted-foreground md:flex'>
+      {t('projectsAll')} <ExternalLink className='size-3' />
+    </Button>
+  </div>
+  <div>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="hidden items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground md:flex"
+    >
+      Barchasi
+      <ExternalLink className="size-3" />
+    </Button>
+  </div>
 
-          <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-3'>
-            {projects.map((project) => (
-              <Card
-                key={project.title}
-                className='group relative gap-3 overflow-hidden border p-0 backdrop-blur transition-all duration-300 bg-neutral-800/40 hover:shadow-md'
+  {/* 🔹 Grid */}
+  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    {projects.map((project) => (
+      <Card
+        key={project.title}
+        className="group relative gap-3 overflow-hidden border p-0 backdrop-blur transition-all duration-300 bg-neutral-800/40 hover:shadow-md "
+      >
+        
+        {/* 🔸 Image */}
+        <div className="relative overflow-hidden">
+          <img
+            src={project.image}
+            alt={project.title}
+            className="h-44 w-full object-cover transition duration-500 group-hover:scale-105"
+          />
+
+          {/* Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+          {/* Type badge */}
+          <span className="absolute right-3 top-3 rounded-md border border-white/20 bg-black/40 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+            {project.type}
+          </span>
+
+          {/* Title */}
+        </div>
+          <p className=" text-sm font-semibold text-white px-4 py-0">
+            {project.title}
+          </p>
+
+        {/* 🔸 Content */}
+        <CardContent className="space-y-2 p-4 pt-0">
+          
+          {/* Tech stack */}
+          <div className="flex flex-wrap gap-2">
+            {project.tech.map((item) => (
+              <Badge
+                key={item}
+                variant="secondary"
+                className="rounded-md px-2 py-0.5 text-[11px]"
               >
-                <div className='relative overflow-hidden'>
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className='h-44 w-full object-cover transition duration-500 group-hover:scale-105'
-                  />
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent' />
-                  <span className='absolute right-3 top-3 rounded-md border border-white/20 bg-black/40 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur'>
-                    {project.type}
-                  </span>
-                </div>
-                <p className='text-sm font-semibold text-white px-4 py-0'>
-                  {project.title}
-                </p>
-                <CardContent className='space-y-2 p-4 pt-0'>
-                  <div className='flex flex-wrap gap-2'>
-                    {project.tech.map((item) => (
-                      <Badge
-                        key={item}
-                        variant='secondary'
-                        className='rounded-md px-2 py-0.5 text-[11px]'
-                      >
-                        {item}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                {item}
+              </Badge>
             ))}
           </div>
-        </section>
+
+          
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+</section>
 
         {/* Sources */}
         <section id='sources' className='space-y-6'>
