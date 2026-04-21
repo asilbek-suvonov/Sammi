@@ -3,9 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
-import { useAuthStore } from '@/stores/auth-store'
+import { showSubmittedData } from '@/lib/show-submitted-data'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,17 +24,14 @@ import {
 const formSchema = z.object({
   otp: z
     .string()
-    .min(6, '6 raqamli kodni kiriting.')
-    .max(6, '6 raqamli kodni kiriting.'),
+    .min(6, 'Please enter the 6-digit code.')
+    .max(6, 'Please enter the 6-digit code.'),
 })
 
-interface OtpFormProps extends React.HTMLAttributes<HTMLFormElement> {
-  email?: string
-}
+type OtpFormProps = React.HTMLAttributes<HTMLFormElement>
 
-export function OtpForm({ className, email = '', ...props }: OtpFormProps) {
+export function OtpForm({ className, ...props }: OtpFormProps) {
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,37 +39,17 @@ export function OtpForm({ className, email = '', ...props }: OtpFormProps) {
     defaultValues: { otp: '' },
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const otp = form.watch('otp')
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
+    showSubmittedData(data)
 
     setTimeout(() => {
-      // Mock: accept any 6-digit code
-      if (data.otp.length === 6) {
-        const resolvedEmail = email || sessionStorage.getItem('sammi_otp_email') || 'user@sammi.local'
-        const namePart = resolvedEmail.split('@')[0] ?? 'User'
-
-        const mockUser = {
-          accountNo: `OTP_${Date.now()}`,
-          firstName: namePart,
-          lastName: '',
-          email: resolvedEmail,
-          role: 'user' as const,
-          exp: Date.now() + 24 * 60 * 60 * 1000,
-        }
-
-        auth.setUser(mockUser)
-        auth.setAccessToken('mock-otp-token')
-        sessionStorage.removeItem('sammi_otp_email')
-
-        toast.success('Muvaffaqiyatli kirildi!')
-        navigate({ to: '/' })
-      } else {
-        form.setError('otp', { message: 'Noto\'g\'ri kod. Qayta urinib ko\'ring.' })
-        setIsLoading(false)
-      }
-    }, 1200)
+      setIsLoading(false)
+      navigate({ to: '/' })
+    }, 1000)
   }
 
   return (
@@ -89,7 +64,7 @@ export function OtpForm({ className, email = '', ...props }: OtpFormProps) {
           name='otp'
           render={({ field }) => (
             <FormItem>
-              <FormLabel className='sr-only'>Bir martalik parol</FormLabel>
+              <FormLabel className='sr-only'>One-Time Password</FormLabel>
               <FormControl>
                 <InputOTP
                   maxLength={6}
@@ -117,8 +92,7 @@ export function OtpForm({ className, email = '', ...props }: OtpFormProps) {
           )}
         />
         <Button className='mt-2' disabled={otp.length < 6 || isLoading}>
-          {isLoading ? <Loader2 className='size-4 animate-spin' /> : null}
-          Tasdiqlash
+          Verify
         </Button>
       </form>
     </Form>

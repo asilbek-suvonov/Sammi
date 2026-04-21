@@ -1,4 +1,4 @@
-import { useSearch } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import {
   Card,
   CardContent,
@@ -11,40 +11,31 @@ import { AuthLayout } from '../auth-layout'
 import { OtpForm } from './components/otp-form'
 
 export function Otp() {
-  const search = useSearch({ strict: false }) as { email?: string }
-  const email = typeof search.email === 'string' && search.email ? search.email : ''
-
   return (
     <AuthLayout>
       <Card className='gap-4'>
         <CardHeader>
           <CardTitle className='text-base tracking-tight'>
-            Tasdiqlash kodi
+            Two-factor Authentication
           </CardTitle>
           <CardDescription>
-            {email ? (
-              <>
-                <span className='font-medium text-foreground'>{email}</span> manziliga{' '}
-                tasdiqlash kodi yuborildi.
-              </>
-            ) : (
-              'Email manzilingizga tasdiqlash kodi yuborildi.'
-            )}
+            Please enter the authentication code. <br /> We have sent the
+            authentication code to your email.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <OtpForm email={email} />
+          <OtpForm />
         </CardContent>
         <CardFooter>
-          <p className='w-full text-center text-sm text-muted-foreground'>
-            Kod kelmadimi?{' '}
-            <button
-              type='button'
+          <p className='px-8 text-center text-sm text-muted-foreground'>
+            Haven't received it?{' '}
+            <Link
+              to='/login'
               className='underline underline-offset-4 hover:text-primary'
-              onClick={() => window.history.back()}
             >
-              Qayta yuborish
-            </button>
+              Resend a new code.
+            </Link>
+            .
           </p>
         </CardFooter>
       </Card>

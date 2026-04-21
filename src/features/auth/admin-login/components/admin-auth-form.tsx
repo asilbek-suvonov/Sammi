@@ -19,12 +19,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 
-const ADMIN_LOGIN = 'Asilbek7712'
-const ADMIN_PASSWORD = 'Asil2008'
-
 const formSchema = z.object({
-  login: z.string().min(1, 'Login kiriting'),
-  password: z.string().min(1, 'Parolni kiriting'),
+  email: z.email({
+    error: (iss) => (iss.input === '' ? 'Please enter your email' : undefined),
+  }),
+  password: z
+    .string()
+    .min(1, 'Please enter your password')
+    .min(7, 'Password must be at least 7 characters long'),
 })
 
 export function AdminAuthForm({
@@ -38,40 +40,63 @@ export function AdminAuthForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      login: '',
+      email: '',
       password: '',
     },
   })
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    if (data.login !== ADMIN_LOGIN || data.password !== ADMIN_PASSWORD) {
-      form.setError('login', { message: 'Noto\'g\'ri login yoki parol' })
-      form.setError('password', { message: 'Login yoki parolni tekshiring' })
+    const usersRaw = localStorage.getItem('sammi_mock_users')
+    const users = usersRaw
+      ? (JSON.parse(usersRaw) as Array<{ email: string; password: string; role: 'user' | 'admin'; firstName: string; lastName: string }>)
+      : []
+
+    if (!users.some((item) => item.role === 'admin')) {
+      users.push({
+        email: 'admin@sammi.local',
+        password: 'admin1234',
+        role: 'admin',
+        firstName: 'Admin',
+        lastName: 'User',
+      })
+      localStorage.setItem('sammi_mock_users', JSON.stringify(users))
+    }
+
+    const adminUser = users.find(
+      (user) =>
+        user.role === 'admin' &&
+        user.email === data.email &&
+        user.password === data.password
+    )
+
+    if (!adminUser) {
+      form.setError('email', { message: 'Invalid admin credentials' })
+      form.setError('password', { message: 'Please check email/password' })
       return
     }
 
     setIsLoading(true)
     toast.promise(sleep(1200), {
-      loading: 'Admin sifatida kirilmoqda...',
+      loading: 'Signing in as admin...',
       success: () => {
         const mockUser = {
           accountNo: 'ADMIN001',
-          firstName: 'Asilbek',
-          lastName: '',
-          email: 'asilbek@sammi.local',
+          firstName: adminUser.firstName,
+          lastName: adminUser.lastName,
+          email: adminUser.email,
           role: 'admin' as const,
           exp: Date.now() + 24 * 60 * 60 * 1000,
         }
 
         auth.setUser(mockUser)
-        auth.setAccessToken('mock-admin-token')
+        auth.setAccessToken('mock-access-token')
         setIsLoading(false)
         navigate({ to: '/dashboard/overview', replace: true })
-        return 'Xush kelibsiz, Admin!'
+        return 'Welcome back, admin!'
       },
       error: () => {
         setIsLoading(false)
-        return 'Kirib bo\'lmadi'
+        return 'Could not sign in'
       },
     })
   }
@@ -85,12 +110,12 @@ export function AdminAuthForm({
       >
         <FormField
           control={form.control}
-          name='login'
+          name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Login</FormLabel>
+              <FormLabel>Admin Email</FormLabel>
               <FormControl>
-                <Input placeholder='Admin login' autoComplete='username' {...field} />
+                <Input placeholder='admin@example.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,9 +126,9 @@ export function AdminAuthForm({
           name='password'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Parol</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder='••••••••' {...field} />
+                <PasswordInput placeholder='********' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -111,7 +136,7 @@ export function AdminAuthForm({
         />
         <Button className='mt-2' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
-          Admin kirish
+          Admin Sign In
         </Button>
       </form>
     </Form>

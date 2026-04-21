@@ -1,5 +1,4 @@
 export { IconDiscord } from './icon-discord'
-export { IconGoogle } from './icon-google'
 export { IconDocker } from './icon-docker'
 export { IconFacebook } from './icon-facebook'
 export { IconFigma } from './icon-figma'
