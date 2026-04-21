@@ -1,4 +1,4 @@
-import { Briefcase, Command, Folder, GraduationCap, LayoutDashboard } from 'lucide-react'
+import { Briefcase, Command, FolderGit2, GraduationCap, LayoutDashboard, Users } from 'lucide-react'
 import { type SidebarData } from '../types'
 
 type Role = 'admin' | 'user'
@@ -12,8 +12,11 @@ export const buildSidebarData = (
     { title: 'Courses', url: '/dashboard/courses', icon: GraduationCap },
     { title: 'Projects', url: '/dashboard/projects', icon: Briefcase },
   ]
+
   if (role === 'admin') {
-    commonItems.push({ title: 'Users', url: '/dashboard/users', icon: Folder })
+    commonItems.push(
+      { title: 'Sources', url: '/dashboard/sources', icon: FolderGit2 },
+    )
   }
 
   return {

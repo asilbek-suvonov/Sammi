@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedCodeSourcesRouteImport } from './routes/_authenticated/code-sources'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -31,7 +30,7 @@ import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
-import { Route as AuthenticatedDashboardUsersRouteImport } from './routes/_authenticated/dashboard/users'
+import { Route as AuthenticatedDashboardSourcesRouteImport } from './routes/_authenticated/dashboard/sources'
 import { Route as AuthenticatedDashboardProjectsRouteImport } from './routes/_authenticated/dashboard/projects'
 import { Route as AuthenticatedDashboardOverviewRouteImport } from './routes/_authenticated/dashboard/overview'
 import { Route as AuthenticatedDashboardCoursesRouteImport } from './routes/_authenticated/dashboard/courses'
@@ -50,12 +49,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedCodeSourcesRoute =
-  AuthenticatedCodeSourcesRouteImport.update({
-    id: '/code-sources',
-    path: '/code-sources',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
   path: '/503',
@@ -155,10 +148,10 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDashboardUsersRoute =
-  AuthenticatedDashboardUsersRouteImport.update({
-    id: '/users',
-    path: '/users',
+const AuthenticatedDashboardSourcesRoute =
+  AuthenticatedDashboardSourcesRouteImport.update({
+    id: '/sources',
+    path: '/sources',
     getParentRoute: () => AuthenticatedDashboardRouteRoute,
   } as any)
 const AuthenticatedDashboardProjectsRoute =
@@ -194,11 +187,10 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-  '/code-sources': typeof AuthenticatedCodeSourcesRoute
   '/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
-  '/dashboard/users': typeof AuthenticatedDashboardUsersRoute
+  '/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -219,11 +211,10 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-  '/code-sources': typeof AuthenticatedCodeSourcesRoute
   '/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
-  '/dashboard/users': typeof AuthenticatedDashboardUsersRoute
+  '/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -248,11 +239,10 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
-  '/_authenticated/code-sources': typeof AuthenticatedCodeSourcesRoute
   '/_authenticated/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/_authenticated/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/_authenticated/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
-  '/_authenticated/dashboard/users': typeof AuthenticatedDashboardUsersRoute
+  '/_authenticated/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -277,11 +267,10 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
-    | '/code-sources'
     | '/dashboard/courses'
     | '/dashboard/overview'
     | '/dashboard/projects'
-    | '/dashboard/users'
+    | '/dashboard/sources'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
@@ -302,11 +291,10 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
-    | '/code-sources'
     | '/dashboard/courses'
     | '/dashboard/overview'
     | '/dashboard/projects'
-    | '/dashboard/users'
+    | '/dashboard/sources'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
@@ -330,11 +318,10 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
-    | '/_authenticated/code-sources'
     | '/_authenticated/dashboard/courses'
     | '/_authenticated/dashboard/overview'
     | '/_authenticated/dashboard/projects'
-    | '/_authenticated/dashboard/users'
+    | '/_authenticated/dashboard/sources'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
@@ -381,13 +368,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/code-sources': {
-      id: '/_authenticated/code-sources'
-      path: '/code-sources'
-      fullPath: '/code-sources'
-      preLoaderRoute: typeof AuthenticatedCodeSourcesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/(errors)/503': {
       id: '/(errors)/503'
@@ -515,11 +495,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard/users': {
-      id: '/_authenticated/dashboard/users'
-      path: '/users'
-      fullPath: '/dashboard/users'
-      preLoaderRoute: typeof AuthenticatedDashboardUsersRouteImport
+    '/_authenticated/dashboard/sources': {
+      id: '/_authenticated/dashboard/sources'
+      path: '/sources'
+      fullPath: '/dashboard/sources'
+      preLoaderRoute: typeof AuthenticatedDashboardSourcesRouteImport
       parentRoute: typeof AuthenticatedDashboardRouteRoute
     }
     '/_authenticated/dashboard/projects': {
@@ -550,7 +530,7 @@ interface AuthenticatedDashboardRouteRouteChildren {
   AuthenticatedDashboardCoursesRoute: typeof AuthenticatedDashboardCoursesRoute
   AuthenticatedDashboardOverviewRoute: typeof AuthenticatedDashboardOverviewRoute
   AuthenticatedDashboardProjectsRoute: typeof AuthenticatedDashboardProjectsRoute
-  AuthenticatedDashboardUsersRoute: typeof AuthenticatedDashboardUsersRoute
+  AuthenticatedDashboardSourcesRoute: typeof AuthenticatedDashboardSourcesRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
@@ -559,7 +539,7 @@ const AuthenticatedDashboardRouteRouteChildren: AuthenticatedDashboardRouteRoute
     AuthenticatedDashboardCoursesRoute: AuthenticatedDashboardCoursesRoute,
     AuthenticatedDashboardOverviewRoute: AuthenticatedDashboardOverviewRoute,
     AuthenticatedDashboardProjectsRoute: AuthenticatedDashboardProjectsRoute,
-    AuthenticatedDashboardUsersRoute: AuthenticatedDashboardUsersRoute,
+    AuthenticatedDashboardSourcesRoute: AuthenticatedDashboardSourcesRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
@@ -592,7 +572,6 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRouteRoute: typeof AuthenticatedDashboardRouteRouteWithChildren
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
-  AuthenticatedCodeSourcesRoute: typeof AuthenticatedCodeSourcesRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
 }
@@ -601,7 +580,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRouteRoute:
     AuthenticatedDashboardRouteRouteWithChildren,
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
-  AuthenticatedCodeSourcesRoute: AuthenticatedCodeSourcesRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
 }
