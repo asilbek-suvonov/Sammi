@@ -1,0 +1,19 @@
+{
+  "navCourses": "Курсы",
+  "navProjects": "Проекты",
+  "navSources": "Источники",
+  "sign": "Войти",
+  "dashboard": "Дашборд",
+  "logout": "Выйти",
+  "coursesTitle": "Курсы",
+  "coursesSubtitle": "Достигните профессионального уровня с реальными проектами",
+  "coursesAll": "Все",
+  "coursesLessons": "уроков",
+  "projectsTitle": "Проекты",
+  "projectsSubtitle": "Создайте портфолио с помощью практических проектов",
+  "projectsAll": "Все",
+  "sourcesTitle": "Исходный код",
+  "sourcesSubtitle": "Код всех проектов публично доступен на GitHub",
+  "footerDescription": "Профессиональная платформа для обучения frontend — реальные проекты, современная архитектура.",
+  "footerRights": "Все права защищены."
+}

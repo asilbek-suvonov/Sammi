@@ -1,0 +1,19 @@
+{
+  "navCourses": "Kurslar",
+  "navProjects": "Loyihalar",
+  "navSources": "Manba",
+  "sign": "Kirish",
+  "dashboard": "Dashboard",
+  "logout": "Chiqish",
+  "coursesTitle": "Kurslar",
+  "coursesSubtitle": "Real loyihalar bilan professional darajaga yeting",
+  "coursesAll": "Barchasi",
+  "coursesLessons": "dars",
+  "projectsTitle": "Loyihalar",
+  "projectsSubtitle": "Amaliy loyihalar orqali portfolio tashkil qiling",
+  "projectsAll": "Barchasi",
+  "sourcesTitle": "Kod manbalari",
+  "sourcesSubtitle": "Barcha loyihalar kodi GitHub da ochiq holda joylashgan",
+  "footerDescription": "Professional frontend o'quv platformasi — real loyihalar, zamonaviy arxitektura.",
+  "footerRights": "Barcha huquqlar himoyalangan."
+}
