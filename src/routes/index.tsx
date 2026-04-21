@@ -412,12 +412,11 @@ function LandingPage() {
     </Button>
   </div>
 
-  {/* 🔹 Grid */}
   <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
     {projects.map((project) => (
       <Card
         key={project.title}
-        className="group relative gap-3 overflow-hidden border p-0 backdrop-blur transition-all duration-300 bg-neutral-800/40 hover:shadow-md "
+        className="group relative gap-3 overflow-hidden border p-0 backdrop-blur transition-all duration-300 dark:bg-neutral-800/40 hover:shadow-md "
       >
         
         {/* 🔸 Image */}
@@ -438,7 +437,7 @@ function LandingPage() {
 
           {/* Title */}
         </div>
-          <p className=" text-sm font-semibold text-white px-4 py-0">
+          <p className=" text-sm font-semibold  dark:text-white px-4 py-0">
             {project.title}
           </p>
 
