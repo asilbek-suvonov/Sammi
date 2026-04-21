@@ -41,6 +41,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/i18n'
+import HeroSection from '@/components/HeroSection'
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
@@ -328,6 +329,7 @@ function LandingPage() {
       </header>
       <section className='border-b'></section>
       <main className='mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 py-16 md:px-6'>
+          <HeroSection />
         <section id='courses' className='space-y-6'>
           <div className='flex items-end justify-between'>
             <div className='space-y-0.5'>
@@ -343,7 +345,7 @@ function LandingPage() {
             {courses.map((course) => (
               <Card
                 key={course.title}
-                className='group cursor-pointer gap-0 overflow-hidden p-3 transition-shadow duration-200 bg-neutral-800/40 hover:shadow-md'
+                className='group cursor-pointer gap-0 overflow-hidden p-3 transition-shadow duration-200 dark:bg-neutral-800/40 hover:shadow-md'
               >
                 <div className='relative overflow-hidden'>
                   <img
@@ -352,7 +354,7 @@ function LandingPage() {
                     className='h-40 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] rounded-md'
                   />
                   <div className='absolute left-2.5 top-2.5'>
-                    <Badge variant={levelVariant(course.level)} className='rounded-md bg-accent text-[11px]'>
+                    <Badge variant={levelVariant(course.level)} className='text-black dark:text-white rounded-md bg-accent text-[11px]'>
                       {course.level}
                     </Badge>
                   </div>

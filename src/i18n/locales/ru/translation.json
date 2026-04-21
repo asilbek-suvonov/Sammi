@@ -15,5 +15,15 @@
   "sourcesTitle": "Исходный код",
   "sourcesSubtitle": "Код всех проектов публично доступен на GitHub",
   "footerDescription": "Профессиональная платформа для обучения frontend — реальные проекты, современная архитектура.",
-  "footerRights": "Все права защищены."
+  "footerRights": "Все права защищены.",
+  "heroBadge": "Новый курс вышел",
+  "heroTitle1": "Изучите",
+  "heroTitleHighlight": "frontend",
+  "heroTitle2": "на профессиональном уровне",
+  "heroSubtitle": "Реальные проекты, современный стек и поддержка ментора — будьте готовы к работе.",
+  "heroCta": "Начать",
+  "heroSecondary": "Проекты",
+  "heroStat1": "Студентов",
+  "heroStat2": "Курсов",
+  "heroStat3": "Проектов"
 }

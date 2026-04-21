@@ -15,5 +15,15 @@
   "sourcesTitle": "Code Sources",
   "sourcesSubtitle": "All project code is publicly available on GitHub",
   "footerDescription": "Professional frontend learning platform — real projects, modern architecture.",
-  "footerRights": "All rights reserved."
+  "footerRights": "All rights reserved.",
+  "heroBadge": "New course released",
+  "heroTitle1": "Master",
+  "heroTitleHighlight": "frontend",
+  "heroTitle2": "at a professional level",
+  "heroSubtitle": "With real projects, modern stack and mentor support — get ready to land a job.",
+  "heroCta": "Get started",
+  "heroSecondary": "Projects",
+  "heroStat1": "Students",
+  "heroStat2": "Courses",
+  "heroStat3": "Projects"
 }
