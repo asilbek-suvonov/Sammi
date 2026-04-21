@@ -1,0 +1,19 @@
+{
+  "navCourses": "Courses",
+  "navProjects": "Projects",
+  "navSources": "Sources",
+  "sign": "Sign In",
+  "dashboard": "Dashboard",
+  "logout": "Logout",
+  "coursesTitle": "Courses",
+  "coursesSubtitle": "Reach professional level with real projects",
+  "coursesAll": "View all",
+  "coursesLessons": "lessons",
+  "projectsTitle": "Projects",
+  "projectsSubtitle": "Build your portfolio through practical projects",
+  "projectsAll": "View all",
+  "sourcesTitle": "Code Sources",
+  "sourcesSubtitle": "All project code is publicly available on GitHub",
+  "footerDescription": "Professional frontend learning platform — real projects, modern architecture.",
+  "footerRights": "All rights reserved."
+}

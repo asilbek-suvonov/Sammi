@@ -36,9 +36,11 @@ import {
   Star,
   Sun,
   Users,
-  Zap
+  Zap,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import i18n from '@/i18n/i18n'
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
@@ -165,12 +167,6 @@ const sources = [
   },
 ]
 
-const navLinks = [
-  { id: 'courses', label: 'Course' },
-  { id: 'projects', label: 'Project' },
-  { id: 'sources', label: 'Manba' },
-]
-
 const LANGUAGE_STORAGE_KEY = 'sammi_language'
 
 function levelVariant(level: string): 'secondary' | 'outline' | 'destructive' {
@@ -193,6 +189,14 @@ function LandingPage() {
   const { theme, setTheme } = useTheme()
   const user = auth.user
 
+  const { t } = useTranslation()
+
+  const navLinks = [
+    { id: 'courses', label: t("navCourses") },
+    { id: 'projects', label: t("navProjects") },
+    { id: 'sources', label: t("navSources") },
+  ]
+
   const linkClass = useMemo(
     () => (id: string) =>
       `px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150 ${
@@ -208,9 +212,11 @@ function LandingPage() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  // ✅ til o'zgarganda i18n.changeLanguage ham chaqiriladi
   const handleLanguageChange = (value: string) => {
     setLanguage(value)
     localStorage.setItem(LANGUAGE_STORAGE_KEY, value)
+    i18n.changeLanguage(value)
   }
 
   const initials = (user?.firstName?.[0] ?? user?.email?.[0] ?? 'U').toUpperCase()
@@ -258,7 +264,7 @@ function LandingPage() {
                 <SelectItem value='en'>English</SelectItem>
                 <SelectItem value='uz'>Uzbek</SelectItem>
                 <SelectItem value='ru'>Russian</SelectItem>
-              </SelectContent>  
+              </SelectContent>
             </Select>
 
             <DropdownMenu>
@@ -301,43 +307,35 @@ function LandingPage() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate({ to: '/dashboard/overview' })}>
-                    <LayoutDashboard className='size-4' /> Dashboard
+                    <LayoutDashboard className='size-4' /> {t('dashboard')}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant='destructive'
                     onClick={() => { auth.reset(); navigate({ to: '/' }) }}
                   >
-                    <LogOut className='size-4' /> Logout
+                    <LogOut className='size-4' /> {t('logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Button asChild size='sm' className='h-8 rounded-lg text-xs'>
-                <Link to='/login'>Kirish</Link>
+                <Link to='/login'>{t('sign')}</Link>
               </Button>
             )}
           </div>
         </div>
       </header>
-
-      {/* ─── Hero ────────────────────────────────────────────────────────── */}
-      <section className='border-b'>
-      
-      </section>
-
-      {/* ─── Main ────────────────────────────────────────────────────────── */}
+      <section className='border-b'></section>
       <main className='mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 py-16 md:px-6'>
-
-        {/* Courses */}
         <section id='courses' className='space-y-6'>
           <div className='flex items-end justify-between'>
             <div className='space-y-0.5'>
-              <h2 className='text-xl font-semibold tracking-tight'>Course</h2>
-              <p className='text-sm text-muted-foreground'>Real loyihalar bilan professional darajaga yeting</p>
+              <h2 className='text-xl font-semibold tracking-tight'>{t('coursesTitle')}</h2>
+              <p className='text-sm text-muted-foreground'>{t('coursesSubtitle')}</p>
             </div>
             <Button variant='ghost' size='sm' className='hidden gap-1.5 text-xs text-muted-foreground md:flex'>
-              Barchasi <ExternalLink className='size-3' />
+              {t('coursesAll')} <ExternalLink className='size-3' />
             </Button>
           </div>
 
@@ -369,7 +367,7 @@ function LandingPage() {
                 <CardContent className='space-y-3 px-2 pb-4'>
                   <div className='flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground'>
                     <span className='flex items-center gap-1'>
-                      <Layers3 className='size-3' /> {course.parts} dars
+                      <Layers3 className='size-3' /> {course.parts} {t('coursesLessons')}
                     </span>
                     <span className='flex items-center gap-1'>
                       <Clock3 className='size-3' /> {course.hours}s
@@ -380,7 +378,6 @@ function LandingPage() {
                   </div>
 
                   <div className='flex items-center justify-between border-t pt-3'>
-                    
                     <span className='flex items-center gap-1 text-sm font-semibold'>
                       {course.price}
                     </span>
@@ -395,11 +392,11 @@ function LandingPage() {
         <section id='projects' className='space-y-6'>
           <div className='flex items-end justify-between'>
             <div className='space-y-0.5'>
-              <h2 className='text-xl font-semibold tracking-tight'>Loyihalar</h2>
-              <p className='text-sm text-muted-foreground'>Amaliy loyihalar orqali portfolio tashkil qiling</p>
+              <h2 className='text-xl font-semibold tracking-tight'>{t('projectsTitle')}</h2>
+              <p className='text-sm text-muted-foreground'>{t('projectsSubtitle')}</p>
             </div>
             <Button variant='ghost' size='sm' className='hidden gap-1.5 text-xs text-muted-foreground md:flex'>
-              Barchasi <ExternalLink className='size-3' />
+              {t('projectsAll')} <ExternalLink className='size-3' />
             </Button>
           </div>
 
@@ -441,8 +438,8 @@ function LandingPage() {
         {/* Sources */}
         <section id='sources' className='space-y-6'>
           <div className='space-y-0.5'>
-            <h2 className='text-xl font-semibold tracking-tight'>Kod manbalari</h2>
-            <p className='text-sm text-muted-foreground'>Barcha loyihalar kodi GitHub da ochiq holda joylashgan</p>
+            <h2 className='text-xl font-semibold tracking-tight'>{t('sourcesTitle')}</h2>
+            <p className='text-sm text-muted-foreground'>{t('sourcesSubtitle')}</p>
           </div>
 
           <div className='grid gap-4 md:grid-cols-3'>
@@ -491,7 +488,7 @@ function LandingPage() {
                 <span className='text-sm font-semibold'>Sammi</span>
               </div>
               <p className='text-sm text-muted-foreground leading-relaxed'>
-                Professional frontend o'quv platformasi — real loyihalar, zamonaviy arxitektura.
+                {t('footerDescription')}
               </p>
             </div>
 
@@ -514,7 +511,7 @@ function LandingPage() {
           </div>
 
           <div className='mt-10 flex flex-col items-start justify-between gap-3 border-t pt-6 text-xs text-muted-foreground md:flex-row md:items-center'>
-            <span>© {new Date().getFullYear()} Sammi. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} Sammi. {t('footerRights')}</span>
             <a href='https://github.com' target='_blank' rel='noreferrer' className='flex items-center gap-1.5 transition-colors hover:text-foreground'>
               <GitCommit className='size-3.5' /> GitHub
             </a>
