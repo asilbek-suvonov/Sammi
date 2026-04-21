@@ -29,6 +29,7 @@ function CoursesPage() {
             <p className='text-muted-foreground'>
               Manage your users and their roles here.
             </p>
+
           </div>
         </div>
       </Main>
