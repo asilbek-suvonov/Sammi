@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { 
   Zap, Languages, Sun, Moon, Monitor, 
-  Check, LayoutDashboard, LogOut 
+  LayoutDashboard, LogOut
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { 
@@ -127,7 +127,7 @@ export default function Navbar({
               <DropdownMenuTrigger asChild>
                 <Button variant='ghost' className='h-auto rounded-full p-0'>
                   <Avatar className='size-8'>
-                    <AvatarImage src={user.avatar} alt={user.email} />
+                    <AvatarImage src='/avatars/shadcn.jpg' alt={user.email} />
                     <AvatarFallback className='text-xs'>{initials}</AvatarFallback>
                   </Avatar>
                 </Button>

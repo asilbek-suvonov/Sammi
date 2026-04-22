@@ -1,194 +1,295 @@
-import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { 
-  PlayCircle, Globe, Code, 
-  ChevronDown, Lock, Search
-} from 'lucide-react'
-import Navbar from '@/components/Navbar' // Sizdagi umumiy Navbar
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
+import { useAuthStore } from '@/stores/auth-store'
+import { useUserStore } from '@/stores/user-store'
+import { COURSES } from '@/data/mock-data'
+import { useTheme } from '@/context/theme-provider'
+import {
+  Check,
+  ChevronDown,
+  Clock3,
+  Layers3,
+  MessageCircle,
+  Monitor,
+  Moon,
+  PlayCircle,
+  Star,
+  Sun,
+  Users,
+  Zap,
+} from 'lucide-react'
+import { useState } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/course/$id')({
-  component: CourseDetailComponent,
+  component: CourseDetailPage,
 })
 
-function CourseDetailComponent() {
-  const [openModule, setOpenModule] = useState<number | null>(1)
-  const [language, setLanguage] = useState(() => localStorage.getItem('sammi_language') ?? 'en')
+function levelVariant(level: string): 'secondary' | 'outline' | 'destructive' {
+  if (level === 'Beginner') return 'secondary'
+  if (level === 'Advanced') return 'destructive'
+  return 'outline'
+}
 
-  const toggleModule = (id: number) => {
-    setOpenModule(openModule === id ? null : id)
+function CourseDetailPage() {
+  const { id } = Route.useParams()
+  const navigate = useNavigate()
+  const { auth } = useAuthStore()
+  const { enrollCourse, isEnrolled } = useUserStore()
+  const { theme, setTheme } = useTheme()
+  const user = auth.user
+  const [openModules, setOpenModules] = useState<string[]>([])
+
+  const course = COURSES.find((c) => c.id === id)
+  const enrolled = course ? isEnrolled(course.id) : false
+
+  if (!course) {
+    return (
+      <div className='flex min-h-screen items-center justify-center'>
+        <p className='text-muted-foreground'>Course not found.</p>
+      </div>
+    )
   }
 
+  const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0)
+
+  const toggleModule = (moduleId: string) => {
+    setOpenModules((prev) =>
+      prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
+    )
+  }
+
+  const handleWatch = () => {
+    if (!user) {
+      toast.error('Please sign in to watch this course.')
+      return
+    }
+    if (!enrolled) enrollCourse(course.id)
+    navigate({ to: '/course/preview', search: { courseId: course.id } })
+  }
+
+  const getThemeIcon = () => {
+    if (theme === 'light') return <Sun className='size-4' />
+    if (theme === 'dark') return <Moon className='size-4' />
+    return <Monitor className='size-4' />
+  }
+
+  const initials = (user?.firstName?.[0] ?? 'U').toUpperCase()
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
-      {/* 1. NAVBAR - Loyihangizdagi tayyor Navbar'dan foydalanamiz */}
-      <Navbar 
-        language={language} 
-        setLanguage={setLanguage} 
-      />
-
-      {/* 2. ASOSIY CONTENT */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-sm text-slate-400 mb-8">
-          <Link to="/" className="hover:text-blue-600 transition-colors">Kurslar</Link>
-          <span>/</span>
-          <span className="text-slate-900 font-medium">Foundation</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
-          {/* CHAP TOMON (8 ustun) */}
-          <div className="lg:col-span-8">
-            <div className="flex gap-2 mb-6">
-              <Badge text="★ Boshlang'ich" color="bg-orange-50 text-orange-600" />
-              <Badge text="Front-end" color="bg-blue-50 text-blue-600" />
+    <div className='min-h-screen bg-background text-foreground'>
+      {/* Header */}
+      <header className='sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+        <div className='mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6'>
+          <Link to='/' className='flex items-center gap-2'>
+            <div className='flex size-7 items-center justify-center rounded-md bg-foreground'>
+              <Zap className='size-3.5 text-background' />
             </div>
+            <span className='text-sm font-semibold tracking-tight'>Sammi</span>
+          </Link>
 
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">Foundation</h1>
-            
-            <p className="text-lg text-slate-600 leading-relaxed mb-10">
-              Foundation to'liq kurs o'zbek tilida. HTML, CSS, JavaScript (BEM), Bootstrap, SASS (SCSS) 
-              va amaliy loyihalar barchasi bitta kursda va asosiysi mutlaqo bepul.
-            </p>
-
-            {/* Video Player Placeholder */}
-            <div className="group relative aspect-video rounded-[30px] md:rounded-[40px] overflow-hidden bg-slate-900 shadow-2xl mb-12 border-[8px] md:border-[12px] border-white">
-               <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-3xl transform group-hover:scale-110 transition-transform cursor-pointer">
-                    <PlayCircle size={40} fill="currentColor" fillOpacity={0.2}/>
-                  </div>
-               </div>
-               <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-black/20 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-2xl text-white text-xs md:text-sm flex items-center gap-3">
-                 <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
-                 Bepul tanishuv videosi
-               </div>
-            </div>
-
-            {/* O'quv dasturi */}
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">O'quv dasturi</h3>
-              
-              <ModuleAccordion 
-                id={1}
-                title="HTML Asoslari" 
-                lessonCount={5}
-                isOpen={openModule === 1}
-                onToggle={() => toggleModule(1)}
-                lessons={[
-                  { name: "Web dasturlashga kirish", duration: "12:00" },
-                  { name: "Semanitk taglar bilan ishlash", duration: "18:45" },
-                  { name: "Form va Inputlar", duration: "22:10" }
-                ]}
-              />
-
-              <ModuleAccordion 
-                id={2}
-                title="CSS Stil berish" 
-                lessonCount={8}
-                isOpen={openModule === 2}
-                onToggle={() => toggleModule(2)}
-                lessons={[
-                  { name: "Selectorlar va Box Model", duration: "15:30" },
-                  { name: "Flexbox asoslari", duration: "25:00" },
-                  { name: "Grid tizimi", duration: "30:15" }
-                ]}
-              />
-            </div>
-          </div>
-
-          {/* O'NG TOMON (4 ustun) */}
-          <div className="lg:col-span-4">
-            <div className="bg-white rounded-[30px] md:rounded-[40px] p-8 md:p-10 shadow-sm border border-slate-100 sticky top-28">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">KURS NARXI</span>
-              <div className="flex items-baseline gap-2 mb-10">
-                <span className="text-5xl font-black text-slate-900">Bepul</span>
-              </div>
-              
-              <div className="flex flex-col gap-4 mb-10">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-16 rounded-2xl font-bold text-lg shadow-lg shadow-blue-100 transition-all active:scale-[0.98]">
-                  Kursni boshlash
+          <div className='flex items-center gap-2'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline' size='icon' className='size-8'>
+                  {getThemeIcon()}
                 </Button>
-                <button className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 h-16 rounded-2xl font-bold transition-all border border-slate-200">
-                  Telegram guruhga qo'shilish
-                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                <DropdownMenuItem onClick={() => setTheme('light')}>
+                  <Sun className='size-4' /> Light {theme === 'light' && <Check className='ms-auto size-3.5' />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme('dark')}>
+                  <Moon className='size-4' /> Dark {theme === 'dark' && <Check className='ms-auto size-3.5' />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme('system')}>
+                  <Monitor className='size-4' /> System {theme === 'system' && <Check className='ms-auto size-3.5' />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {user && (
+              <Avatar className='size-8'>
+                <AvatarFallback className='text-xs'>{initials}</AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className='mx-auto max-w-6xl px-4 py-10 md:px-6'>
+        {/* Breadcrumb */}
+        <nav className='mb-8 flex items-center gap-1.5 text-sm text-muted-foreground'>
+          <Link to='/' className='transition-colors hover:text-foreground'>Home</Link>
+          <span>/</span>
+          <span className='text-foreground'>{course.title}</span>
+        </nav>
+
+        <div className='grid gap-10 lg:grid-cols-[1fr_340px]'>
+          {/* Left side */}
+          <div className='space-y-8'>
+            <div className='space-y-4'>
+              <div className='flex flex-wrap gap-2'>
+                <Badge variant={levelVariant(course.level)}>{course.level}</Badge>
+                <Badge variant='outline'>{course.instructor}</Badge>
               </div>
 
-              <div className="space-y-6">
-                <FeatureItem icon={<PlayCircle size={20}/>} text="47 ta darsliklar soni" />
-                <FeatureItem icon={<Code size={20}/>} text="Barcha manba kodlari" />
-                <FeatureItem icon={<Globe size={20}/>} text="Umrbod ruxsat" />
+              <h1 className='text-3xl font-bold tracking-tight md:text-4xl'>
+                {course.title}
+              </h1>
+
+              <p className='text-base leading-relaxed text-muted-foreground'>
+                {course.description}
+              </p>
+
+              <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
+                <span className='flex items-center gap-1.5'>
+                  <Star className='size-4 fill-amber-400 text-amber-400' />
+                  {course.rating} rating
+                </span>
+                <span className='flex items-center gap-1.5'>
+                  <Users className='size-4' />
+                  {course.students.toLocaleString()} students
+                </span>
+                <span className='flex items-center gap-1.5'>
+                  <Layers3 className='size-4' />
+                  {course.parts} modules
+                </span>
+                <span className='flex items-center gap-1.5'>
+                  <Clock3 className='size-4' />
+                  {course.hours}h total
+                </span>
+              </div>
+            </div>
+
+            {/* Course image */}
+            <div className='overflow-hidden rounded-xl border'>
+              <img
+                src={course.image}
+                alt={course.title}
+                className='h-64 w-full object-cover md:h-80'
+              />
+            </div>
+
+            {/* Curriculum */}
+            <div className='space-y-3'>
+              <h2 className='text-xl font-semibold'>Course Curriculum</h2>
+              <p className='text-sm text-muted-foreground'>
+                {course.modules.length} modules • {totalLessons} lessons
+              </p>
+
+              <div className='space-y-2'>
+                {course.modules.map((module, i) => {
+                  const isOpen = openModules.includes(module.id)
+                  return (
+                    <Collapsible
+                      key={module.id}
+                      open={isOpen}
+                      onOpenChange={() => toggleModule(module.id)}
+                    >
+                      <CollapsibleTrigger className='flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50'>
+                        <span className='flex items-center gap-2.5'>
+                          <span className='flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold'>
+                            {i + 1}
+                          </span>
+                          {module.title}
+                          <span className='text-xs font-normal text-muted-foreground'>
+                            {module.lessons.length} lessons
+                          </span>
+                        </span>
+                        <ChevronDown
+                          className={cn(
+                            'size-4 shrink-0 text-muted-foreground transition-transform duration-200',
+                            isOpen && 'rotate-180'
+                          )}
+                        />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <ul className='mt-1 space-y-0.5 rounded-lg border bg-card px-3 py-2'>
+                          {module.lessons.map((lesson) => (
+                            <li
+                              key={lesson.id}
+                              className='flex items-center justify-between rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted/50'
+                            >
+                              <span className='flex items-center gap-2'>
+                                <PlayCircle className='size-3.5 shrink-0' />
+                                {lesson.title}
+                              </span>
+                              <span className='font-mono text-xs'>{lesson.duration}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )
+                })}
               </div>
             </div>
           </div>
 
+          {/* Right side – sticky card */}
+          <div className='lg:sticky lg:top-20 lg:self-start'>
+            <div className='space-y-6 rounded-xl border bg-card p-6 shadow-sm'>
+              <div>
+                <p className='text-xs font-medium uppercase tracking-widest text-muted-foreground'>
+                  Course Price
+                </p>
+                <p className='mt-1 text-4xl font-black'>{course.price}</p>
+              </div>
+
+              <div className='space-y-3'>
+                <Button className='w-full gap-2' size='lg' onClick={handleWatch}>
+                  <PlayCircle className='size-5' />
+                  {enrolled ? 'Continue Watching' : 'Watch Course'}
+                </Button>
+                <Button variant='outline' className='w-full gap-2' size='lg'>
+                  <MessageCircle className='size-5' /> Contact
+                </Button>
+              </div>
+
+              <div className='space-y-3 border-t pt-4 text-sm'>
+                {[
+                  { label: 'Modules', value: course.modules.length },
+                  { label: 'Total lessons', value: totalLessons },
+                  { label: 'Duration', value: `${course.hours}h total` },
+                  { label: 'Students', value: course.students.toLocaleString() },
+                ].map(({ label, value }) => (
+                  <div key={label} className='flex items-center justify-between'>
+                    <span className='text-muted-foreground'>{label}</span>
+                    <span className='font-medium'>{value}</span>
+                  </div>
+                ))}
+                <div className='flex items-center justify-between'>
+                  <span className='text-muted-foreground'>Level</span>
+                  <Badge variant={levelVariant(course.level)} className='text-[11px]'>
+                    {course.level}
+                  </Badge>
+                </div>
+                <div className='flex items-center justify-between'>
+                  <span className='text-muted-foreground'>Rating</span>
+                  <span className='flex items-center gap-1 font-medium'>
+                    <Star className='size-3.5 fill-amber-400 text-amber-400' />
+                    {course.rating}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
-    </div>
-  )
-}
-
-
-function Badge({ text, color }: { text: string, color: string }) {
-  return (
-    <span className={`${color} px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider`}>
-      {text}
-    </span>
-  )
-}
-
-function FeatureItem({ icon, text }: { icon: any, text: string }) {
-  return (
-    <div className="flex items-center gap-4 text-slate-600 font-medium">
-      <div className="text-blue-600 bg-blue-50 p-2 rounded-lg">{icon}</div>
-      <span className="text-sm">{text}</span>
-    </div>
-  )
-}
-
-interface AccordionProps {
-  id: number;
-  title: string;
-  lessonCount: number;
-  isOpen: boolean;
-  onToggle: () => void;
-  lessons: { name: string, duration: string }[];
-}
-
-function ModuleAccordion({ title, lessonCount, isOpen, onToggle, lessons }: AccordionProps) {
-  return (
-    <div className={`border rounded-[25px] transition-all overflow-hidden ${isOpen ? 'border-blue-200 bg-white shadow-md' : 'border-slate-200 bg-transparent'}`}>
-      <button 
-        onClick={onToggle}
-        className="max-w-full flex items-center justify-between p-5 md:p-6 hover:bg-slate-50/50 transition-colors"
-      >
-        <div className="flex items-center gap-4 text-left">
-          <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-colors ${isOpen ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-            <PlayCircle size={22} />
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900 text-sm md:text-base">{title}</h4>
-            <p className="text-[10px] md:text-xs text-slate-400 font-medium">{lessonCount} ta dars</p>
-          </div>
-        </div>
-        <ChevronDown className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      <div className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        <div className="px-5 md:px-6 pb-6 space-y-1 border-t border-slate-50 pt-4">
-          {lessons.map((lesson, i) => (
-            <div key={i} className="group flex items-center justify-between p-3 md:p-4 rounded-2xl hover:bg-blue-50 transition-colors cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="text-slate-300 group-hover:text-blue-500 transition-colors">
-                  <Lock size={16} />
-                </div>
-                <span className="text-xs md:text-sm font-medium text-slate-600 group-hover:text-slate-900">{lesson.name}</span>
-              </div>
-              <span className="text-[10px] md:text-xs font-mono text-slate-400 group-hover:text-blue-600">{lesson.duration}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   )
 }

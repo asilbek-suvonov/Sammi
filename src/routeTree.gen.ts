@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectIdRouteImport } from './routes/project.$id'
+import { Route as CoursePreviewRouteImport } from './routes/course.preview'
 import { Route as CourseIdRouteImport } from './routes/course.$id'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
@@ -33,6 +34,7 @@ import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_a
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedDashboardUsersRouteImport } from './routes/_authenticated/dashboard/users'
+import { Route as AuthenticatedDashboardSourcesRouteImport } from './routes/_authenticated/dashboard/sources'
 import { Route as AuthenticatedDashboardProjectsRouteImport } from './routes/_authenticated/dashboard/projects'
 import { Route as AuthenticatedDashboardOverviewRouteImport } from './routes/_authenticated/dashboard/overview'
 import { Route as AuthenticatedDashboardCoursesRouteImport } from './routes/_authenticated/dashboard/courses'
@@ -54,6 +56,11 @@ const IndexRoute = IndexRouteImport.update({
 const ProjectIdRoute = ProjectIdRouteImport.update({
   id: '/project/$id',
   path: '/project/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursePreviewRoute = CoursePreviewRouteImport.update({
+  id: '/course/preview',
+  path: '/course/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CourseIdRoute = CourseIdRouteImport.update({
@@ -166,6 +173,12 @@ const AuthenticatedDashboardUsersRoute =
     path: '/users',
     getParentRoute: () => AuthenticatedDashboardRouteRoute,
   } as any)
+const AuthenticatedDashboardSourcesRoute =
+  AuthenticatedDashboardSourcesRouteImport.update({
+    id: '/sources',
+    path: '/sources',
+    getParentRoute: () => AuthenticatedDashboardRouteRoute,
+  } as any)
 const AuthenticatedDashboardProjectsRoute =
   AuthenticatedDashboardProjectsRouteImport.update({
     id: '/projects',
@@ -200,10 +213,12 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/course/$id': typeof CourseIdRoute
+  '/course/preview': typeof CoursePreviewRoute
   '/project/$id': typeof ProjectIdRoute
   '/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
+  '/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
   '/dashboard/users': typeof AuthenticatedDashboardUsersRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -226,10 +241,12 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/course/$id': typeof CourseIdRoute
+  '/course/preview': typeof CoursePreviewRoute
   '/project/$id': typeof ProjectIdRoute
   '/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
+  '/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
   '/dashboard/users': typeof AuthenticatedDashboardUsersRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -256,10 +273,12 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/course/$id': typeof CourseIdRoute
+  '/course/preview': typeof CoursePreviewRoute
   '/project/$id': typeof ProjectIdRoute
   '/_authenticated/dashboard/courses': typeof AuthenticatedDashboardCoursesRoute
   '/_authenticated/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/_authenticated/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
+  '/_authenticated/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
   '/_authenticated/dashboard/users': typeof AuthenticatedDashboardUsersRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
@@ -286,10 +305,12 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/course/$id'
+    | '/course/preview'
     | '/project/$id'
     | '/dashboard/courses'
     | '/dashboard/overview'
     | '/dashboard/projects'
+    | '/dashboard/sources'
     | '/dashboard/users'
     | '/errors/$error'
     | '/settings/account'
@@ -312,10 +333,12 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/course/$id'
+    | '/course/preview'
     | '/project/$id'
     | '/dashboard/courses'
     | '/dashboard/overview'
     | '/dashboard/projects'
+    | '/dashboard/sources'
     | '/dashboard/users'
     | '/errors/$error'
     | '/settings/account'
@@ -341,10 +364,12 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/course/$id'
+    | '/course/preview'
     | '/project/$id'
     | '/_authenticated/dashboard/courses'
     | '/_authenticated/dashboard/overview'
     | '/_authenticated/dashboard/projects'
+    | '/_authenticated/dashboard/sources'
     | '/_authenticated/dashboard/users'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/account'
@@ -369,6 +394,7 @@ export interface RootRouteChildren {
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
   CourseIdRoute: typeof CourseIdRoute
+  CoursePreviewRoute: typeof CoursePreviewRoute
   ProjectIdRoute: typeof ProjectIdRoute
 }
 
@@ -400,6 +426,13 @@ declare module '@tanstack/react-router' {
       path: '/project/$id'
       fullPath: '/project/$id'
       preLoaderRoute: typeof ProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/preview': {
+      id: '/course/preview'
+      path: '/course/preview'
+      fullPath: '/course/preview'
+      preLoaderRoute: typeof CoursePreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/course/$id': {
@@ -542,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardUsersRouteImport
       parentRoute: typeof AuthenticatedDashboardRouteRoute
     }
+    '/_authenticated/dashboard/sources': {
+      id: '/_authenticated/dashboard/sources'
+      path: '/sources'
+      fullPath: '/dashboard/sources'
+      preLoaderRoute: typeof AuthenticatedDashboardSourcesRouteImport
+      parentRoute: typeof AuthenticatedDashboardRouteRoute
+    }
     '/_authenticated/dashboard/projects': {
       id: '/_authenticated/dashboard/projects'
       path: '/projects'
@@ -570,6 +610,7 @@ interface AuthenticatedDashboardRouteRouteChildren {
   AuthenticatedDashboardCoursesRoute: typeof AuthenticatedDashboardCoursesRoute
   AuthenticatedDashboardOverviewRoute: typeof AuthenticatedDashboardOverviewRoute
   AuthenticatedDashboardProjectsRoute: typeof AuthenticatedDashboardProjectsRoute
+  AuthenticatedDashboardSourcesRoute: typeof AuthenticatedDashboardSourcesRoute
   AuthenticatedDashboardUsersRoute: typeof AuthenticatedDashboardUsersRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
@@ -579,6 +620,7 @@ const AuthenticatedDashboardRouteRouteChildren: AuthenticatedDashboardRouteRoute
     AuthenticatedDashboardCoursesRoute: AuthenticatedDashboardCoursesRoute,
     AuthenticatedDashboardOverviewRoute: AuthenticatedDashboardOverviewRoute,
     AuthenticatedDashboardProjectsRoute: AuthenticatedDashboardProjectsRoute,
+    AuthenticatedDashboardSourcesRoute: AuthenticatedDashboardSourcesRoute,
     AuthenticatedDashboardUsersRoute: AuthenticatedDashboardUsersRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
@@ -641,6 +683,7 @@ const rootRouteChildren: RootRouteChildren = {
   errors500Route: errors500Route,
   errors503Route: errors503Route,
   CourseIdRoute: CourseIdRoute,
+  CoursePreviewRoute: CoursePreviewRoute,
   ProjectIdRoute: ProjectIdRoute,
 }
 export const routeTree = rootRouteImport

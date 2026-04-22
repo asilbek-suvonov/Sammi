@@ -1,20 +1,21 @@
-import { Briefcase, Command, Folder, GraduationCap, LayoutDashboard } from 'lucide-react'
+import { BookOpen, Briefcase, Command, FolderGit2, GraduationCap, LayoutDashboard } from 'lucide-react'
 import { type SidebarData } from '../types'
 
 type Role = 'admin' | 'user'
 
-export const buildSidebarData = (
-  role: Role,
-  email: string
-): SidebarData => {
-  const commonItems: SidebarData['navGroups'][number]['items'] = [
-    { title: 'Overview', url: '/dashboard/overview', icon: LayoutDashboard },
+export const buildSidebarData = (role: Role, email: string): SidebarData => {
+  const adminItems: SidebarData['navGroups'][number]['items'] = [
+    { title: 'Dashboard', url: '/dashboard/overview', icon: LayoutDashboard },
     { title: 'Courses', url: '/dashboard/courses', icon: GraduationCap },
+    { title: 'Sources', url: '/dashboard/sources', icon: FolderGit2 },
     { title: 'Projects', url: '/dashboard/projects', icon: Briefcase },
   ]
-  if (role === 'admin') {
-    commonItems.push({ title: 'Users', url: '/dashboard/users', icon: Folder })
-  }
+
+  const userItems: SidebarData['navGroups'][number]['items'] = [
+    { title: 'Dashboard', url: '/dashboard/overview', icon: LayoutDashboard },
+    { title: 'My Courses', url: '/dashboard/courses', icon: BookOpen },
+    { title: 'Projects', url: '/dashboard/projects', icon: Briefcase },
+  ]
 
   return {
     user: {
@@ -27,13 +28,13 @@ export const buildSidebarData = (
         name: 'Edu Center',
         logo: Command,
         plan: role === 'admin' ? 'Admin' : 'User',
-        homeUrl: role === 'admin' ? '/dashboard/overview' : '/',
+        homeUrl: '/',
       },
     ],
     navGroups: [
       {
-        title: 'General',
-        items: commonItems,
+        title: role === 'admin' ? 'Admin Panel' : 'My Panel',
+        items: role === 'admin' ? adminItems : userItems,
       },
     ],
   }
