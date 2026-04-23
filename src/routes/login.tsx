@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { SignIn } from '@/features/auth/sign-in'
 import { useAuthStore } from '@/stores/auth-store'
 
 const searchSchema = z.object({
@@ -14,6 +13,5 @@ export const Route = createFileRoute('/login')({
       throw redirect({ to: '/dashboard/overview' })
     }
   },
-  component: SignIn,
   validateSearch: searchSchema,
 })

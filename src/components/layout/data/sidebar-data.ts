@@ -7,14 +7,15 @@ export const buildSidebarData = (role: Role, email: string): SidebarData => {
   const adminItems: SidebarData['navGroups'][number]['items'] = [
     { title: 'Dashboard', url: '/dashboard/overview', icon: LayoutDashboard },
     { title: 'Courses', url: '/dashboard/courses', icon: GraduationCap },
-    { title: 'Sources', url: '/dashboard/sources', icon: FolderGit2 },
     { title: 'Projects', url: '/dashboard/projects', icon: Briefcase },
+    { title: 'Sources', url: '/dashboard/sources', icon: FolderGit2 },
   ]
 
   const userItems: SidebarData['navGroups'][number]['items'] = [
     { title: 'Dashboard', url: '/dashboard/overview', icon: LayoutDashboard },
-    { title: 'My Courses', url: '/dashboard/courses', icon: BookOpen },
+    { title: 'Courses', url: '/dashboard/courses', icon: BookOpen },
     { title: 'Projects', url: '/dashboard/projects', icon: Briefcase },
+    { title: 'Sources', url: '/dashboard/sources', icon: FolderGit2 },
   ]
 
   return {

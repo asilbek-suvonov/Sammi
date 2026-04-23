@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { CoursePreviewPage } from '@/features/course-preview'
+import { CoursePreviewPage } from '@/features/landing/course-preview'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 

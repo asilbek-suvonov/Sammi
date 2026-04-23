@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { ProjectDetailPage } from '@/features/project-detail'
+import { ProjectDetailPage } from '@/features/landing/project-detail'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/project/$id')({

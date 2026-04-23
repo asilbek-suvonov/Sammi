@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { CourseDetailPage } from '@/features/course-detail'
+import { CourseDetailPage } from '@/features/landing/course-detail'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/course/$id')({

@@ -26,12 +26,10 @@ import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authen
 import { Route as AuthenticatedDashboardRouteRouteImport } from './routes/_authenticated/dashboard/route'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
-import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
-import { Route as AuthenticatedDashboardUsersRouteImport } from './routes/_authenticated/dashboard/users'
 import { Route as AuthenticatedDashboardSourcesRouteImport } from './routes/_authenticated/dashboard/sources'
 import { Route as AuthenticatedDashboardProjectsRouteImport } from './routes/_authenticated/dashboard/projects'
 import { Route as AuthenticatedDashboardOverviewRouteImport } from './routes/_authenticated/dashboard/overview'
@@ -125,12 +123,6 @@ const AuthenticatedHelpCenterIndexRoute =
     path: '/help-center/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDashboardIndexRoute =
-  AuthenticatedDashboardIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedDashboardRouteRoute,
-  } as any)
 const AuthenticatedSettingsNotificationsRoute =
   AuthenticatedSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -154,12 +146,6 @@ const AuthenticatedErrorsErrorRoute =
     id: '/errors/$error',
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedDashboardUsersRoute =
-  AuthenticatedDashboardUsersRouteImport.update({
-    id: '/users',
-    path: '/users',
-    getParentRoute: () => AuthenticatedDashboardRouteRoute,
   } as any)
 const AuthenticatedDashboardSourcesRoute =
   AuthenticatedDashboardSourcesRouteImport.update({
@@ -205,18 +191,17 @@ export interface FileRoutesByFullPath {
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
   '/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
-  '/dashboard/users': typeof AuthenticatedDashboardUsersRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteRouteWithChildren
   '/otp': typeof authOtpRoute
   '/sign-in-2': typeof authSignIn2Route
   '/401': typeof errors401Route
@@ -231,12 +216,10 @@ export interface FileRoutesByTo {
   '/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
   '/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
-  '/dashboard/users': typeof AuthenticatedDashboardUsersRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
 }
@@ -261,12 +244,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/overview': typeof AuthenticatedDashboardOverviewRoute
   '/_authenticated/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
   '/_authenticated/dashboard/sources': typeof AuthenticatedDashboardSourcesRoute
-  '/_authenticated/dashboard/users': typeof AuthenticatedDashboardUsersRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
 }
@@ -291,18 +272,17 @@ export interface FileRouteTypes {
     | '/dashboard/overview'
     | '/dashboard/projects'
     | '/dashboard/sources'
-    | '/dashboard/users'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/notifications'
-    | '/dashboard/'
     | '/help-center/'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/dashboard'
     | '/otp'
     | '/sign-in-2'
     | '/401'
@@ -317,12 +297,10 @@ export interface FileRouteTypes {
     | '/dashboard/overview'
     | '/dashboard/projects'
     | '/dashboard/sources'
-    | '/dashboard/users'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/notifications'
-    | '/dashboard'
     | '/help-center'
     | '/settings'
   id:
@@ -346,12 +324,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/overview'
     | '/_authenticated/dashboard/projects'
     | '/_authenticated/dashboard/sources'
-    | '/_authenticated/dashboard/users'
     | '/_authenticated/errors/$error'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/notifications'
-    | '/_authenticated/dashboard/'
     | '/_authenticated/help-center/'
     | '/_authenticated/settings/'
   fileRoutesById: FileRoutesById
@@ -493,13 +469,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard/': {
-      id: '/_authenticated/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
-      parentRoute: typeof AuthenticatedDashboardRouteRoute
-    }
     '/_authenticated/settings/notifications': {
       id: '/_authenticated/settings/notifications'
       path: '/notifications'
@@ -527,13 +496,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/errors/$error'
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard/users': {
-      id: '/_authenticated/dashboard/users'
-      path: '/users'
-      fullPath: '/dashboard/users'
-      preLoaderRoute: typeof AuthenticatedDashboardUsersRouteImport
-      parentRoute: typeof AuthenticatedDashboardRouteRoute
     }
     '/_authenticated/dashboard/sources': {
       id: '/_authenticated/dashboard/sources'
@@ -571,8 +533,6 @@ interface AuthenticatedDashboardRouteRouteChildren {
   AuthenticatedDashboardOverviewRoute: typeof AuthenticatedDashboardOverviewRoute
   AuthenticatedDashboardProjectsRoute: typeof AuthenticatedDashboardProjectsRoute
   AuthenticatedDashboardSourcesRoute: typeof AuthenticatedDashboardSourcesRoute
-  AuthenticatedDashboardUsersRoute: typeof AuthenticatedDashboardUsersRoute
-  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedDashboardRouteRouteChildren: AuthenticatedDashboardRouteRouteChildren =
@@ -581,8 +541,6 @@ const AuthenticatedDashboardRouteRouteChildren: AuthenticatedDashboardRouteRoute
     AuthenticatedDashboardOverviewRoute: AuthenticatedDashboardOverviewRoute,
     AuthenticatedDashboardProjectsRoute: AuthenticatedDashboardProjectsRoute,
     AuthenticatedDashboardSourcesRoute: AuthenticatedDashboardSourcesRoute,
-    AuthenticatedDashboardUsersRoute: AuthenticatedDashboardUsersRoute,
-    AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
 const AuthenticatedDashboardRouteRouteWithChildren =
