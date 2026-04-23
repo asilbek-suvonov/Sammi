@@ -4,9 +4,8 @@ import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/(auth)/sign-in-2')({
   beforeLoad: () => {
-    const token = useAuthStore.getState().auth.accessToken
-    const role = useAuthStore.getState().auth.user?.role
-    if (token && role === 'admin') {
+    const { accessToken } = useAuthStore.getState().auth
+    if (accessToken) {
       throw redirect({ to: '/dashboard/overview' })
     }
   },

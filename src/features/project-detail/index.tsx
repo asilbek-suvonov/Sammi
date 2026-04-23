@@ -1,19 +1,15 @@
 import { ProjectSideCard } from '@/components/project/project-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
-import { ThemeToggle } from '@/components/public/theme-toggle'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { PublicNavRight } from '@/components/public/public-nav-right'
 import { Badge } from '@/components/ui/badge'
-import { useAuthStore } from '@/stores/auth-store'
 import { useAdminStore } from '@/stores/admin-store'
 import { Check, Clock3, FolderGit2, Layers3, Users } from 'lucide-react'
 
 interface Props { id: string }
 
 export function ProjectDetailPage({ id }: Props) {
-  const { auth } = useAuthStore()
   const { projects } = useAdminStore()
-  const user = auth.user
   const project = projects.find((p) => p.id === id)
 
   if (!project) return (
@@ -22,18 +18,11 @@ export function ProjectDetailPage({ id }: Props) {
     </div>
   )
 
-  const initials = (user?.firstName?.[0] ?? 'U').toUpperCase()
-
   return (
     <div className='min-h-screen bg-background text-foreground'>
       <PublicHeader
         logoAsLink
-        right={
-          <>
-            <ThemeToggle />
-            {user && <Avatar className='size-8'><AvatarFallback className='text-xs'>{initials}</AvatarFallback></Avatar>}
-          </>
-        }
+        right={<PublicNavRight />}
       />
 
       <main className='mx-auto max-w-6xl px-4 py-10 md:px-6'>

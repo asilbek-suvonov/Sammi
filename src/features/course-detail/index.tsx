@@ -2,8 +2,7 @@ import { CourseCurriculum } from '@/components/course/course-curriculum'
 import { CourseSideCard } from '@/components/course/course-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
-import { ThemeToggle } from '@/components/public/theme-toggle'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { PublicNavRight } from '@/components/public/public-nav-right'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/stores/auth-store'
 import { useUserStore } from '@/stores/user-store'
@@ -34,7 +33,6 @@ export function CourseDetailPage({ id }: Props) {
   )
 
   const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0)
-  const initials = (user?.firstName?.[0] ?? 'U').toUpperCase()
   const toggleModule = (moduleId: string) =>
     setOpenModules((prev) => prev.includes(moduleId) ? prev.filter((x) => x !== moduleId) : [...prev, moduleId])
 
@@ -48,12 +46,7 @@ export function CourseDetailPage({ id }: Props) {
     <div className='min-h-screen bg-background text-foreground'>
       <PublicHeader
         logoAsLink
-        right={
-          <>
-            <ThemeToggle />
-            {user && <Avatar className='size-8'><AvatarFallback className='text-xs'>{initials}</AvatarFallback></Avatar>}
-          </>
-        }
+        right={<PublicNavRight />}
       />
 
       <main className='mx-auto max-w-6xl px-4 py-10 md:px-6'>

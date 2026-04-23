@@ -1,11 +1,11 @@
+import type { Module } from '@/data/mock-data'
+import { ChevronDown, PlayCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import type { Module } from '@/data/mock-data'
-import { cn } from '@/lib/utils'
-import { ChevronDown, PlayCircle } from 'lucide-react'
 
 interface CourseCurriculumProps {
   modules: Module[]
@@ -13,7 +13,11 @@ interface CourseCurriculumProps {
   onToggle: (moduleId: string) => void
 }
 
-export function CourseCurriculum({ modules, openModules, onToggle }: CourseCurriculumProps) {
+export function CourseCurriculum({
+  modules,
+  openModules,
+  onToggle,
+}: CourseCurriculumProps) {
   const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0)
 
   return (
@@ -27,10 +31,21 @@ export function CourseCurriculum({ modules, openModules, onToggle }: CourseCurri
         {modules.map((module, i) => {
           const isOpen = openModules.includes(module.id)
           return (
-            <Collapsible key={module.id} open={isOpen} onOpenChange={() => onToggle(module.id)}>
-              <CollapsibleTrigger className='flex w-full items-center justify-between rounded-lg border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50'>
+            <Collapsible
+              key={module.id}
+              open={isOpen}
+              onOpenChange={() => onToggle(module.id)}
+            >
+              <CollapsibleTrigger
+                className={cn(
+                  'flex w-full items-center justify-between rounded-lg border px-4 py-3 text-sm font-medium transition-colors',
+                  isOpen
+                    ? 'bg-neutral-900/50 hover:bg-neutral-900/70'
+                    : 'bg-card hover:bg-muted/50'
+                )}
+              >
                 <span className='flex items-center gap-2.5'>
-                  <span className='flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold'>
+                  <span className='flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold, '>
                     {i + 1}
                   </span>
                   {module.title}
@@ -53,10 +68,12 @@ export function CourseCurriculum({ modules, openModules, onToggle }: CourseCurri
                       className='flex items-center justify-between rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted/50'
                     >
                       <span className='flex items-center gap-2'>
-                        <PlayCircle className='size-3.5 shrink-0 ' />
+                        <PlayCircle className='size-3.5 shrink-0' />
                         {lesson.title}
                       </span>
-                      <span className='font-mono text-xs'>{lesson.duration}</span>
+                      <span className='font-mono text-xs'>
+                        {lesson.duration}
+                      </span>
                     </li>
                   ))}
                 </ul>

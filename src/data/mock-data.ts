@@ -36,6 +36,13 @@ export interface Course {
   rating: number
   instructor: string
   modules: Module[]
+  preview_video_url?: string
+  category?: string
+  technologies?: string[]
+  language?: 'uz' | 'en' | 'ru'
+  is_free?: boolean
+  is_new?: boolean
+  is_published?: boolean
 }
 
 export interface Project {
@@ -50,6 +57,10 @@ export interface Project {
   features: string[]
   modules: number
   duration: string
+  difficulty?: 'Easy' | 'Medium' | 'Hard'
+  github_url?: string
+  demo_url?: string
+  is_published?: boolean
 }
 
 export const COURSES: Course[] = [

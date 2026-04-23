@@ -7,10 +7,14 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { requireAdmin } from '@/lib/route-guards'
 import { createFileRoute } from '@tanstack/react-router'
 import { ExternalLink, FolderGit2, GitBranch, Star } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/dashboard/sources')({
+  beforeLoad: () => {
+    requireAdmin()
+  },
   component: SourcesPage,
 })
 

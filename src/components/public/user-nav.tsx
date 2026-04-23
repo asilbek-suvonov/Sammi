@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/stores/auth-store'
 import { useNavigate } from '@tanstack/react-router'
-import { LayoutDashboard, LogOut } from 'lucide-react'
+import { LayoutDashboard, LogOut, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 interface UserNavProps {
@@ -32,6 +33,7 @@ export function UserNav({ onSignIn }: UserNavProps) {
   }
 
   const initials = (user.firstName?.[0] ?? user.email?.[0] ?? 'U').toUpperCase()
+  const isAdmin = user.role === 'admin'
 
   return (
     <DropdownMenu>
@@ -44,15 +46,27 @@ export function UserNav({ onSignIn }: UserNavProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-56'>
-        <DropdownMenuLabel>
-          <p className='truncate text-sm'>{`${user.firstName} ${user.lastName}`}</p>
-          <p className='text-xs text-muted-foreground'>{user.email}</p>
-          <p className='capitalize text-xs text-muted-foreground'>Role: {user.role}</p>
+        <DropdownMenuLabel className='space-y-1'>
+          <div className='flex items-center justify-between gap-2'>
+            <p className='truncate text-sm font-medium'>{`${user.firstName} ${user.lastName}`}</p>
+            {isAdmin && (
+              <Badge variant='destructive' className='shrink-0 text-[10px] px-1.5 py-0'>
+                Admin
+              </Badge>
+            )}
+          </div>
+          <p className='truncate text-xs text-muted-foreground'>{user.email}</p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate({ to: '/dashboard/overview' })}>
-          <LayoutDashboard className='size-4' /> {t('dashboard')}
-        </DropdownMenuItem>
+        {isAdmin ? (
+          <DropdownMenuItem onClick={() => navigate({ to: '/dashboard/overview' })}>
+            <Shield className='size-4' /> Admin Panel
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={() => navigate({ to: '/dashboard/overview' })}>
+            <LayoutDashboard className='size-4' /> {t('dashboard')}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant='destructive'
