@@ -1,3 +1,16 @@
+export interface Source {
+  title: string
+  description: string
+  href: string
+  stars: number
+}
+
+export const SOURCES: Source[] = [
+  { title: 'Landing Repository', description: 'Responsive landing page source code', href: 'https://github.com', stars: 214 },
+  { title: 'Dashboard Repository', description: 'Admin panel with role-based access', href: 'https://github.com', stars: 389 },
+  { title: 'UI Components Repository', description: 'Shared shadcn/ui component library', href: 'https://github.com', stars: 157 },
+]
+
 export interface Lesson {
   id: string
   title: string
@@ -40,6 +53,96 @@ export interface Project {
 }
 
 export const COURSES: Course[] = [
+  // ─── Extra courses (id 6-11) come first so landing shows them in the mix ─
+  {
+    id: '6',
+    title: 'Node.js Backend',
+    description: 'Build scalable REST APIs and microservices with Node.js, Express, and modern backend patterns including authentication, file uploads, and WebSockets.',
+    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800&auto=format&fit=crop',
+    parts: 11, hours: 30, price: '$129', level: 'Intermediate', students: 870, rating: 4.8,
+    instructor: 'Asilbek Karimov',
+    modules: [
+      { id: 'm1', title: 'Express Fundamentals', lessons: [
+        { id: 'l1', title: 'Routing and Middleware', duration: '18:00' },
+        { id: 'l2', title: 'Error Handling', duration: '15:30' },
+      ]},
+      { id: 'm2', title: 'Database Integration', lessons: [
+        { id: 'l3', title: 'MongoDB with Mongoose', duration: '24:00' },
+        { id: 'l4', title: 'PostgreSQL with Prisma', duration: '22:00' },
+      ]},
+    ],
+  },
+  {
+    id: '7',
+    title: 'GraphQL API Design',
+    description: 'Design and implement production-grade GraphQL APIs with Apollo Server, schema design, resolvers, subscriptions, and performance optimization.',
+    image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?q=80&w=800&auto=format&fit=crop',
+    parts: 8, hours: 22, price: '$119', level: 'Advanced', students: 540, rating: 4.7,
+    instructor: 'Asilbek Karimov',
+    modules: [
+      { id: 'm1', title: 'GraphQL Basics', lessons: [
+        { id: 'l1', title: 'Schema Definition Language', duration: '20:00' },
+        { id: 'l2', title: 'Resolvers & Context', duration: '18:30' },
+      ]},
+    ],
+  },
+  {
+    id: '8',
+    title: 'Docker & DevOps',
+    description: 'Master containerization with Docker, orchestration with Kubernetes, and CI/CD pipelines to ship code faster and more reliably.',
+    image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=800&auto=format&fit=crop',
+    parts: 10, hours: 28, price: '$109', level: 'Intermediate', students: 690, rating: 4.6,
+    instructor: 'Asilbek Karimov',
+    modules: [
+      { id: 'm1', title: 'Docker Fundamentals', lessons: [
+        { id: 'l1', title: 'Images and Containers', duration: '22:00' },
+        { id: 'l2', title: 'Docker Compose', duration: '19:00' },
+      ]},
+    ],
+  },
+  {
+    id: '9',
+    title: 'Vue.js 3 Mastery',
+    description: 'Build modern single-page applications with Vue.js 3, Composition API, Pinia state management, and Vue Router.',
+    image: 'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?q=80&w=800&auto=format&fit=crop',
+    parts: 9, hours: 26, price: '$99', level: 'Beginner', students: 760, rating: 4.8,
+    instructor: 'Asilbek Karimov',
+    modules: [
+      { id: 'm1', title: 'Vue 3 Basics', lessons: [
+        { id: 'l1', title: 'Composition API', duration: '20:00' },
+        { id: 'l2', title: 'Reactivity System', duration: '16:00' },
+      ]},
+    ],
+  },
+  {
+    id: '10',
+    title: 'PostgreSQL Mastery',
+    description: 'Deep dive into PostgreSQL — from advanced queries and indexing strategies to partitioning, replication, and performance tuning for large datasets.',
+    image: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=800&auto=format&fit=crop',
+    parts: 7, hours: 18, price: '$89', level: 'Intermediate', students: 430, rating: 4.7,
+    instructor: 'Asilbek Karimov',
+    modules: [
+      { id: 'm1', title: 'Advanced SQL', lessons: [
+        { id: 'l1', title: 'Window Functions', duration: '18:00' },
+        { id: 'l2', title: 'CTEs and Recursive Queries', duration: '20:00' },
+      ]},
+    ],
+  },
+  {
+    id: '11',
+    title: 'AWS Cloud Architecture',
+    description: 'Design and deploy scalable cloud solutions on AWS using EC2, S3, Lambda, RDS, CloudFront, and infrastructure as code with Terraform.',
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop',
+    parts: 12, hours: 38, price: '$149', level: 'Advanced', students: 390, rating: 4.9,
+    instructor: 'Asilbek Karimov',
+    modules: [
+      { id: 'm1', title: 'AWS Fundamentals', lessons: [
+        { id: 'l1', title: 'IAM and Security', duration: '24:00' },
+        { id: 'l2', title: 'EC2 and VPC', duration: '28:00' },
+      ]},
+    ],
+  },
+  // ─── Original 6 courses ──────────────────────────────────────────────────
   {
     id: '0',
     title: 'Frontend Foundations',

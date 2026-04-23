@@ -9,7 +9,7 @@ interface AuthUser {
   lastName: string
   email: string
   role: 'admin' | 'user'
-  exp: number
+  exp: number 
 }
 
 interface AuthState {
