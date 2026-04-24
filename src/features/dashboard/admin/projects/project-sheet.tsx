@@ -34,15 +34,30 @@ import {
 } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { MultiSelect } from '@/components/ui/multi-select'
+import { FileUpload } from '@/components/ui/file-upload'
+
+const TECHNOLOGIES_OPTIONS = [
+  'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
+  'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'SCSS',
+  'Node.js', 'Express', 'NestJS', 'Fastify', 'Hono',
+  'Python', 'Django', 'FastAPI', 'Flask',
+  'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'SQLite',
+  'GraphQL', 'REST API', 'WebSocket', 'tRPC',
+  'Docker', 'Kubernetes', 'AWS', 'Firebase', 'Supabase',
+  'Prisma', 'Drizzle', 'TypeORM',
+  'Zustand', 'Redux', 'Jotai', 'MobX',
+  'Vite', 'Webpack', 'Git', 'Linux',
+].map((t) => ({ label: t, value: t }))
 
 const projectSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  image: z.string().min(1, 'Image URL is required'),
+  image: z.string().min(1, 'Image is required'),
   difficulty: z.enum(['Easy', 'Medium', 'Hard', '']),
   github_url: z.string(),
   demo_url: z.string(),
-  technologies: z.string(),
+  technologies: z.array(z.string()),
   is_published: z.boolean(),
 })
 
@@ -55,7 +70,7 @@ const defaultValues: ProjectFormValues = {
   difficulty: '',
   github_url: '',
   demo_url: '',
-  technologies: '',
+  technologies: [],
   is_published: false,
 }
 
@@ -84,7 +99,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
           difficulty: project.difficulty ?? '',
           github_url: project.github_url ?? '',
           demo_url: project.demo_url ?? '',
-          technologies: project.tech?.join(', ') ?? '',
+          technologies: project.tech ?? [],
           is_published: project.is_published ?? false,
         })
       } else {
@@ -94,19 +109,15 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
   }, [open, project, form])
 
   const onSubmit = (values: ProjectFormValues) => {
-    const tech = values.technologies
-      ? values.technologies.split(',').map((t) => t.trim()).filter(Boolean)
-      : []
-
     if (isEdit && project) {
       updateProject(project.id, {
         title: values.title,
         description: values.description,
         image: values.image,
-        difficulty: values.difficulty as Project['difficulty'] || undefined,
+        difficulty: (values.difficulty as Project['difficulty']) || undefined,
         github_url: values.github_url || undefined,
         demo_url: values.demo_url || undefined,
-        tech,
+        tech: values.technologies,
         is_published: values.is_published,
       })
       toast.success('Project updated successfully')
@@ -116,10 +127,10 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
         title: values.title,
         description: values.description,
         image: values.image,
-        difficulty: values.difficulty as Project['difficulty'] || undefined,
+        difficulty: (values.difficulty as Project['difficulty']) || undefined,
         github_url: values.github_url || undefined,
         demo_url: values.demo_url || undefined,
-        tech,
+        tech: values.technologies,
         is_published: values.is_published,
         type: 'Full-Stack',
         price: '$0',
@@ -165,6 +176,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='description'
@@ -183,19 +195,27 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='image'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL</FormLabel>
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
-                      <Input placeholder='https://...' {...field} />
+                      <FileUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        accept='image/*'
+                        placeholder='https://...'
+                        mode='both'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='difficulty'
@@ -218,6 +238,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='technologies'
@@ -225,12 +246,18 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   <FormItem>
                     <FormLabel>Technologies</FormLabel>
                     <FormControl>
-                      <Input placeholder='React, Node.js, PostgreSQL (comma-separated)' {...field} />
+                      <MultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={TECHNOLOGIES_OPTIONS}
+                        placeholder='Select technologies...'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='github_url'
@@ -244,6 +271,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='demo_url'
@@ -257,6 +285,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='is_published'

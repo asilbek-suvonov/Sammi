@@ -34,14 +34,47 @@ import {
 } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { MultiSelect } from '@/components/ui/multi-select'
+import { FileUpload } from '@/components/ui/file-upload'
+import { Combobox } from '@/components/ui/combobox'
+
+const TECHNOLOGIES_OPTIONS = [
+  'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
+  'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'SCSS',
+  'Node.js', 'Express', 'NestJS', 'Fastify', 'Hono',
+  'Python', 'Django', 'FastAPI', 'Flask',
+  'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'SQLite',
+  'GraphQL', 'REST API', 'WebSocket', 'tRPC',
+  'Docker', 'Kubernetes', 'AWS', 'Firebase', 'Supabase',
+  'Prisma', 'Drizzle', 'TypeORM',
+  'Zustand', 'Redux', 'Jotai', 'MobX',
+  'Vite', 'Webpack', 'Git', 'Linux',
+].map((t) => ({ label: t, value: t }))
+
+const LANGUAGE_OPTIONS = [
+  { label: "O'zbek", value: 'uz' },
+  { label: 'English', value: 'en' },
+  { label: 'Русский', value: 'ru' },
+]
+
+const CATEGORY_OPTIONS = [
+  { label: 'Frontend', value: 'frontend' },
+  { label: 'Backend', value: 'backend' },
+  { label: 'Full Stack', value: 'fullstack' },
+  { label: 'Mobile', value: 'mobile' },
+  { label: 'DevOps', value: 'devops' },
+  { label: 'Data Science', value: 'data-science' },
+  { label: 'UI/UX Design', value: 'ui-ux' },
+]
 
 const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  image: z.string().min(1, 'Image URL is required'),
+  image: z.string().min(1, 'Image is required'),
   preview_video_url: z.string(),
   category: z.string(),
-  technologies: z.string(),
+  technologies: z.array(z.string()),
+  language: z.enum(['uz', 'en', 'ru', '']),
   level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
   price: z.string().min(1, 'Price is required'),
   is_free: z.boolean(),
@@ -57,7 +90,8 @@ const defaultValues: CourseFormValues = {
   image: '',
   preview_video_url: '',
   category: '',
-  technologies: '',
+  technologies: [],
+  language: '',
   level: 'Beginner',
   price: '',
   is_free: false,
@@ -89,7 +123,8 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
           image: course.image,
           preview_video_url: course.preview_video_url ?? '',
           category: course.category ?? '',
-          technologies: course.technologies?.join(', ') ?? '',
+          technologies: course.technologies ?? [],
+          language: course.language ?? '',
           level: course.level,
           price: course.price,
           is_free: course.is_free ?? false,
@@ -103,10 +138,6 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
   }, [open, course, form])
 
   const onSubmit = (values: CourseFormValues) => {
-    const technologies = values.technologies
-      ? values.technologies.split(',').map((t) => t.trim()).filter(Boolean)
-      : []
-
     if (isEdit && course) {
       updateCourse(course.id, {
         title: values.title,
@@ -114,7 +145,8 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
         image: values.image,
         preview_video_url: values.preview_video_url || undefined,
         category: values.category || undefined,
-        technologies,
+        technologies: values.technologies,
+        language: (values.language || undefined) as Course['language'],
         level: values.level,
         price: values.price,
         is_free: values.is_free,
@@ -130,7 +162,8 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
         image: values.image,
         preview_video_url: values.preview_video_url || undefined,
         category: values.category || undefined,
-        technologies,
+        technologies: values.technologies,
+        language: (values.language || undefined) as Course['language'],
         level: values.level,
         price: values.price,
         is_free: values.is_free,
@@ -180,6 +213,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='description'
@@ -198,32 +232,47 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='image'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL</FormLabel>
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
-                      <Input placeholder='https://...' {...field} />
+                      <FileUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        accept='image/*'
+                        placeholder='https://...'
+                        mode='both'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='preview_video_url'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preview Video URL</FormLabel>
+                    <FormLabel>Preview Video</FormLabel>
                     <FormControl>
-                      <Input placeholder='https://youtube.com/...' {...field} />
+                      <FileUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        accept='video/*'
+                        placeholder='https://youtube.com/...'
+                        mode='both'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <div className='grid grid-cols-2 gap-4'>
                 <FormField
                   control={form.control}
@@ -232,35 +281,63 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                     <FormItem>
                       <FormLabel>Category</FormLabel>
                       <FormControl>
-                        <Input placeholder='Frontend, Backend...' {...field} />
+                        <Combobox
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={CATEGORY_OPTIONS}
+                          placeholder='Select category'
+                          searchPlaceholder='Search category...'
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
-                  name='level'
+                  name='language'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Level</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select level' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value='Beginner'>Beginner</SelectItem>
-                          <SelectItem value='Intermediate'>Intermediate</SelectItem>
-                          <SelectItem value='Advanced'>Advanced</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Language</FormLabel>
+                      <FormControl>
+                        <Combobox
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={LANGUAGE_OPTIONS}
+                          placeholder='Select language'
+                          searchPlaceholder='Search language...'
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name='level'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Level</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select level' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value='Beginner'>Beginner</SelectItem>
+                        <SelectItem value='Intermediate'>Intermediate</SelectItem>
+                        <SelectItem value='Advanced'>Advanced</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name='technologies'
@@ -268,12 +345,18 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   <FormItem>
                     <FormLabel>Technologies</FormLabel>
                     <FormControl>
-                      <Input placeholder='React, TypeScript, Tailwind (comma-separated)' {...field} />
+                      <MultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={TECHNOLOGIES_OPTIONS}
+                        placeholder='Select technologies...'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='price'
@@ -287,6 +370,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   </FormItem>
                 )}
               />
+
               <div className='grid grid-cols-3 gap-4'>
                 <FormField
                   control={form.control}
