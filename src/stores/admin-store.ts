@@ -23,6 +23,7 @@ interface AdminState {
   updateProject: (id: string, updates: Partial<Project>) => void
   deleteProject: (id: string) => void
   addSource: (source: AdminSource) => void
+  updateSource: (id: string, updates: Partial<AdminSource>) => void
   deleteSource: (id: string) => void
 }
 
@@ -52,6 +53,8 @@ export const useAdminStore = create<AdminState>()(
         set((state) => ({ projects: state.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)) })),
       deleteProject: (id) => set((state) => ({ projects: state.projects.filter((p) => p.id !== id) })),
       addSource: (source) => set((state) => ({ sources: [...state.sources, source] })),
+      updateSource: (id, updates) =>
+        set((state) => ({ sources: state.sources.map((s) => (s.id === id ? { ...s, ...updates } : s)) })),
       deleteSource: (id) => set((state) => ({ sources: state.sources.filter((s) => s.id !== id) })),
     }),
     { name: 'sammi_admin_data' }

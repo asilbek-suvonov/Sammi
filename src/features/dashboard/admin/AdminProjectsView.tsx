@@ -1,11 +1,105 @@
+import { useState, useMemo } from 'react'
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type ColumnFiltersState,
+  type RowSelectionState,
+  type SortingState,
+  type VisibilityState,
+} from '@tanstack/react-table'
+import { PlusIcon, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { type Project } from '@/data/mock-data'
+import { useAdminStore } from '@/stores/admin-store'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Separator } from '@radix-ui/react-select'
-const AdminProjectsView = () => {
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import {
+  DataTableBulkActions,
+  DataTablePagination,
+  DataTableToolbar,
+} from '@/components/data-table'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { getProjectsColumns } from './projects/columns'
+import { ProjectSheet } from './projects/project-sheet'
+
+export default function AdminProjectsView() {
+  const { projects, deleteProject } = useAdminStore()
+
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
+
+  const handleEdit = (project: Project) => {
+    setSelectedProject(project)
+    setSheetOpen(true)
+  }
+
+  const handleDelete = (project: Project) => {
+    setProjectToDelete(project)
+    setDeleteOpen(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (projectToDelete) {
+      deleteProject(projectToDelete.id)
+      toast.success('Project deleted successfully')
+      setProjectToDelete(null)
+      setDeleteOpen(false)
+    }
+  }
+
+  const handleBulkDelete = () => {
+    const selectedIds = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original.id)
+    selectedIds.forEach((id) => deleteProject(id))
+    table.resetRowSelection()
+    toast.success(`${selectedIds.length} project(s) deleted`)
+  }
+
+  const columns = useMemo(
+    () => getProjectsColumns({ onEdit: handleEdit, onDelete: handleDelete }),
+    []
+  )
+
+  const table = useReactTable({
+    data: projects,
+    columns,
+    state: { sorting, columnFilters, columnVisibility, rowSelection },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  })
+
   return (
     <>
       <Header>
@@ -18,19 +112,132 @@ const AdminProjectsView = () => {
       </Header>
 
       <Main fixed>
-        <div>
-          <h1 className='text-2xl font-bold tracking-tight'>
-            Projects
-          </h1>
-        </div>  
-    
-        <Separator className='shadow-sm' />
-        <ul className='faded-bottom no-scrollbar grid gap-4 overflow-auto pt-4 pb-16 md:grid-cols-2 lg:grid-cols-3'>
-        {/* <ComingSoon/> */}
-        </ul>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='text-2xl font-bold tracking-tight'>Projects</h1>
+            <p className='text-sm text-muted-foreground'>
+              Manage your projects — add, edit, or remove.
+            </p>
+          </div>
+          <Button
+            onClick={() => {
+              setSelectedProject(null)
+              setSheetOpen(true)
+            }}
+          >
+            <PlusIcon className='mr-2 h-4 w-4' />
+            Add Project
+          </Button>
+        </div>
+
+        <Separator className='my-4' />
+
+        <div className='space-y-4'>
+          <DataTableToolbar
+            table={table}
+            searchPlaceholder='Search projects...'
+            filters={[
+              {
+                columnId: 'difficulty',
+                title: 'Difficulty',
+                options: [
+                  { label: 'Easy', value: 'Easy' },
+                  { label: 'Medium', value: 'Medium' },
+                  { label: 'Hard', value: 'Hard' },
+                ],
+              },
+              {
+                columnId: 'is_published',
+                title: 'Status',
+                options: [
+                  { label: 'Published', value: 'true' },
+                  { label: 'Draft', value: 'false' },
+                ],
+              },
+            ]}
+          />
+
+          <div className='rounded-md border'>
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() ? 'selected' : undefined}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className='h-24 text-center text-muted-foreground'
+                    >
+                      No projects found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <DataTablePagination table={table} />
+        </div>
+
+        <DataTableBulkActions table={table} entityName='project'>
+          <Button variant='destructive' size='sm' onClick={handleBulkDelete}>
+            <Trash2 className='mr-2 h-4 w-4' />
+            Delete Selected
+          </Button>
+        </DataTableBulkActions>
       </Main>
-</>
+
+      <ProjectSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        project={selectedProject}
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title='Delete Project'
+        desc={
+          <span>
+            Are you sure you want to delete{' '}
+            <strong>{projectToDelete?.title}</strong>? This action cannot be
+            undone.
+          </span>
+        }
+        confirmText='Delete'
+        destructive
+        handleConfirm={handleConfirmDelete}
+      />
+    </>
   )
 }
-
-export default AdminProjectsView

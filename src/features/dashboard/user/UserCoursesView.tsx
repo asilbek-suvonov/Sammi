@@ -16,7 +16,6 @@ const UserCoursesView = () => {
           <ProfileDropdown />
         </div>
       </Header>
-
       <Main fixed>
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>
