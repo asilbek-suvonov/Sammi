@@ -12,7 +12,7 @@ export function CourseCard({ course }: { course: Course }) {
   return (
     <Link to='/course/$id' params={{ id: course.id }} className='group block'>
       {/* Card: border va backdrop-blur qo'shildi */}
-      <Card className='cursor-pointer overflow-hidden border border-neutral-700/50 bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-900 hover:shadow-2xl hover:shadow-black/20'>
+      <Card className='cursor-pointer overflow-hidden border border-neutral-700/50 dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-900 hover:shadow-2xl hover:shadow-black/20'>
         
         <div className='relative overflow-hidden rounded-lg'>
           <img
@@ -21,7 +21,7 @@ export function CourseCard({ course }: { course: Course }) {
             className='h-45 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110'
           />  
           <div className='absolute left-2.5 top-2.5'>
-            <Badge variant={levelVariant(course.level)} className='rounded-md bg-accent text-[11px] backdrop-blur-md'>
+            <Badge variant={levelVariant(course.level)} className='rounded-md text-black dark:text-white bg-accent text-[11px] backdrop-blur-md'>
               {course.level}
             </Badge>
           </div>
