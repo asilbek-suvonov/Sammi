@@ -6,37 +6,25 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Separator } from '@/components/ui/separator'
 import { Outlet } from '@tanstack/react-router'
-import { Bell, Palette, UserCog, Wrench } from 'lucide-react'
+import { Palette, UserCog } from 'lucide-react'
 import { SidebarNav } from './components/sidebar-nav'
 
 const sidebarNavItems = [
   {
-    title: 'Profile',
-    href: '/settings',
-    icon: <UserCog size={18} />,
-  },
-  {
     title: 'Account',
     href: '/settings/account',
-    icon: <Wrench size={18} />,
+    icon: <UserCog size={18} />,
   },
   {
     title: 'Appearance',
     href: '/settings/appearance',
     icon: <Palette size={18} />,
   },
-  {
-    title: 'Notifications',
-    href: '/settings/notifications',
-    icon: <Bell size={18} />,
-  },
-
 ]
 
 export function Settings() {
   return (
     <>
-      {/* ===== Top Heading ===== */}
       <Header>
         <Search />
         <div className='ms-auto flex items-center space-x-4'>
@@ -52,7 +40,7 @@ export function Settings() {
             Settings
           </h1>
           <p className='text-muted-foreground'>
-            Manage your account settings and set e-mail preferences.
+            Manage your account settings and preferences.
           </p>
         </div>
         <Separator className='my-4 lg:my-6' />

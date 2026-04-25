@@ -14,43 +14,43 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SignOutDialog } from '@/components/sign-out-dialog'
 import { useAuthStore } from '@/stores/auth-store'
+import { useProfileStore } from '@/stores/profile-store'
 
 export function ProfileDropdown() {
   const [open, setOpen] = useDialogState()
- const { auth } = useAuthStore()  
+  const { auth } = useAuthStore()
+  const { profile } = useProfileStore()
+  const user = auth.user
 
- const user = auth.user
+  const avatarUrl = profile.avatarUrl || ''
+  const displayName =
+    profile.nickname || user?.firstName || user?.email?.split('@')[0] || 'User'
+  const initials = (displayName?.[0] ?? 'U').toUpperCase()
+
   return (
     <>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
             <Avatar className='h-8 w-8'>
-              <AvatarImage src='/avatars/01.png' alt='@shadcn' />
-              <AvatarFallback>SN</AvatarFallback>
+              <AvatarImage src={avatarUrl} alt={displayName} />
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className='w-56' align='end' forceMount>
           <DropdownMenuLabel className='font-normal'>
             <div className='flex flex-col gap-1.5'>
-              <p className='text-sm leading-none font-medium'>{user?.email}</p>
+              <p className='text-sm leading-none font-medium'>{displayName}</p>
               <p className='text-xs leading-none text-muted-foreground'>
-                 Role: {user?.role}
+                {user?.email}
               </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link to='/settings'>
-                Profile
-                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-              </Link>
-            </DropdownMenuItem>
-            
-            <DropdownMenuItem asChild>
-              <Link to='/settings'>
+              <Link to='/settings/account'>
                 Settings
                 <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
               </Link>
@@ -59,9 +59,7 @@ export function ProfileDropdown() {
           <DropdownMenuSeparator />
           <DropdownMenuItem variant='destructive' onClick={() => setOpen(true)}>
             Sign out
-            <DropdownMenuShortcut className='text-current'>
-              ⇧⌘Q
-            </DropdownMenuShortcut>
+            <DropdownMenuShortcut className='text-current'>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

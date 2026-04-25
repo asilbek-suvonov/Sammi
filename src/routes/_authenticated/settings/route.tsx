@@ -1,13 +1,8 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Settings } from '@/features/settings'
-import { useAuthStore } from '@/stores/auth-store'
+import { requireAuth } from '@/lib/route-guards'
 
 export const Route = createFileRoute('/_authenticated/settings')({
-  beforeLoad: () => {
-    const role = useAuthStore.getState().auth.user?.role
-    if (role !== 'admin') {
-      throw redirect({ to: '/dashboard' })
-    }
-  },
+  beforeLoad: ({ location }) => requireAuth(location.href),
   component: Settings,
 })
