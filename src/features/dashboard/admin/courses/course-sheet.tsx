@@ -183,8 +183,8 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-lg'>
-        <SheetHeader className='px-6 pt-6 pb-4'>
+      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-[450px]'>
+        <SheetHeader className='px-6 pt-2 pb-4'>
           <SheetTitle>{isEdit ? 'Edit Course' : 'Add New Course'}</SheetTitle>
           <SheetDescription>
             {isEdit
@@ -244,8 +244,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                         value={field.value}
                         onChange={field.onChange}
                         accept='image/*'
-                        placeholder='https://...'
-                        mode='both'
+                        placeholder='Upload course image'
                       />
                     </FormControl>
                     <FormMessage />
@@ -258,14 +257,11 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                 name='preview_video_url'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preview Video</FormLabel>
+                    <FormLabel>Preview Video URL</FormLabel>
                     <FormControl>
-                      <FileUpload
-                        value={field.value}
-                        onChange={field.onChange}
-                        accept='video/*'
-                        placeholder='https://youtube.com/...'
-                        mode='both'
+                      <Input
+                        placeholder='https://youtube.com/watch?v=...'
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />

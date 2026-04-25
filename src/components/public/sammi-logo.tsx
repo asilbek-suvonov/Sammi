@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Zap } from 'lucide-react'
+import eduLogo from '@/assets/EduLogo.png'
 
 interface SammiLogoProps {
   asLink?: boolean
@@ -7,10 +7,8 @@ interface SammiLogoProps {
 
 const Inner = () => (
   <>
-    <div className='flex size-7 items-center justify-center rounded-md bg-foreground'>
-      <Zap className='size-3.5 text-background' />
-    </div>
-    <span className='text-sm font-semibold tracking-tight'>Sammi</span>
+    <img src={eduLogo} alt='Edu Center' className='size-7 object-contain' />
+    <span className='text-sm font-semibold tracking-tight'>Edu Center</span>
   </>
 )
 

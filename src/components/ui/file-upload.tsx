@@ -1,17 +1,13 @@
 import * as React from 'react'
-import { Link2, Upload, X } from 'lucide-react'
+import { Upload, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 type FileUploadProps = {
   value: string
   onChange: (value: string) => void
   accept?: string
   placeholder?: string
-  /** 'both' shows URL + Upload tabs, 'url' shows only URL input, 'file' shows only file picker */
-  mode?: 'both' | 'url' | 'file'
   className?: string
 }
 
@@ -19,12 +15,10 @@ export function FileUpload({
   value,
   onChange,
   accept = 'image/*',
-  placeholder = 'https://',
-  mode = 'both',
+  placeholder,
   className,
 }: FileUploadProps) {
   const fileRef = React.useRef<HTMLInputElement>(null)
-  const [tab, setTab] = React.useState<'url' | 'file'>('url')
   const [fileName, setFileName] = React.useState('')
   const isImage = accept.includes('image')
 
@@ -47,116 +41,53 @@ export function FileUpload({
     setFileName('')
   }
 
-  if (mode === 'url') {
-    return (
-      <div className={cn('space-y-2', className)}>
-        <div className='flex gap-2'>
-          <Input
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-          />
-          {value && (
-            <Button type='button' variant='outline' size='icon' onClick={handleClear}>
-              <X className='size-4' />
-            </Button>
-          )}
-        </div>
-        {isImage && value && <ImagePreview src={value} />}
-      </div>
-    )
-  }
-
-  if (mode === 'file') {
-    return (
-      <div className={cn('space-y-2', className)}>
-        <div className='flex gap-2'>
-          <div className='flex-1 flex items-center rounded-md border border-input bg-transparent px-3 py-1.5 text-sm text-muted-foreground min-h-9 truncate'>
-            {fileName || value || 'No file selected'}
-          </div>
-          <Button
-            type='button'
-            variant='outline'
-            size='icon'
-            onClick={() => fileRef.current?.click()}
-          >
-            <Upload className='size-4' />
-          </Button>
-          {(fileName || value) && (
-            <Button type='button' variant='outline' size='icon' onClick={handleClear}>
-              <X className='size-4' />
-            </Button>
-          )}
-        </div>
-        <input ref={fileRef} type='file' accept={accept} onChange={handleFile} className='hidden' />
-        {isImage && value && <ImagePreview src={value} />}
-      </div>
-    )
-  }
-
-  // mode === 'both'
-  const isDataUrl = value.startsWith('data:')
+  const displayName = fileName || (value && !value.startsWith('data:') ? value : '') || (value ? 'File selected' : '')
 
   return (
     <div className={cn('space-y-2', className)}>
-      <Tabs value={tab} onValueChange={(v) => setTab(v as 'url' | 'file')}>
-        <TabsList className='h-8'>
-          <TabsTrigger value='url' className='h-6 gap-1 px-2 text-xs'>
-            <Link2 className='size-3' />
-            URL
-          </TabsTrigger>
-          <TabsTrigger value='file' className='h-6 gap-1 px-2 text-xs'>
-            <Upload className='size-3' />
-            Upload
-          </TabsTrigger>
-        </TabsList>
+      <div
+        role='button'
+        tabIndex={0}
+        onClick={() => fileRef.current?.click()}
+        onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
+        className={cn(
+          'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input px-4 py-5 transition-colors hover:border-primary/60 hover:bg-muted/30',
+          value && 'border-primary/40 bg-muted/20'
+        )}
+      >
+        <Upload className='size-5 text-muted-foreground' />
+        {displayName ? (
+          <p className='max-w-full truncate text-sm text-foreground'>{displayName}</p>
+        ) : (
+          <p className='text-sm text-muted-foreground'>
+            {placeholder ?? 'Click to upload'}
+          </p>
+        )}
+        <p className='text-xs text-muted-foreground/60'>
+          {accept.replace('*', '').replace('/', '').toUpperCase() || 'Any file'}
+        </p>
+      </div>
 
-        <TabsContent value='url' className='mt-2'>
-          <div className='flex gap-2'>
-            <Input
-              value={isDataUrl ? '' : value}
-              onChange={(e) => {
-                onChange(e.target.value)
-                setFileName('')
-              }}
-              placeholder={placeholder}
-            />
-            {value && !isDataUrl && (
-              <Button type='button' variant='outline' size='icon' onClick={handleClear}>
-                <X className='size-4' />
-              </Button>
-            )}
-          </div>
-        </TabsContent>
+      <input
+        ref={fileRef}
+        type='file'
+        accept={accept}
+        onChange={handleFile}
+        className='hidden'
+      />
 
-        <TabsContent value='file' className='mt-2'>
-          <div className='flex gap-2'>
-            <div className='flex-1 flex items-center rounded-md border border-input bg-transparent px-3 py-1.5 text-sm text-muted-foreground min-h-9 truncate'>
-              {fileName || (isDataUrl ? 'File selected' : 'No file selected')}
-            </div>
-            <Button
-              type='button'
-              variant='outline'
-              size='icon'
-              onClick={() => fileRef.current?.click()}
-            >
-              <Upload className='size-4' />
-            </Button>
-            {(fileName || value) && (
-              <Button type='button' variant='outline' size='icon' onClick={handleClear}>
-                <X className='size-4' />
-              </Button>
-            )}
-          </div>
-          <input
-            ref={fileRef}
-            type='file'
-            accept={accept}
-            onChange={handleFile}
-            className='hidden'
-          />
-        </TabsContent>
-      </Tabs>
+      {value && (
+        <Button
+          type='button'
+          variant='outline'
+          size='sm'
+          onClick={handleClear}
+          className='h-8 w-full text-xs'
+        >
+          <X className='mr-1.5 size-3.5' />
+          Remove file
+        </Button>
+      )}
 
       {isImage && value && <ImagePreview src={value} />}
     </div>

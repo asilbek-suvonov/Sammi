@@ -207,8 +207,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                         value={field.value}
                         onChange={field.onChange}
                         accept='image/*'
-                        placeholder='https://...'
-                        mode='both'
+                        placeholder='Upload project image'
                       />
                     </FormControl>
                     <FormMessage />
