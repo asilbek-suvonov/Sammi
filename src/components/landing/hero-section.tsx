@@ -15,15 +15,15 @@ export default function HeroSection() {
           {/* CHAP TOMON: MATN QISMI */}
           <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/50 backdrop-blur-md mb-6 animate-in fade-in slide-in-from-bottom-3">
-              <Badge className="bg-blue-600 dark:bg-blue-500 text-[10px] h-5 px-2">LIVE</Badge>
+              <Badge className="rounded-md border border-white/20 bg-black/40 px-2 py-0.5 text-white text-[10px] h-5">LIVE</Badge>
               <span className="text-[12px] font-medium text-muted-foreground flex items-center gap-1">
                 Yangi Mentorlik dasturi boshlandi <ArrowRight size={12} />
               </span>
             </div>
 
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.1] text-foreground">
+            <h1 className="text-3xl lg:text-3xl font-black tracking-tight mb-6 leading-[1.1] text-foreground">
               KOD YOZISHNI <br />
-              <span className="text-blue-600 dark:text-blue-400 italic">SAN'AT</span> DARAJASIGA CHIQARING.
+              <span className="text-neutral-300 dark:text-neutral-400 italic">SAN'AT</span> DARAJASIGA CHIQARING.
             </h1>
 
             <p className="text-[15px] md:text-[16px] text-muted-foreground mb-8 max-w-xl leading-relaxed">
@@ -32,18 +32,18 @@ export default function HeroSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto h-12 px-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-600/20">
+              <Button size="lg" className="w-full sm:w-auto h-12 px-8 rounded-xl bg-neutral-200 hover:bg-neutral-400 text-white font-bold text-sm shadow-xl shadow-neutral-600/20">
                 Kurslarni boshlash
               </Button>
               <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 rounded-xl border-border font-bold text-sm bg-background/50 backdrop-blur-sm">
-                <PlayCircle className="mr-2 size-4 text-blue-600" /> Demo dars
+                <PlayCircle className="mr-2 size-4 text-blue-600 " /> Demo dars
               </Button>
             </div>
           </div>
 
           {/* O'NG TOMON: CODE EDITOR (Qiziqarli kod bilan) */}
           <div className="lg:col-span-6 flex items-center justify-center order-1 lg:order-2">
-            <Card className="relative w-full max-w-2xl border border-border bg-card/80 dark:bg-neutral-950/50 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden group border-t-blue-500/20">
+            <Card className="relative w-full max-w-2xl border border-border bg-card/80 dark:bg-neutral-950/50 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden group h-98 border-t-blue-500/20">
               
               {/* Window Header */}
               <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border">
@@ -85,9 +85,9 @@ export default function HeroSection() {
 
               {/* Floating Success Badge */}
               <div className="absolute bottom-4 right-4 animate-bounce">
-                <div className="bg-green-500/10 backdrop-blur-md border border-green-500/20 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                  <CheckCircle2 size={14} className="text-green-500" />
-                  <span className="text-[11px] font-bold text-green-600 dark:text-green-400">Code Compiled!</span>
+                <div className="bg-neutral-500/10 backdrop-blur-md border border-neutral-500/20 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-neutral-500" />
+                  <span className="text-[11px] font-bold text-neutral-600 dark:text-neutral-400">Code Compiled!</span>
                 </div>
               </div>
             </Card>
@@ -122,9 +122,9 @@ export default function HeroSection() {
 
 function StatCard({ icon, label, value, desc }: { icon: any, label: string, value: string, desc: string }) {
   return (
-    <Card className="p-4 border border-border bg-card/40 backdrop-blur-sm rounded-2xl hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5 group">
+    <Card className="p-4 border border-border bg-card/40 backdrop-blur-sm rounded-2xl hover:border-neutral-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5 group">
       <div className="flex items-center gap-4">
-        <div className="size-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+        <div className="size-10 rounded-xl bg-neutral-500 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
           {icon}
         </div>
         <div>
