@@ -1,4 +1,5 @@
 import { CoursesSection } from '@/components/landing/courses-section'
+import HeroSection from '@/components/landing/hero-section'
 import { LandingFooter } from '@/components/landing/landing-footer'
 import { ProjectsSection } from '@/components/landing/projects-section'
 import { SourcesSection } from '@/components/landing/sources-section'
@@ -51,7 +52,7 @@ export function LandingPage() {
       />
 
       <div className='border-b' />
-
+        <HeroSection />
       <main className='mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 py-16 md:px-6'>
         <CoursesSection />
         <ProjectsSection />
