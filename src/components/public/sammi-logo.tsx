@@ -1,18 +1,16 @@
 import { Link } from '@tanstack/react-router'
-import eduLogo from '@/assets/EduLogo.png'
 
-interface SammiLogoProps {
+interface EduLogoProps {
   asLink?: boolean
 }
 
 const Inner = () => (
   <>
-    <img src={eduLogo} alt='Edu Center' className='size-7 object-contain' />
     <span className='text-sm font-semibold tracking-tight'>Edu Center</span>
   </>
 )
 
-export function SammiLogo({ asLink = false }: SammiLogoProps) {
+export function EduLogo({ asLink = false }: EduLogoProps) {
   if (asLink) {
     return (
       <Link to='/' className='flex items-center gap-2'>

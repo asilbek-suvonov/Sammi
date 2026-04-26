@@ -39,23 +39,53 @@ import { FileUpload } from '@/components/ui/file-upload'
 import { Combobox } from '@/components/ui/combobox'
 
 const TECHNOLOGIES_OPTIONS = [
-  'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-  'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'SCSS',
-  'Node.js', 'Express', 'NestJS', 'Fastify', 'Hono',
-  'Python', 'Django', 'FastAPI', 'Flask',
-  'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'SQLite',
-  'GraphQL', 'REST API', 'WebSocket', 'tRPC',
-  'Docker', 'Kubernetes', 'AWS', 'Firebase', 'Supabase',
-  'Prisma', 'Drizzle', 'TypeORM',
-  'Zustand', 'Redux', 'Jotai', 'MobX',
-  'Vite', 'Webpack', 'Git', 'Linux',
+  'React',
+  'Vue',
+  'Angular',
+  'Next.js',
+  'Nuxt.js',
+  'Svelte',
+  'TypeScript',
+  'JavaScript',
+  'HTML',
+  'CSS',
+  'Tailwind CSS',
+  'SCSS',
+  'Node.js',
+  'Express',
+  'NestJS',
+  'Fastify',
+  'Hono',
+  'Python',
+  'Django',
+  'FastAPI',
+  'Flask',
+  'PostgreSQL',
+  'MySQL',
+  'MongoDB',
+  'Redis',
+  'SQLite',
+  'GraphQL',
+  'REST API',
+  'WebSocket',
+  'tRPC',
+  'Docker',
+  'Kubernetes',
+  'AWS',
+  'Firebase',
+  'Supabase',
+  'Prisma',
+  'Drizzle',
+  'TypeORM',
+  'Zustand',
+  'Redux',
+  'Jotai',
+  'MobX',
+  'Vite',
+  'Webpack',
+  'Git',
+  'Linux',
 ].map((t) => ({ label: t, value: t }))
-
-const LANGUAGE_OPTIONS = [
-  { label: "O'zbek", value: 'uz' },
-  { label: 'English', value: 'en' },
-  { label: 'Русский', value: 'ru' },
-]
 
 const CATEGORY_OPTIONS = [
   { label: 'Frontend', value: 'frontend' },
@@ -71,10 +101,9 @@ const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
   image: z.string().min(1, 'Image is required'),
-  preview_video_url: z.string(),
+  preview_video_url: z.string().min(1, 'Preview video is required'),
   category: z.string(),
   technologies: z.array(z.string()),
-  language: z.enum(['uz', 'en', 'ru', '']),
   level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
   price: z.string().min(1, 'Price is required'),
   is_free: z.boolean(),
@@ -91,7 +120,6 @@ const defaultValues: CourseFormValues = {
   preview_video_url: '',
   category: '',
   technologies: [],
-  language: '',
   level: 'Beginner',
   price: '',
   is_free: false,
@@ -124,7 +152,6 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
           preview_video_url: course.preview_video_url ?? '',
           category: course.category ?? '',
           technologies: course.technologies ?? [],
-          language: course.language ?? '',
           level: course.level,
           price: course.price,
           is_free: course.is_free ?? false,
@@ -140,41 +167,21 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
   const onSubmit = (values: CourseFormValues) => {
     if (isEdit && course) {
       updateCourse(course.id, {
-        title: values.title,
-        description: values.description,
-        image: values.image,
-        preview_video_url: values.preview_video_url || undefined,
-        category: values.category || undefined,
-        technologies: values.technologies,
-        language: (values.language || undefined) as Course['language'],
-        level: values.level,
-        price: values.price,
-        is_free: values.is_free,
-        is_new: values.is_new,
-        is_published: values.is_published,
+        ...course, // Keep original extra fields
+        ...values,
       })
       toast.success('Course updated successfully')
     } else {
       addCourse({
         id: String(Date.now()),
-        title: values.title,
-        description: values.description,
-        image: values.image,
-        preview_video_url: values.preview_video_url || undefined,
-        category: values.category || undefined,
-        technologies: values.technologies,
-        language: (values.language || undefined) as Course['language'],
-        level: values.level,
-        price: values.price,
-        is_free: values.is_free,
-        is_new: values.is_new,
-        is_published: values.is_published,
+        ...values,
         parts: 0,
         hours: 0,
         students: 0,
         rating: 0,
         instructor: 'Admin',
         modules: [],
+        language: 'uz', // Default value logic
       })
       toast.success('Course added successfully')
     }
@@ -183,22 +190,24 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-[450px]'>
-        <SheetHeader className='px-6 pt-2 pb-4'>
+      <SheetContent className='flex h-full flex-col gap-0 p-0 sm:max-w-[450px]'>
+        <SheetHeader className='px-6 pt-2 pb-2'>
           <SheetTitle>{isEdit ? 'Edit Course' : 'Add New Course'}</SheetTitle>
-          <SheetDescription>
+          <SheetDescription className='text-xs'>
             {isEdit
               ? 'Update the course details below.'
               : 'Fill in the details to add a new course.'}
           </SheetDescription>
         </SheetHeader>
         <Separator />
-        <ScrollArea className='flex-1'>
+
+        {/* Scrollable Area */}
+        <ScrollArea className='relative w-full flex-1 overflow-hidden'>
           <Form {...form}>
             <form
               id='course-form'
               onSubmit={form.handleSubmit(onSubmit)}
-              className='space-y-4 px-6 py-4'
+              className='space-y-6 px-6 py-4'
             >
               <FormField
                 control={form.control}
@@ -257,11 +266,13 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                 name='preview_video_url'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preview Video URL</FormLabel>
+                    <FormLabel>Preview Video</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder='https://youtube.com/watch?v=...'
-                        {...field}
+                      <FileUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        accept='video/*'
+                        placeholder='Upload preview video'
                       />
                     </FormControl>
                     <FormMessage />
@@ -269,12 +280,12 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                 )}
               />
 
-              <div className='grid grid-cols-2 gap-4'>
+              <div className='flex flex-row gap-4'>
                 <FormField
                   control={form.control}
                   name='category'
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className='flex-1'>
                       <FormLabel>Category</FormLabel>
                       <FormControl>
                         <Combobox
@@ -292,48 +303,32 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
 
                 <FormField
                   control={form.control}
-                  name='language'
+                  name='level'
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Language</FormLabel>
-                      <FormControl>
-                        <Combobox
-                          value={field.value}
-                          onChange={field.onChange}
-                          options={LANGUAGE_OPTIONS}
-                          placeholder='Select language'
-                          searchPlaceholder='Search language...'
-                        />
-                      </FormControl>
+                    <FormItem className='flex-1'>
+                      <FormLabel>Level</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select level' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='Beginner'>Beginner</SelectItem>
+                          <SelectItem value='Intermediate'>
+                            Intermediate
+                          </SelectItem>
+                          <SelectItem value='Advanced'>Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name='level'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Level</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select level' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value='Beginner'>Beginner</SelectItem>
-                        <SelectItem value='Intermediate'>Intermediate</SelectItem>
-                        <SelectItem value='Advanced'>Advanced</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name='technologies'
@@ -375,7 +370,10 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                     <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
                       <FormLabel className='text-sm'>Free</FormLabel>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -387,7 +385,10 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                     <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
                       <FormLabel className='text-sm'>New</FormLabel>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -399,7 +400,10 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                     <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
                       <FormLabel className='text-sm'>Published</FormLabel>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -408,6 +412,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
             </form>
           </Form>
         </ScrollArea>
+
         <Separator />
         <SheetFooter className='flex flex-row justify-end gap-2 px-6 py-4'>
           <Button variant='outline' onClick={() => onOpenChange(false)}>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useAdminStore } from '@/stores/admin-store'
 import { useUserStore } from '@/stores/user-store'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { GraduationCap, LayoutList, Zap } from 'lucide-react'
+import { GraduationCap, LayoutList } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -73,10 +73,7 @@ export function CoursePreviewPage({ courseId }: Props) {
       <header className='shrink-0 border-b bg-background/95 backdrop-blur'>
         <div className='mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6'>
           <Link to='/' className='flex items-center gap-2'>
-            <div className='flex size-7 items-center justify-center rounded-md bg-foreground'>
-              <Zap className='size-3.5 text-background' />
-            </div>
-            <span className='hidden text-sm font-semibold tracking-tight sm:block'>Sammi</span>
+            <span className='hidden text-sm font-semibold tracking-tight sm:block'>Edu Center</span>
           </Link>
           <div className='flex flex-1 items-center justify-center px-4'>
             <div className='flex items-center gap-2 text-sm'>

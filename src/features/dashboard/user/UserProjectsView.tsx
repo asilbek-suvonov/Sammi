@@ -48,7 +48,7 @@ const UserProjectsView = () => {
             <p className='text-sm text-muted-foreground'>
               Browse projects and build your portfolio.
             </p>
-          </div>
+          </div> 
         </div>
 
         <Separator className='my-4' />
@@ -61,7 +61,7 @@ const UserProjectsView = () => {
             onChange={(e) => setQuery(e.target.value)}
             className='pl-9'
           />
-        </div>
+        </div> 
 
         {filtered.length === 0 ? (
           <div className='flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center'>

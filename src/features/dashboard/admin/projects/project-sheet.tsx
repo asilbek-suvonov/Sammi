@@ -146,8 +146,8 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-lg'>
-        <SheetHeader className='px-6 pt-6 pb-4'>
+      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-[450px]'>
+        <SheetHeader className='px-6 pt-2 pb-2'>
           <SheetTitle>{isEdit ? 'Edit Project' : 'Add New Project'}</SheetTitle>
           <SheetDescription>
             {isEdit
@@ -156,7 +156,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
           </SheetDescription>
         </SheetHeader>
         <Separator />
-        <ScrollArea className='flex-1'>
+        <ScrollArea className='relative w-full flex-1 overflow-hidden'>
           <Form {...form}>
             <form
               id='project-form'
