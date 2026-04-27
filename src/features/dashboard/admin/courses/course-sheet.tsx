@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
 import { type Course } from '@/data/mock-data'
+import { toast } from 'sonner'
 import { useAdminStore } from '@/stores/admin-store'
 import { Button } from '@/components/ui/button'
+import { Combobox } from '@/components/ui/combobox'
+import { FileUpload } from '@/components/ui/file-upload'
 import {
   Form,
   FormControl,
@@ -15,7 +17,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { MultiSelect } from '@/components/ui/multi-select'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
   SelectContent,
@@ -23,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
 import {
   Sheet,
   SheetContent,
@@ -32,11 +35,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { MultiSelect } from '@/components/ui/multi-select'
-import { FileUpload } from '@/components/ui/file-upload'
-import { Combobox } from '@/components/ui/combobox'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 
 const TECHNOLOGIES_OPTIONS = [
   'React',
@@ -88,14 +88,40 @@ const TECHNOLOGIES_OPTIONS = [
 ].map((t) => ({ label: t, value: t }))
 
 const CATEGORY_OPTIONS = [
-  { label: 'Frontend', value: 'frontend' },
-  { label: 'Backend', value: 'backend' },
-  { label: 'Full Stack', value: 'fullstack' },
-  { label: 'Mobile', value: 'mobile' },
-  { label: 'DevOps', value: 'devops' },
-  { label: 'Data Science', value: 'data-science' },
-  { label: 'UI/UX Design', value: 'ui-ux' },
-]
+  'Frontend',
+  'Backend',
+  'Full-Stack',
+  'Mobile',
+  'DevOps',
+  'Data Science',
+  'UI/UX Design',
+  'API',
+  'Database',
+  'Cloud',
+  'Language',
+  'Design',
+].map((category) => ({ label: category, value: category }))
+
+const CATEGORY_ALIASES: Record<string, string> = {
+  fullstack: 'Full-Stack',
+  'full-stack': 'Full-Stack',
+  'full stack': 'Full-Stack',
+  uiux: 'UI/UX Design',
+  'ui-ux': 'UI/UX Design',
+  'ui/ux': 'UI/UX Design',
+  'ui/ux design': 'UI/UX Design',
+}
+
+function normalizeCategory(category?: string) {
+  if (!category) return ''
+
+  const normalized = category.trim().toLowerCase()
+  const option = CATEGORY_OPTIONS.find(
+    (item) => item.value.toLowerCase() === normalized
+  )
+
+  return option?.value ?? CATEGORY_ALIASES[normalized] ?? category
+}
 
 const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -150,7 +176,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
           description: course.description,
           image: course.image,
           preview_video_url: course.preview_video_url ?? '',
-          category: course.category ?? '',
+          category: normalizeCategory(course.category),
           technologies: course.technologies ?? [],
           level: course.level,
           price: course.price,
@@ -181,7 +207,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
         rating: 0,
         instructor: 'Admin',
         modules: [],
-        language: 'uz', // Default value logic
+        language: 'uz',
       })
       toast.success('Course added successfully')
     }
@@ -192,11 +218,9 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className='flex h-full flex-col gap-0 p-0 sm:max-w-[450px]'>
         <SheetHeader className='px-6 pt-2 pb-2'>
-          <SheetTitle>{isEdit ? 'Edit Course' : 'Add New Course'}</SheetTitle>
+          <SheetTitle>Course details</SheetTitle>
           <SheetDescription className='text-xs'>
-            {isEdit
-              ? 'Update the course details below.'
-              : 'Fill in the details to add a new course.'}
+            Fill in the details to save the course.
           </SheetDescription>
         </SheetHeader>
         <Separator />
@@ -254,6 +278,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                         onChange={field.onChange}
                         accept='image/*'
                         placeholder='Upload course image'
+                        hideExistingValue={isEdit}
                       />
                     </FormControl>
                     <FormMessage />
@@ -273,6 +298,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                         onChange={field.onChange}
                         accept='video/*'
                         placeholder='Upload preview video'
+                        hideExistingValue={isEdit}
                       />
                     </FormControl>
                     <FormMessage />
@@ -419,7 +445,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
             Cancel
           </Button>
           <Button type='submit' form='course-form'>
-            {isEdit ? 'Update Course' : 'Add Course'}
+            Save Course
           </Button>
         </SheetFooter>
       </SheetContent>

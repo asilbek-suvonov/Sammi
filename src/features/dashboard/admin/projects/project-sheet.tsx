@@ -2,10 +2,11 @@ import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
 import { type Project } from '@/data/mock-data'
+import { toast } from 'sonner'
 import { useAdminStore } from '@/stores/admin-store'
 import { Button } from '@/components/ui/button'
+import { FileUpload } from '@/components/ui/file-upload'
 import {
   Form,
   FormControl,
@@ -15,7 +16,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { MultiSelect } from '@/components/ui/multi-select'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
   SelectContent,
@@ -23,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
 import {
   Sheet,
   SheetContent,
@@ -32,22 +34,56 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { MultiSelect } from '@/components/ui/multi-select'
-import { FileUpload } from '@/components/ui/file-upload'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
 
 const TECHNOLOGIES_OPTIONS = [
-  'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-  'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Tailwind CSS', 'SCSS',
-  'Node.js', 'Express', 'NestJS', 'Fastify', 'Hono',
-  'Python', 'Django', 'FastAPI', 'Flask',
-  'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'SQLite',
-  'GraphQL', 'REST API', 'WebSocket', 'tRPC',
-  'Docker', 'Kubernetes', 'AWS', 'Firebase', 'Supabase',
-  'Prisma', 'Drizzle', 'TypeORM',
-  'Zustand', 'Redux', 'Jotai', 'MobX',
-  'Vite', 'Webpack', 'Git', 'Linux',
+  'React',
+  'Vue',
+  'Angular',
+  'Next.js',
+  'Nuxt.js',
+  'Svelte',
+  'TypeScript',
+  'JavaScript',
+  'HTML',
+  'CSS',
+  'Tailwind CSS',
+  'SCSS',
+  'Node.js',
+  'Express',
+  'NestJS',
+  'Fastify',
+  'Hono',
+  'Python',
+  'Django',
+  'FastAPI',
+  'Flask',
+  'PostgreSQL',
+  'MySQL',
+  'MongoDB',
+  'Redis',
+  'SQLite',
+  'GraphQL',
+  'REST API',
+  'WebSocket',
+  'tRPC',
+  'Docker',
+  'Kubernetes',
+  'AWS',
+  'Firebase',
+  'Supabase',
+  'Prisma',
+  'Drizzle',
+  'TypeORM',
+  'Zustand',
+  'Redux',
+  'Jotai',
+  'MobX',
+  'Vite',
+  'Webpack',
+  'Git',
+  'Linux',
 ].map((t) => ({ label: t, value: t }))
 
 const projectSchema = z.object({
@@ -80,7 +116,11 @@ type ProjectSheetProps = {
   project?: Project | null
 }
 
-export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps) {
+export function ProjectSheet({
+  open,
+  onOpenChange,
+  project,
+}: ProjectSheetProps) {
   const { addProject, updateProject } = useAdminStore()
   const isEdit = !!project
 
@@ -111,6 +151,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
   const onSubmit = (values: ProjectFormValues) => {
     if (isEdit && project) {
       updateProject(project.id, {
+        ...project,
         title: values.title,
         description: values.description,
         image: values.image,
@@ -148,11 +189,9 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className='flex h-full flex-col gap-0 p-0 sm:max-w-[450px]'>
         <SheetHeader className='px-6 pt-2 pb-2'>
-          <SheetTitle>{isEdit ? 'Edit Project' : 'Add New Project'}</SheetTitle>
+          <SheetTitle>Project details</SheetTitle>
           <SheetDescription className='text-xs'>
-            {isEdit
-              ? 'Update the project details below.'
-              : 'Fill in the details to add a new project.'}
+            Fill in the details to save the project.
           </SheetDescription>
         </SheetHeader>
         <Separator />
@@ -208,6 +247,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                         onChange={field.onChange}
                         accept='image/*'
                         placeholder='Upload project image'
+                        hideExistingValue={isEdit}
                       />
                     </FormControl>
                     <FormMessage />
@@ -278,7 +318,10 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   <FormItem>
                     <FormLabel>Demo URL</FormLabel>
                     <FormControl>
-                      <Input placeholder='https://demo.example.com' {...field} />
+                      <Input
+                        placeholder='https://demo.example.com'
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -292,7 +335,10 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                   <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
                     <FormLabel className='text-sm'>Published</FormLabel>
                     <FormControl>
-                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -306,7 +352,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
             Cancel
           </Button>
           <Button type='submit' form='project-form'>
-            {isEdit ? 'Update Project' : 'Add Project'}
+            Save Project
           </Button>
         </SheetFooter>
       </SheetContent>

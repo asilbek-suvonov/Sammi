@@ -8,6 +8,7 @@ type FileUploadProps = {
   onChange: (value: string) => void
   accept?: string
   placeholder?: string
+  hideExistingValue?: boolean
   className?: string
 }
 
@@ -16,6 +17,7 @@ export function FileUpload({
   onChange,
   accept = 'image/*',
   placeholder,
+  hideExistingValue = false,
   className,
 }: FileUploadProps) {
   const fileRef = React.useRef<HTMLInputElement>(null)
@@ -41,7 +43,11 @@ export function FileUpload({
     setFileName('')
   }
 
-  const displayName = fileName || (value && !value.startsWith('data:') ? value : '') || (value ? 'File selected' : '')
+  const shouldShowValue = !hideExistingValue || !!fileName
+  const displayName =
+    fileName ||
+    (shouldShowValue && value && !value.startsWith('data:') ? value : '') ||
+    (shouldShowValue && value ? 'File selected' : '')
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -52,12 +58,14 @@ export function FileUpload({
         onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
         className={cn(
           'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input px-4 py-5 transition-colors hover:border-primary/60 hover:bg-muted/30',
-          value && 'border-primary/40 bg-muted/20'
+          value && shouldShowValue && 'border-primary/40 bg-muted/20'
         )}
       >
         <Upload className='size-5 text-muted-foreground' />
         {displayName ? (
-          <p className='max-w-full truncate text-sm text-foreground'>{displayName}</p>
+          <p className='max-w-full truncate text-sm text-foreground'>
+            {displayName}
+          </p>
         ) : (
           <p className='text-sm text-muted-foreground'>
             {placeholder ?? 'Click to upload'}
@@ -76,7 +84,7 @@ export function FileUpload({
         className='hidden'
       />
 
-      {value && (
+      {value && shouldShowValue && (
         <Button
           type='button'
           variant='outline'
@@ -89,7 +97,7 @@ export function FileUpload({
         </Button>
       )}
 
-      {isImage && value && <ImagePreview src={value} />}
+      {isImage && value && shouldShowValue && <ImagePreview src={value} />}
     </div>
   )
 }
