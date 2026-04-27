@@ -1,9 +1,17 @@
+import { ContactDialog } from '@/components/contact-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Project } from '@/data/mock-data'
-import { FolderGit2, MessageCircle } from 'lucide-react'
+import { ExternalLink, FolderGit2, MessageCircle } from 'lucide-react'
 
 export function ProjectSideCard({ project }: { project: Project }) {
+  const hasLinks = Boolean(project.demo_url || project.github_url)
+
+  const handleGetProject = () => {
+    const url = project.demo_url || project.github_url
+    if (url) window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div className='lg:sticky lg:top-20 lg:self-start'>
       <div className='space-y-6 rounded-xl border bg-card p-6 shadow-sm'>
@@ -15,12 +23,30 @@ export function ProjectSideCard({ project }: { project: Project }) {
         </div>
 
         <div className='space-y-3'>
-          <Button className='w-full gap-2' size='lg'>
-            <FolderGit2 className='size-5' /> Get Project
-          </Button>
-          <Button variant='outline' className='w-full gap-2' size='lg'>
-            <MessageCircle className='size-5' /> Contact
-          </Button>
+          {hasLinks ? (
+            <Button type='button' className='w-full gap-2' size='lg' onClick={handleGetProject}>
+              <ExternalLink className='size-5' /> Get Project
+            </Button>
+          ) : (
+            <ContactDialog
+              subject={project.title}
+              title='Get this project'
+              description='Leave your details and we will send you access instructions.'
+              trigger={
+                <Button type='button' className='w-full gap-2' size='lg'>
+                  <FolderGit2 className='size-5' /> Get Project
+                </Button>
+              }
+            />
+          )}
+          <ContactDialog
+            subject={project.title}
+            trigger={
+              <Button type='button' variant='outline' className='w-full gap-2' size='lg'>
+                <MessageCircle className='size-5' /> Contact
+              </Button>
+            }
+          />
         </div>
 
         <div className='space-y-3 border-t pt-4 text-sm'>

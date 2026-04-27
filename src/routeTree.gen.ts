@@ -20,8 +20,8 @@ import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
 import { Route as errors403RouteImport } from './routes/(errors)/403'
 import { Route as errors401RouteImport } from './routes/(errors)/401'
-import { Route as authSignIn2RouteImport } from './routes/(auth)/sign-in-2'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
+import { Route as authAdminLoginRouteImport } from './routes/(auth)/admin-login'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedDashboardRouteRouteImport } from './routes/_authenticated/dashboard/route'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
@@ -87,14 +87,14 @@ const errors401Route = errors401RouteImport.update({
   path: '/401',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authSignIn2Route = authSignIn2RouteImport.update({
-  id: '/(auth)/sign-in-2',
-  path: '/sign-in-2',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const authOtpRoute = authOtpRouteImport.update({
   id: '/(auth)/otp',
   path: '/otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authAdminLoginRoute = authAdminLoginRouteImport.update({
+  id: '/(auth)/admin-login',
+  path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSettingsRouteRoute =
@@ -163,8 +163,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRouteRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/admin-login': typeof authAdminLoginRoute
   '/otp': typeof authOtpRoute
-  '/sign-in-2': typeof authSignIn2Route
   '/401': typeof errors401Route
   '/403': typeof errors403Route
   '/404': typeof errors404Route
@@ -186,8 +186,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRouteRouteWithChildren
+  '/admin-login': typeof authAdminLoginRoute
   '/otp': typeof authOtpRoute
-  '/sign-in-2': typeof authSignIn2Route
   '/401': typeof errors401Route
   '/403': typeof errors403Route
   '/404': typeof errors404Route
@@ -212,8 +212,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/(auth)/admin-login': typeof authAdminLoginRoute
   '/(auth)/otp': typeof authOtpRoute
-  '/(auth)/sign-in-2': typeof authSignIn2Route
   '/(errors)/401': typeof errors401Route
   '/(errors)/403': typeof errors403Route
   '/(errors)/404': typeof errors404Route
@@ -238,8 +238,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/settings'
+    | '/admin-login'
     | '/otp'
-    | '/sign-in-2'
     | '/401'
     | '/403'
     | '/404'
@@ -261,8 +261,8 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/dashboard'
+    | '/admin-login'
     | '/otp'
-    | '/sign-in-2'
     | '/401'
     | '/403'
     | '/404'
@@ -286,8 +286,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/dashboard'
     | '/_authenticated/settings'
+    | '/(auth)/admin-login'
     | '/(auth)/otp'
-    | '/(auth)/sign-in-2'
     | '/(errors)/401'
     | '/(errors)/403'
     | '/(errors)/404'
@@ -310,8 +310,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
+  authAdminLoginRoute: typeof authAdminLoginRoute
   authOtpRoute: typeof authOtpRoute
-  authSignIn2Route: typeof authSignIn2Route
   errors401Route: typeof errors401Route
   errors403Route: typeof errors403Route
   errors404Route: typeof errors404Route
@@ -401,18 +401,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof errors401RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/sign-in-2': {
-      id: '/(auth)/sign-in-2'
-      path: '/sign-in-2'
-      fullPath: '/sign-in-2'
-      preLoaderRoute: typeof authSignIn2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(auth)/otp': {
       id: '/(auth)/otp'
       path: '/otp'
       fullPath: '/otp'
       preLoaderRoute: typeof authOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/admin-login': {
+      id: '/(auth)/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof authAdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/settings': {
@@ -546,8 +546,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
+  authAdminLoginRoute: authAdminLoginRoute,
   authOtpRoute: authOtpRoute,
-  authSignIn2Route: authSignIn2Route,
   errors401Route: errors401Route,
   errors403Route: errors403Route,
   errors404Route: errors404Route,

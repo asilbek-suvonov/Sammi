@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/data-table'
+import { ImagePreview } from '@/components/image-preview'
 
 type CoursesColumnsProps = {
   onEdit: (course: Course) => void
@@ -48,7 +49,7 @@ export function getCoursesColumns({ onEdit, onDelete }: CoursesColumnsProps): Co
       cell: ({ row }) => (
         <div className='flex items-center gap-3 max-w-[220px]'>
           {row.original.image && (
-            <img
+            <ImagePreview
               src={row.original.image}
               alt={row.original.title}
               className='h-8 w-14 rounded object-cover shrink-0'
@@ -123,7 +124,7 @@ export function getCoursesColumns({ onEdit, onDelete }: CoursesColumnsProps): Co
               <span className='sr-only'>Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
+          <DropdownMenuContent align='end' sideOffset={4} collisionPadding={8}>
             <DropdownMenuItem onClick={() => onEdit(row.original)}>
               <Pencil className='mr-2 h-4 w-4' />
               Edit

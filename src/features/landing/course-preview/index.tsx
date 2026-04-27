@@ -81,7 +81,15 @@ export function CoursePreviewPage({ courseId }: Props) {
               <span className='line-clamp-1 font-medium'>{course.title}</span>
             </div>
           </div>
-          <Button variant='outline' size='sm' className='gap-1.5' onClick={() => setSheetOpen(true)}>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='gap-1.5'
+            aria-expanded={sheetOpen}
+            aria-controls='lessons-panel'
+            onClick={() => setSheetOpen((o) => !o)}
+          >
             <LayoutList className='size-4' />
             <span className='hidden sm:inline'>Darslar</span>
           </Button>

@@ -72,6 +72,7 @@ export const COURSES: Course[] = [
     image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800&auto=format&fit=crop',
     parts: 11, hours: 30, price: '$129', level: 'Intermediate', students: 870, rating: 4.8,
     instructor: 'Asilbek Karimov',
+    category: 'Backend', is_new: true, is_published: true,
     modules: [
       { id: 'm1', title: 'Express Fundamentals', lessons: [
         { id: 'l1', title: 'Routing and Middleware', duration: '18:00' },
@@ -90,6 +91,7 @@ export const COURSES: Course[] = [
     image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?q=80&w=800&auto=format&fit=crop',
     parts: 8, hours: 22, price: '$119', level: 'Advanced', students: 540, rating: 4.7,
     instructor: 'Asilbek Karimov',
+    category: 'API', is_new: true, is_published: true,
     modules: [
       { id: 'm1', title: 'GraphQL Basics', lessons: [
         { id: 'l1', title: 'Schema Definition Language', duration: '20:00' },
@@ -104,6 +106,7 @@ export const COURSES: Course[] = [
     image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=800&auto=format&fit=crop',
     parts: 10, hours: 28, price: '$109', level: 'Intermediate', students: 690, rating: 4.6,
     instructor: 'Asilbek Karimov',
+    category: 'DevOps', is_new: false, is_published: true,
     modules: [
       { id: 'm1', title: 'Docker Fundamentals', lessons: [
         { id: 'l1', title: 'Images and Containers', duration: '22:00' },
@@ -118,6 +121,7 @@ export const COURSES: Course[] = [
     image: 'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?q=80&w=800&auto=format&fit=crop',
     parts: 9, hours: 26, price: '$99', level: 'Beginner', students: 760, rating: 4.8,
     instructor: 'Asilbek Karimov',
+    category: 'Frontend', is_new: true, is_published: true,
     modules: [
       { id: 'm1', title: 'Vue 3 Basics', lessons: [
         { id: 'l1', title: 'Composition API', duration: '20:00' },
@@ -132,6 +136,7 @@ export const COURSES: Course[] = [
     image: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=800&auto=format&fit=crop',
     parts: 7, hours: 18, price: '$89', level: 'Intermediate', students: 430, rating: 4.7,
     instructor: 'Asilbek Karimov',
+    category: 'Database', is_new: false, is_published: true,
     modules: [
       { id: 'm1', title: 'Advanced SQL', lessons: [
         { id: 'l1', title: 'Window Functions', duration: '18:00' },
@@ -146,6 +151,7 @@ export const COURSES: Course[] = [
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop',
     parts: 12, hours: 38, price: '$149', level: 'Advanced', students: 390, rating: 4.9,
     instructor: 'Asilbek Karimov',
+    category: 'Cloud', is_new: true, is_published: true,
     modules: [
       { id: 'm1', title: 'AWS Fundamentals', lessons: [
         { id: 'l1', title: 'IAM and Security', duration: '24:00' },
@@ -168,6 +174,9 @@ export const COURSES: Course[] = [
     students: 1240,
     rating: 4.9,
     instructor: 'Asilbek Karimov',
+    category: 'Frontend',
+    is_new: false,
+    is_published: true,
     modules: [
       {
         id: 'm1',
@@ -215,6 +224,9 @@ export const COURSES: Course[] = [
     students: 980,
     rating: 4.8,
     instructor: 'Asilbek Karimov',
+    category: 'Language',
+    is_new: false,
+    is_published: true,
     modules: [
       {
         id: 'm1',
@@ -251,6 +263,9 @@ export const COURSES: Course[] = [
     students: 750,
     rating: 4.9,
     instructor: 'Asilbek Karimov',
+    category: 'Frontend',
+    is_new: true,
+    is_published: true,
     modules: [
       {
         id: 'm1',
@@ -295,6 +310,9 @@ export const COURSES: Course[] = [
     students: 1540,
     rating: 5.0,
     instructor: 'Asilbek Karimov',
+    category: 'Full-Stack',
+    is_new: true,
+    is_published: true,
     modules: [
       {
         id: 'm1',
@@ -340,6 +358,9 @@ export const COURSES: Course[] = [
     students: 620,
     rating: 4.7,
     instructor: 'Asilbek Karimov',
+    category: 'Frontend',
+    is_new: false,
+    is_published: true,
     modules: [
       {
         id: 'm1',
@@ -374,6 +395,9 @@ export const COURSES: Course[] = [
     students: 890,
     rating: 4.8,
     instructor: 'Asilbek Karimov',
+    category: 'Design',
+    is_new: false,
+    is_published: false,
     modules: [
       {
         id: 'm1',
@@ -412,6 +436,10 @@ export const PROJECTS: Project[] = [
     features: ['Payment integration', 'Subscription plans', 'Usage analytics', 'Export reports'],
     modules: 6,
     duration: '18h',
+    difficulty: 'Medium',
+    github_url: 'https://github.com/sammi-edu/saas-billing',
+    demo_url: 'https://demo.sammi.edu/saas-billing',
+    is_published: true,
   },
   {
     id: '1',
@@ -427,6 +455,10 @@ export const PROJECTS: Project[] = [
     features: ['40+ components', 'Dark mode', 'Storybook docs', 'Accessibility'],
     modules: 5,
     duration: '14h',
+    difficulty: 'Easy',
+    github_url: 'https://github.com/sammi-edu/design-system',
+    demo_url: 'https://demo.sammi.edu/design-system',
+    is_published: true,
   },
   {
     id: '2',
@@ -442,6 +474,10 @@ export const PROJECTS: Project[] = [
     features: ['Real-time charts', 'Data filters', 'CSV export', 'Responsive'],
     modules: 7,
     duration: '22h',
+    difficulty: 'Medium',
+    github_url: 'https://github.com/sammi-edu/analytics-portal',
+    demo_url: 'https://demo.sammi.edu/analytics',
+    is_published: true,
   },
   {
     id: '3',
@@ -457,6 +493,10 @@ export const PROJECTS: Project[] = [
     features: ['Product management', 'Stripe payments', 'Order tracking', 'Admin panel'],
     modules: 9,
     duration: '32h',
+    difficulty: 'Hard',
+    github_url: 'https://github.com/sammi-edu/ecommerce',
+    demo_url: 'https://demo.sammi.edu/shop',
+    is_published: true,
   },
   {
     id: '4',
@@ -472,6 +512,10 @@ export const PROJECTS: Project[] = [
     features: ['Real-time messages', 'File sharing', 'Online presence', 'Message history'],
     modules: 8,
     duration: '26h',
+    difficulty: 'Medium',
+    github_url: 'https://github.com/sammi-edu/realtime-chat',
+    demo_url: 'https://demo.sammi.edu/chat',
+    is_published: true,
   },
   {
     id: '5',
@@ -487,5 +531,8 @@ export const PROJECTS: Project[] = [
     features: ['Container metrics', 'Deployment status', 'Alert management', 'Log viewer'],
     modules: 6,
     duration: '20h',
+    difficulty: 'Hard',
+    github_url: 'https://github.com/sammi-edu/devops-dashboard',
+    is_published: false,
   },
 ]

@@ -1,6 +1,8 @@
+import { ContactDialog } from '@/components/contact-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Course } from '@/data/mock-data'
+import { getCourseStats } from '@/lib/course-stats'
 import { levelVariant } from '@/lib/variants'
 import { Star } from 'lucide-react'
 
@@ -13,10 +15,12 @@ interface CourseSideCardProps {
 
 export function CourseSideCard({
   course,
-  totalLessons = 0,
+  totalLessons,
   enrolled = false,
   onWatch,
 }: CourseSideCardProps) {
+  const stats = course ? getCourseStats(course) : null
+  const lessonCount = totalLessons ?? stats?.lessonCount ?? 0
   return (
     <div className='lg:sticky lg:top-20 lg:self-start'>
       <div className='space-y-6 rounded-xl border bg-card p-6 shadow-sm'>
@@ -34,6 +38,7 @@ export function CourseSideCard({
         {/* ACTION BUTTONS */}
         <div className='space-y-3'>
           <Button
+            type='button'
             className='w-full gap-2'
             size='lg'
             onClick={() => onWatch?.()}
@@ -41,9 +46,14 @@ export function CourseSideCard({
             {enrolled ? 'Continue Watching' : 'Watch Course'}
           </Button>
 
-          <Button variant='outline' className='w-full gap-2' size='lg'>
-            Contact
-          </Button>
+          <ContactDialog
+            subject={course.title}
+            trigger={
+              <Button type='button' variant='outline' className='w-full gap-2' size='lg'>
+                Contact
+              </Button>
+            }
+          />
         </div>
 
         {/* COURSE INFO */}
@@ -51,15 +61,15 @@ export function CourseSideCard({
           {[
             {
               label: 'Modules',
-              value: course?.modules?.length ?? 0,
+              value: stats?.moduleCount ?? course?.modules?.length ?? 0,
             },
             {
               label: 'Total lessons',
-              value: totalLessons,
+              value: lessonCount,
             },
             {
               label: 'Duration',
-              value: `${course?.hours ?? 0}h total`,
+              value: stats ? `${stats.hoursLabel} total` : `${course?.hours ?? 0}h total`,
             },
             {
               label: 'Students',

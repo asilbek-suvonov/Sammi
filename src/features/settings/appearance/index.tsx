@@ -28,7 +28,7 @@ export function SettingsAppearance() {
   const { font, setFont } = useFont()
 
   return (
-    <div className='w-full max-w-2xl space-y-10'>
+    <div className='w-full max-w-2xl space-y-10 overflow-y-auto'>
       {/* Theme Section */}
       <div className='space-y-4'>
         <div>

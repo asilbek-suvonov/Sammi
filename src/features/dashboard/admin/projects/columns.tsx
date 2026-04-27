@@ -11,7 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { DataTableColumnHeader } from '@/components/data-table'
+import { ImagePreview } from '@/components/image-preview'
 
 type ProjectsColumnsProps = {
   onEdit: (project: Project) => void
@@ -48,7 +54,7 @@ export function getProjectsColumns({ onEdit, onDelete }: ProjectsColumnsProps): 
       cell: ({ row }) => (
         <div className='flex items-center gap-3 max-w-[220px]'>
           {row.original.image && (
-            <img
+            <ImagePreview
               src={row.original.image}
               alt={row.original.title}
               className='h-8 w-14 rounded object-cover shrink-0'
@@ -77,18 +83,39 @@ export function getProjectsColumns({ onEdit, onDelete }: ProjectsColumnsProps): 
       accessorKey: 'tech',
       header: ({ column }) => <DataTableColumnHeader column={column} title='Technologies' />,
       cell: ({ row }) => {
-        const tech = row.getValue('tech') as string[]
+        const tech = (row.getValue('tech') as string[]) ?? []
+        const visible = tech.slice(0, 2)
+        const hidden = tech.slice(2)
         return (
-          <div className='flex flex-wrap gap-1 max-w-[180px]'>
-            {tech.slice(0, 3).map((t) => (
+          <div className='flex flex-wrap items-center gap-1 max-w-[180px]'>
+            {visible.map((t) => (
               <Badge key={t} variant='outline' className='text-xs'>
                 {t}
               </Badge>
             ))}
-            {tech.length > 3 && (
-              <Badge variant='outline' className='text-xs'>
-                +{tech.length - 3}
-              </Badge>
+            {hidden.length > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant='secondary'
+                    className='cursor-default text-xs'
+                  >
+                    +{hidden.length}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side='top' className='max-w-xs'>
+                  <div className='flex flex-wrap gap-1'>
+                    {hidden.map((t) => (
+                      <span
+                        key={t}
+                        className='rounded-sm bg-primary-foreground/10 px-1.5 py-0.5 text-[11px]'
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         )
@@ -152,7 +179,7 @@ export function getProjectsColumns({ onEdit, onDelete }: ProjectsColumnsProps): 
               <span className='sr-only'>Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
+          <DropdownMenuContent align='end' sideOffset={4} collisionPadding={8}>
             <DropdownMenuItem onClick={() => onEdit(row.original)}>
               <Pencil className='mr-2 h-4 w-4' />
               Edit

@@ -57,6 +57,6 @@ export const useAdminStore = create<AdminState>()(
         set((state) => ({ sources: state.sources.map((s) => (s.id === id ? { ...s, ...updates } : s)) })),
       deleteSource: (id) => set((state) => ({ sources: state.sources.filter((s) => s.id !== id) })),
     }),
-    { name: 'sammi_admin_data' }
+    { name: 'sammi_admin_data', version: 2 }
   )
 )

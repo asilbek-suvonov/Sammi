@@ -1,5 +1,6 @@
 import { CourseCurriculum } from '@/components/course/course-curriculum'
 import { CourseSideCard } from '@/components/course/course-side-card'
+import { LoginDialog } from '@/components/login-dialog'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
@@ -7,11 +8,11 @@ import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/stores/auth-store'
 import { useUserStore } from '@/stores/user-store'
 import { useAdminStore } from '@/stores/admin-store'
+import { getCourseStats } from '@/lib/course-stats'
 import { levelVariant } from '@/lib/variants'
 import { useNavigate } from '@tanstack/react-router'
 import { Clock3, Layers3, Star, Users } from 'lucide-react'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 interface Props { id: string }
 
@@ -23,6 +24,8 @@ export function CourseDetailPage({ id }: Props) {
   const user = auth.user
   const [openModules, setOpenModules] = useState<string[]>([])
 
+  const [loginOpen, setLoginOpen] = useState(false)
+
   const course = courses.find((c) => c.id === id)
   const enrolled = course ? isEnrolled(course.id) : false
 
@@ -32,14 +35,22 @@ export function CourseDetailPage({ id }: Props) {
     </div>
   )
 
-  const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0)
+  const stats = getCourseStats(course)
+  const totalLessons = stats.lessonCount
   const toggleModule = (moduleId: string) =>
     setOpenModules((prev) => prev.includes(moduleId) ? prev.filter((x) => x !== moduleId) : [...prev, moduleId])
 
-  const handleWatch = () => {
-    if (!user) { toast.error('Please sign in to watch this course.'); return }
+  const goToPreview = () => {
     if (!enrolled) enrollCourse(course.id)
     navigate({ to: '/course/preview', search: { courseId: course.id } })
+  }
+
+  const handleWatch = () => {
+    if (!user) {
+      setLoginOpen(true)
+      return
+    }
+    goToPreview()
   }
 
   return (
@@ -63,8 +74,8 @@ export function CourseDetailPage({ id }: Props) {
               <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
                 <span className='flex items-center gap-1.5'><Star className='size-4 fill-amber-400 text-amber-400' /> {course.rating} rating</span>
                 <span className='flex items-center gap-1.5'><Users className='size-4' /> {course.students.toLocaleString()} students</span>
-                <span className='flex items-center gap-1.5'><Layers3 className='size-4' /> {course.parts} modules</span>
-                <span className='flex items-center gap-1.5'><Clock3 className='size-4' /> {course.hours}h total</span>
+                <span className='flex items-center gap-1.5'><Layers3 className='size-4' /> {stats.moduleCount} modules</span>
+                <span className='flex items-center gap-1.5'><Clock3 className='size-4' /> {stats.hoursLabel} total</span>
               </div>
             </div>
             <div className='overflow-hidden rounded-xl border'>
@@ -75,6 +86,13 @@ export function CourseDetailPage({ id }: Props) {
           <CourseSideCard course={course} totalLessons={totalLessons} enrolled={enrolled} onWatch={handleWatch} />
         </div>
       </main>
+      <LoginDialog
+        open={loginOpen}
+        onOpenChange={setLoginOpen}
+        onSuccess={goToPreview}
+        title='Sign in to watch'
+        description={`Sign in to start "${course.title}".`}
+      />
     </div>
   )
 }

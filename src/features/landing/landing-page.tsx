@@ -20,7 +20,9 @@ export function LandingPage() {
   const linkClass = useMemo(
     () => (id: string) =>
       `px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-150 ${
-        active === id ? 'text-gray-900/80 bg-white' : 'text-muted-foreground hover:text-foreground'
+        active === id
+          ? 'bg-foreground/5 text-foreground dark:bg-foreground/10'
+          : 'text-muted-foreground hover:text-foreground hover:bg-foreground/5'
       }`,
     [active]
   )

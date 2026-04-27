@@ -6,6 +6,8 @@ interface UserProfile {
   username: string
   avatarUrl: string
   bio: string
+  firstName?: string
+  lastName?: string
 }
 
 interface ProfileState {

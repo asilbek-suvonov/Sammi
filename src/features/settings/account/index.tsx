@@ -1,28 +1,33 @@
-import { useState, useRef } from 'react'
-import { useAuthStore } from '@/stores/auth-store'
-import { useProfileStore } from '@/stores/profile-store'
+import { useEffect, useRef, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { useUserSettings } from '@/hooks/use-user-settings'
 import { toast } from 'sonner'
 import { Camera, Eye, EyeOff, Loader2 } from 'lucide-react'
 
 export function SettingsAccount() {
-  const { auth } = useAuthStore()
-  const { profile, setProfile } = useProfileStore()
-  const user = auth.user
+  const { data, save, uploadAvatar, removeAvatar } = useUserSettings()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [profileForm, setProfileForm] = useState({
-    nickname: profile.nickname || user?.firstName || '',
-    username: profile.username || user?.accountNo || '',
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+    nickname: data.nickname,
+    username: data.username,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    bio: data.bio,
   })
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl || '')
+  const [avatarUrl, setAvatarUrl] = useState(data.avatarUrl)
   const [profileSaving, setProfileSaving] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+
+  // Keep form in sync if store updates from elsewhere (e.g. another tab).
+  useEffect(() => {
+    setAvatarUrl(data.avatarUrl)
+  }, [data.avatarUrl])
 
   const [passForm, setPassForm] = useState({
     currentPassword: '',
@@ -35,19 +40,27 @@ export function SettingsAccount() {
   const [passSaving, setPassSaving] = useState(false)
 
   const initials = (
-    (profileForm.firstName?.[0] ?? user?.email?.[0] ?? 'U')
+    profileForm.firstName?.[0] ?? data.email?.[0] ?? 'U'
   ).toUpperCase()
 
-  const handleAvatarFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      const url = (ev.target?.result ?? '') as string
-      setAvatarUrl(url)
-    }
-    reader.readAsDataURL(file)
     if (fileRef.current) fileRef.current.value = ''
+    if (!file) return
+    setAvatarUploading(true)
+    const url = await uploadAvatar(file)
+    setAvatarUploading(false)
+    if (!url) return
+    setAvatarUrl(url)
+    if (save({ avatarUrl: url })) {
+      toast.success('Profile picture updated')
+    }
+  }
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl('')
+    removeAvatar()
+    toast.success('Profile picture removed')
   }
 
   const handleProfileSave = async (e: React.FormEvent) => {
@@ -61,19 +74,17 @@ export function SettingsAccount() {
       return
     }
     setProfileSaving(true)
-    await new Promise((r) => setTimeout(r, 600))
-    setProfile({
-      nickname: profileForm.nickname,
-      username: profileForm.username,
+    await new Promise((r) => setTimeout(r, 400))
+    const ok = save({
+      nickname: profileForm.nickname.trim(),
+      username: profileForm.username.trim(),
+      firstName: profileForm.firstName.trim(),
+      lastName: profileForm.lastName.trim(),
+      bio: profileForm.bio.trim(),
       avatarUrl,
     })
-    auth.setUser(
-      user
-        ? { ...user, firstName: profileForm.firstName, lastName: profileForm.lastName }
-        : null
-    )
     setProfileSaving(false)
-    toast.success('Profile updated successfully')
+    if (ok) toast.success('Profile updated successfully')
   }
 
   const handlePasswordSave = async (e: React.FormEvent) => {
@@ -98,7 +109,7 @@ export function SettingsAccount() {
   }
 
   return (
-    <div className='w-full max-w-2xl space-y-8'>
+    <div className='w-full max-w-2xl space-y-8 overflow-y-auto'>
       {/* Avatar Section */}
       <div className='space-y-4'>
         <div>
@@ -118,9 +129,14 @@ export function SettingsAccount() {
             <button
               type='button'
               onClick={() => fileRef.current?.click()}
-              className='absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary/90'
+              disabled={avatarUploading}
+              className='absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-60'
             >
-              <Camera className='size-3.5' />
+              {avatarUploading ? (
+                <Loader2 className='size-3.5 animate-spin' />
+              ) : (
+                <Camera className='size-3.5' />
+              )}
             </button>
             <input
               ref={fileRef}
@@ -132,10 +148,10 @@ export function SettingsAccount() {
           </div>
           <div className='space-y-1'>
             <p className='text-sm font-medium'>
-              {profileForm.nickname || profileForm.firstName || user?.email}
+              {profileForm.nickname || profileForm.firstName || data.email}
             </p>
             <p className='text-xs text-muted-foreground'>
-              @{profileForm.username || user?.accountNo}
+              @{profileForm.username || data.email.split('@')[0]}
             </p>
             {avatarUrl && (
               <Button
@@ -143,7 +159,7 @@ export function SettingsAccount() {
                 variant='ghost'
                 size='sm'
                 className='h-7 text-xs text-destructive hover:text-destructive'
-                onClick={() => setAvatarUrl('')}
+                onClick={handleRemoveAvatar}
               >
                 Remove photo
               </Button>
@@ -222,10 +238,23 @@ export function SettingsAccount() {
         </div>
 
         <div className='space-y-2'>
+          <Label htmlFor='bio'>Bio</Label>
+          <Textarea
+            id='bio'
+            value={profileForm.bio}
+            onChange={(e) =>
+              setProfileForm((f) => ({ ...f, bio: e.target.value }))
+            }
+            placeholder='Tell us a bit about yourself.'
+            rows={3}
+          />
+        </div>
+
+        <div className='space-y-2'>
           <Label htmlFor='email'>Email</Label>
           <Input
             id='email'
-            value={user?.email ?? ''}
+            value={data.email}
             readOnly
             disabled
             className='cursor-not-allowed opacity-60'

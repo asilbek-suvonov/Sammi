@@ -146,10 +146,10 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-[450px]'>
+      <SheetContent className='flex h-full flex-col gap-0 p-0 sm:max-w-[450px]'>
         <SheetHeader className='px-6 pt-2 pb-2'>
           <SheetTitle>{isEdit ? 'Edit Project' : 'Add New Project'}</SheetTitle>
-          <SheetDescription>
+          <SheetDescription className='text-xs'>
             {isEdit
               ? 'Update the project details below.'
               : 'Fill in the details to add a new project.'}
