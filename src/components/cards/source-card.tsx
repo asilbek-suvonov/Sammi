@@ -11,22 +11,17 @@ export function SourceCard({ source }: { source: Source }) {
       rel='noreferrer'
       className='group block'
     >
-      {/* bg-card: Light/Dark mode uchun moslashtirilgan fon rangi */}
       <Card className='relative overflow-hidden border bg-card p-4 transition-all duration-300 hover:border-primary/10 hover:shadow-md'>
         
-        {/* LEFT HOVER LINE */}
         <div className='absolute left-0 top-0 h-full w-[2px] bg-primary opacity-0 transition-all duration-300 group-hover:opacity-100' />
 
         <div className='flex items-center justify-between'>
-          {/* LEFT SIDE */}
           <div className='flex items-center gap-4'>
             
-            {/* ICON BOX */}
             <div className='flex h-11 w-11 items-center justify-center rounded-xl border bg-muted/50 transition-colors group-hover:bg-primary/10'>
               <FolderGit2 className='size-5 text-muted-foreground transition-colors group-hover:text-primary' />
             </div>
 
-            {/* TEXT */}
             <div className='space-y-0.5'>
               <h3 className='text-sm font-semibold tracking-tight transition-colors group-hover:text-primary'>
                 {source.title}
@@ -37,7 +32,6 @@ export function SourceCard({ source }: { source: Source }) {
             </div>
           </div>
 
-          {/* RIGHT SIDE */}
           <div className='flex items-center gap-3'>
             <div className='flex h-9 w-9 items-center justify-center rounded-full border bg-muted/50'>
               <IconGithub className='size-4 text-muted-foreground' />

@@ -11,10 +11,6 @@ export function CourseCard({ course }: { course: Course }) {
 
   return (
     <Link to='/course/$id' params={{ id: course.id }} className='group block'>
-      {/* bg-card: Dark/Light mode uchun avtomatik fon rangi
-        border: Chegaralar uchun mos rang
-        hover:border-primary/50: Hover holatida temaga mos rang 
-      */}
       <Card className='cursor-pointer overflow-hidden border bg-card p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/10 hover:shadow-lg'>
         
         <div className='relative overflow-hidden rounded-lg'>

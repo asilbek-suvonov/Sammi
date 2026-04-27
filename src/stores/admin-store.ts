@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { type Course, type Project, COURSES, PROJECTS, SOURCES, type Source } from '@/data/mock-data'
+import { type Course, type Lesson, type Module, type Project, COURSES, PROJECTS, SOURCES, type Source } from '@/data/mock-data'
 
 export interface AdminSource extends Source {
   id: string
@@ -19,6 +19,12 @@ interface AdminState {
   addCourse: (course: Course) => void
   updateCourse: (id: string, updates: Partial<Course>) => void
   deleteCourse: (id: string) => void
+  addModule: (courseId: string, module: Module) => void
+  updateModule: (courseId: string, moduleId: string, updates: Partial<Module>) => void
+  deleteModule: (courseId: string, moduleId: string) => void
+  addLesson: (courseId: string, moduleId: string, lesson: Lesson) => void
+  updateLesson: (courseId: string, moduleId: string, lessonId: string, updates: Partial<Lesson>) => void
+  deleteLesson: (courseId: string, moduleId: string, lessonId: string) => void
   addProject: (project: Project) => void
   updateProject: (id: string, updates: Partial<Project>) => void
   deleteProject: (id: string) => void
@@ -48,6 +54,79 @@ export const useAdminStore = create<AdminState>()(
       updateCourse: (id, updates) =>
         set((state) => ({ courses: state.courses.map((c) => (c.id === id ? { ...c, ...updates } : c)) })),
       deleteCourse: (id) => set((state) => ({ courses: state.courses.filter((c) => c.id !== id) })),
+      addModule: (courseId, module) =>
+        set((state) => ({
+          courses: state.courses.map((c) =>
+            c.id === courseId ? { ...c, modules: [...c.modules, module] } : c
+          ),
+        })),
+      updateModule: (courseId, moduleId, updates) =>
+        set((state) => ({
+          courses: state.courses.map((c) =>
+            c.id === courseId
+              ? {
+                  ...c,
+                  modules: c.modules.map((m) => (m.id === moduleId ? { ...m, ...updates } : m)),
+                }
+              : c
+          ),
+        })),
+      deleteModule: (courseId, moduleId) =>
+        set((state) => ({
+          courses: state.courses.map((c) =>
+            c.id === courseId
+              ? { ...c, modules: c.modules.filter((m) => m.id !== moduleId) }
+              : c
+          ),
+        })),
+      addLesson: (courseId, moduleId, lesson) =>
+        set((state) => ({
+          courses: state.courses.map((c) =>
+            c.id === courseId
+              ? {
+                  ...c,
+                  modules: c.modules.map((m) =>
+                    m.id === moduleId ? { ...m, lessons: [...m.lessons, lesson] } : m
+                  ),
+                }
+              : c
+          ),
+        })),
+      updateLesson: (courseId, moduleId, lessonId, updates) =>
+        set((state) => ({
+          courses: state.courses.map((c) =>
+            c.id === courseId
+              ? {
+                  ...c,
+                  modules: c.modules.map((m) =>
+                    m.id === moduleId
+                      ? {
+                          ...m,
+                          lessons: m.lessons.map((l) =>
+                            l.id === lessonId ? { ...l, ...updates } : l
+                          ),
+                        }
+                      : m
+                  ),
+                }
+              : c
+          ),
+        })),
+      deleteLesson: (courseId, moduleId, lessonId) =>
+        set((state) => ({
+          courses: state.courses.map((c) =>
+            c.id === courseId
+              ? {
+                  ...c,
+                  modules: c.modules.map((m) =>
+                    m.id === moduleId
+                      ? { ...m, lessons: m.lessons.filter((l) => l.id !== lessonId) }
+                      : m
+                  ),
+                }
+              : c
+          ),
+        })),
       addProject: (project) => set((state) => ({ projects: [...state.projects, project] })),
       updateProject: (id, updates) =>
         set((state) => ({ projects: state.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)) })),

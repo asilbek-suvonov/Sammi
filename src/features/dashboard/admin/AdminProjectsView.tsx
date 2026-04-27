@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import {
   flexRender,
   getCoreRowModel,
@@ -41,6 +42,7 @@ import { getProjectsColumns } from './projects/columns'
 import { ProjectSheet } from './projects/project-sheet'
 
 export default function AdminProjectsView() {
+  const navigate = useNavigate()
   const { projects, deleteProject } = useAdminStore()
 
   const [sorting, setSorting] = useState<SortingState>([])
@@ -188,6 +190,17 @@ export default function AdminProjectsView() {
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() ? 'selected' : undefined}
+                      className='cursor-pointer'
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement
+                        if (target.closest('button, a, input, [role="checkbox"], [role="menu"], [role="menuitem"]')) {
+                          return
+                        }
+                        navigate({
+                          to: '/dashboard/projects/$id',
+                          params: { id: row.original.id },
+                        })
+                      }}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>

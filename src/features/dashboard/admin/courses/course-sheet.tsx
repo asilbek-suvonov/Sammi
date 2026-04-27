@@ -127,7 +127,6 @@ const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
   image: z.string().min(1, 'Image is required'),
-  preview_video_url: z.string().min(1, 'Preview video is required'),
   category: z.string(),
   technologies: z.array(z.string()),
   level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
@@ -143,7 +142,6 @@ const defaultValues: CourseFormValues = {
   title: '',
   description: '',
   image: '',
-  preview_video_url: '',
   category: '',
   technologies: [],
   level: 'Beginner',
@@ -175,7 +173,6 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
           title: course.title,
           description: course.description,
           image: course.image,
-          preview_video_url: course.preview_video_url ?? '',
           category: normalizeCategory(course.category),
           technologies: course.technologies ?? [],
           level: course.level,
@@ -278,26 +275,6 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                         onChange={field.onChange}
                         accept='image/*'
                         placeholder='Upload course image'
-                        hideExistingValue={isEdit}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name='preview_video_url'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preview Video</FormLabel>
-                    <FormControl>
-                      <FileUpload
-                        value={field.value}
-                        onChange={field.onChange}
-                        accept='video/*'
-                        placeholder='Upload preview video'
                         hideExistingValue={isEdit}
                       />
                     </FormControl>

@@ -1,12 +1,12 @@
-import { useEffect, useState, type MouseEvent } from 'react'
-import { X, ZoomIn } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
   DialogDescription,
+  DialogTitle,
 } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
+import { ZoomIn } from 'lucide-react'
+import { useEffect, useState, type MouseEvent } from 'react'
 
 type ImagePreviewProps = {
   src: string
@@ -72,20 +72,27 @@ export function ImagePreview({
           <DialogDescription className='sr-only'>
             Image preview
           </DialogDescription>
-          <div className='relative flex items-center justify-center'>
+          <div className='
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          '>
             <img
               src={src}
               alt={alt}
               className='max-h-[80vh] w-auto rounded-lg object-contain shadow-2xl'
             />
-            <button
-              type='button'
-              onClick={() => setOpen(false)}
-              aria-label='Close preview'
-              className='absolute -right-2 -top-2 flex size-9 items-center justify-center rounded-full bg-background text-foreground shadow-lg ring-1 ring-border transition hover:bg-muted'
-            >
-              <X className='size-4' />
-            </button>
+           
           </div>
         </DialogContent>
       </Dialog>

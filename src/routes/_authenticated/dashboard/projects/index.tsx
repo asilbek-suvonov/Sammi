@@ -4,7 +4,7 @@ import UserProjectsView from '@/features/dashboard/user/UserProjectsView'
 import { useAuthStore } from '@/stores/auth-store'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/_authenticated/dashboard/projects')({
+export const Route = createFileRoute('/_authenticated/dashboard/projects/')({
   component: ProjectsPage,
 })
 
@@ -14,4 +14,3 @@ function ProjectsPage() {
 
   return isAdmin ? <AdminProjectsView /> : <UserProjectsView />
 }
-
