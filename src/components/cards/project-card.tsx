@@ -7,7 +7,7 @@ export function ProjectCard({ project }: { project: Project }) {
   return (
     <Link to='/project/$id' params={{ id: project.id }} className='group block'>
       {/* CourseCard bilan bir xil Card uslubi */}
-      <Card className='cursor-pointer overflow-hidden border border-neutral-700/50 dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-900 hover:shadow-2xl hover:shadow-black/20'>
+      <Card className='cursor-pointer overflow-hidden dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>
         
         {/* Rasm qismi (CourseCard'dagi kabi rounded-lg va zoom effekt) */}
         <div className='relative overflow-hidden rounded-lg'>

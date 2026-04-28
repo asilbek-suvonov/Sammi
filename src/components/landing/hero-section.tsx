@@ -32,7 +32,7 @@ export default function HeroSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto h-12 px-8 rounded-xl bg-neutral-200 hover:bg-neutral-400 text-white font-bold text-sm shadow-xl shadow-neutral-600/20">
+              <Button size="lg" className="w-full sm:w-auto h-12 px-8 rounded-xl bg-neutral-400 hover:bg-neutral-300 text-white font-bold text-sm shadow-xl shadow-neutral-600/20">
                 Kurslarni boshlash
               </Button>
               <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 rounded-xl border-border font-bold text-sm bg-background/50 backdrop-blur-sm">

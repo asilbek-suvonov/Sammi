@@ -11,7 +11,7 @@ export function SourceCard({ source }: { source: Source }) {
       rel='noreferrer'
       className='group block'
     >
-      <Card className='relative overflow-hidden border bg-background p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-sm'>
+      <Card className='relative overflow-hidden border bg-background p-4 transition-all duration-300 hover:shadow-sm'>
 
         {/* LEFT HOVER LINE */}
         <div className='absolute left-0 top-0 h-full w-[2px] bg-primary opacity-0 transition-all duration-300 group-hover:opacity-100' />
