@@ -1,4 +1,5 @@
-import { BookOpen, Briefcase, Command, FolderGit2, GraduationCap, LayoutDashboard } from 'lucide-react'
+import { BookOpen, Briefcase, FolderGit2, GraduationCap, LayoutDashboard } from 'lucide-react'
+import { EduLogoIcon } from '@/assets/edu-logo-icon'
 import { type SidebarData } from '../types'
 
 type Role = 'admin' | 'user'
@@ -27,7 +28,7 @@ export const buildSidebarData = (role: Role, email: string): SidebarData => {
     teams: [
       {
         name: 'Edu Center',
-        logo: Command,
+        logo: EduLogoIcon,
         plan: role === 'admin' ? 'Admin' : 'User',
         homeUrl: '/',
       },

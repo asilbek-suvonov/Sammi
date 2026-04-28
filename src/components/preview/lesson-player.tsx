@@ -32,6 +32,7 @@ export function LessonPlayer({
       <div className='overflow-hidden rounded-xl border bg-black shadow-sm'>
         <div className='aspect-video w-full'>
           <ReactPlayer
+            key={lesson?.id ?? 'no-lesson'}
             src={SAMPLE_VIDEO}
             width='100%'
             height='100%'

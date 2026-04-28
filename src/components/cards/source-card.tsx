@@ -1,7 +1,7 @@
 import { IconGithub } from '@/assets/brand-icons'
 import { Card } from '@/components/ui/card'
 import type { Source } from '@/data/mock-data'
-import { ExternalLink, FolderGit2,  } from 'lucide-react'
+import { ExternalLink, FolderGit2 } from 'lucide-react'
 
 export function SourceCard({ source }: { source: Source }) {
   return (
@@ -11,41 +11,36 @@ export function SourceCard({ source }: { source: Source }) {
       rel='noreferrer'
       className='group block'
     >
-      <Card className='relative overflow-hidden border bg-background p-4 transition-all duration-300 hover:shadow-sm'>
+      {/* Sening dizayning: bg-background va hover effekti */}
+      <Card className='relative overflow-hidden border border-neutral-700/50 bg-neutral-900/20 p-4 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-black/20'>
 
-        {/* LEFT HOVER LINE */}
-        <div className='absolute left-0 top-0 h-full w-[2px] bg-primary opacity-0 transition-all duration-300 group-hover:opacity-100' />
+        {/* LEFT HOVER LINE - Sening g'oyang */}
+        <div className='absolute left-0 top-0 h-full w-[2px] bg-foreground opacity-0 transition-all duration-300 group-hover:opacity-100' />
 
         <div className='flex items-center justify-between'>
-
-          {/* LEFT SIDE */}
           <div className='flex items-center gap-4'>
-
-            {/* ICON BOX */}
-            <div className='flex h-11 w-11 items-center justify-center rounded-xl border bg-muted transition group-hover:bg-primary/10'>
-              <FolderGit2 className='size-5 text-muted-foreground group-hover:text-primary transition' />
+            
+            <div className='flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-800 bg-neutral-800/50 transition-colors group-hover:bg-foreground/10'>
+              <FolderGit2 className='size-5 text-neutral-400 transition-colors group-hover:text-foreground' />
             </div>
 
-            {/* TEXT */}
-            <div className='space-y-1'>
-              <h3 className='text-sm font-semibold tracking-tight transition group-hover:text-primary'>
+            <div className='space-y-0.5'>
+              <h3 className='text-sm font-semibold tracking-tight transition-colors group-hover:text-foreground text-foreground'>
                 {source.title}
               </h3>
-                <p className='text-[10px] tracking-wider text-muted-foreground'>
-                  Repository
-                </p>
+              <p className='text-[10px] uppercase tracking-wider text-neutral-500'>
+                Repository
+              </p>
             </div>
           </div>
 
-          {/* RIGHT SIDE */}
           <div className='flex items-center gap-3'>
-            <div className='flex h-9 w-9 items-center justify-center rounded-full border bg-muted'>
-              <IconGithub className='size-4 text-muted-foreground' />
+            <div className='flex h-9 w-9 items-center justify-center rounded-full border border-neutral-800 bg-neutral-800/50'>
+              <IconGithub className='size-4 text-neutral-400' />
             </div>
 
-            <ExternalLink className='size-4 text-muted-foreground transition group-hover:text-primary' />
+            <ExternalLink className='size-4 text-neutral-500 transition-colors group-hover:text-foreground' />
           </div>
-
         </div>
       </Card>
     </a>

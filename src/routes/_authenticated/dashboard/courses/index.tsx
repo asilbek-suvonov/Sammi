@@ -4,10 +4,9 @@ import UserCoursesView from '@/features/dashboard/user/UserCoursesView'
 import { useAuthStore } from '@/stores/auth-store'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/_authenticated/dashboard/courses')({
+export const Route = createFileRoute('/_authenticated/dashboard/courses/')({
   component: CoursesPage,
 })
-
 
 function CoursesPage() {
   const { auth } = useAuthStore()
@@ -15,4 +14,3 @@ function CoursesPage() {
 
   return isAdmin ? <AdminCoursesView /> : <UserCoursesView />
 }
-

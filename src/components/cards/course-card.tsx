@@ -11,17 +11,21 @@ export function CourseCard({ course }: { course: Course }) {
 
   return (
     <Link to='/course/$id' params={{ id: course.id }} className='group block'>
-      {/* Card: border va backdrop-blur qo'shildi */}
-      <Card className='cursor-pointer overflow-hidden border  dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>
+      {/* Sening dizayning saqlandi: dark:bg-neutral-900/30 va backdrop-blur */}
+      <Card className='cursor-pointer overflow-hidden border border-neutral-700/50 dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-900 hover:shadow-2xl hover:shadow-black/20'>
         
         <div className='relative overflow-hidden rounded-lg'>
           <img
             src={course.image}
             alt={course.title}
             className='h-45 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110'
-          />  
+          />
           <div className='absolute left-2.5 top-2.5'>
-            <Badge variant={levelVariant(course.level)} className='rounded-md text-black dark:text-white bg-accent text-[11px] backdrop-blur-md'>
+            {/* Sening Badge uslubing */}
+            <Badge 
+              variant={levelVariant(course.level)} 
+              className='rounded-md text-black dark:text-white bg-accent/80 text-[11px] backdrop-blur-md border border-white/10'
+            >
               {course.level}
             </Badge>
           </div>
@@ -45,7 +49,6 @@ export function CourseCard({ course }: { course: Course }) {
               <Users className='size-3' /> {course.students.toLocaleString()}
             </span>
           </div>
-          
         </CardContent>
       </Card>
     </Link>

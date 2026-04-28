@@ -1,20 +1,16 @@
 import { Link } from '@tanstack/react-router'
-import { Zap } from 'lucide-react'
 
-interface SammiLogoProps {
+interface EduLogoProps {
   asLink?: boolean
 }
 
 const Inner = () => (
   <>
-    <div className='flex size-7 items-center justify-center rounded-md bg-foreground'>
-      <Zap className='size-3.5 text-background' />
-    </div>
-    <span className='text-sm font-semibold tracking-tight'>Sammi</span>
+    <span className='text-sm font-semibold tracking-tight'>Edu Center</span>
   </>
 )
 
-export function SammiLogo({ asLink = false }: SammiLogoProps) {
+export function EduLogo({ asLink = false }: EduLogoProps) {
   if (asLink) {
     return (
       <Link to='/' className='flex items-center gap-2'>

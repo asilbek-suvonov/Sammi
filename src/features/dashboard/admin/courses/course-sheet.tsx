@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
 import { type Course } from '@/data/mock-data'
+import { toast } from 'sonner'
 import { useAdminStore } from '@/stores/admin-store'
 import { Button } from '@/components/ui/button'
+import { Combobox } from '@/components/ui/combobox'
+import { FileUpload } from '@/components/ui/file-upload'
 import {
   Form,
   FormControl,
@@ -15,7 +17,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { MultiSelect } from '@/components/ui/multi-select'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
   SelectContent,
@@ -23,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
 import {
   Sheet,
   SheetContent,
@@ -32,16 +35,100 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+
+const TECHNOLOGIES_OPTIONS = [
+  'React',
+  'Vue',
+  'Angular',
+  'Next.js',
+  'Nuxt.js',
+  'Svelte',
+  'TypeScript',
+  'JavaScript',
+  'HTML',
+  'CSS',
+  'Tailwind CSS',
+  'SCSS',
+  'Node.js',
+  'Express',
+  'NestJS',
+  'Fastify',
+  'Hono',
+  'Python',
+  'Django',
+  'FastAPI',
+  'Flask',
+  'PostgreSQL',
+  'MySQL',
+  'MongoDB',
+  'Redis',
+  'SQLite',
+  'GraphQL',
+  'REST API',
+  'WebSocket',
+  'tRPC',
+  'Docker',
+  'Kubernetes',
+  'AWS',
+  'Firebase',
+  'Supabase',
+  'Prisma',
+  'Drizzle',
+  'TypeORM',
+  'Zustand',
+  'Redux',
+  'Jotai',
+  'MobX',
+  'Vite',
+  'Webpack',
+  'Git',
+  'Linux',
+].map((t) => ({ label: t, value: t }))
+
+const CATEGORY_OPTIONS = [
+  'Frontend',
+  'Backend',
+  'Full-Stack',
+  'Mobile',
+  'DevOps',
+  'Data Science',
+  'UI/UX Design',
+  'API',
+  'Database',
+  'Cloud',
+  'Language',
+  'Design',
+].map((category) => ({ label: category, value: category }))
+
+const CATEGORY_ALIASES: Record<string, string> = {
+  fullstack: 'Full-Stack',
+  'full-stack': 'Full-Stack',
+  'full stack': 'Full-Stack',
+  uiux: 'UI/UX Design',
+  'ui-ux': 'UI/UX Design',
+  'ui/ux': 'UI/UX Design',
+  'ui/ux design': 'UI/UX Design',
+}
+
+function normalizeCategory(category?: string) {
+  if (!category) return ''
+
+  const normalized = category.trim().toLowerCase()
+  const option = CATEGORY_OPTIONS.find(
+    (item) => item.value.toLowerCase() === normalized
+  )
+
+  return option?.value ?? CATEGORY_ALIASES[normalized] ?? category
+}
 
 const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  image: z.string().min(1, 'Image URL is required'),
-  preview_video_url: z.string(),
+  image: z.string().min(1, 'Image is required'),
   category: z.string(),
-  technologies: z.string(),
+  technologies: z.array(z.string()),
   level: z.enum(['Beginner', 'Intermediate', 'Advanced']),
   price: z.string().min(1, 'Price is required'),
   is_free: z.boolean(),
@@ -55,9 +142,8 @@ const defaultValues: CourseFormValues = {
   title: '',
   description: '',
   image: '',
-  preview_video_url: '',
   category: '',
-  technologies: '',
+  technologies: [],
   level: 'Beginner',
   price: '',
   is_free: false,
@@ -87,9 +173,8 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
           title: course.title,
           description: course.description,
           image: course.image,
-          preview_video_url: course.preview_video_url ?? '',
-          category: course.category ?? '',
-          technologies: course.technologies?.join(', ') ?? '',
+          category: normalizeCategory(course.category),
+          technologies: course.technologies ?? [],
           level: course.level,
           price: course.price,
           is_free: course.is_free ?? false,
@@ -103,45 +188,23 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
   }, [open, course, form])
 
   const onSubmit = (values: CourseFormValues) => {
-    const technologies = values.technologies
-      ? values.technologies.split(',').map((t) => t.trim()).filter(Boolean)
-      : []
-
     if (isEdit && course) {
       updateCourse(course.id, {
-        title: values.title,
-        description: values.description,
-        image: values.image,
-        preview_video_url: values.preview_video_url || undefined,
-        category: values.category || undefined,
-        technologies,
-        level: values.level,
-        price: values.price,
-        is_free: values.is_free,
-        is_new: values.is_new,
-        is_published: values.is_published,
+        ...course, // Keep original extra fields
+        ...values,
       })
       toast.success('Course updated successfully')
     } else {
       addCourse({
         id: String(Date.now()),
-        title: values.title,
-        description: values.description,
-        image: values.image,
-        preview_video_url: values.preview_video_url || undefined,
-        category: values.category || undefined,
-        technologies,
-        level: values.level,
-        price: values.price,
-        is_free: values.is_free,
-        is_new: values.is_new,
-        is_published: values.is_published,
+        ...values,
         parts: 0,
         hours: 0,
         students: 0,
         rating: 0,
         instructor: 'Admin',
         modules: [],
+        language: 'uz',
       })
       toast.success('Course added successfully')
     }
@@ -150,22 +213,22 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-lg'>
-        <SheetHeader className='px-6 pt-6 pb-4'>
-          <SheetTitle>{isEdit ? 'Edit Course' : 'Add New Course'}</SheetTitle>
-          <SheetDescription>
-            {isEdit
-              ? 'Update the course details below.'
-              : 'Fill in the details to add a new course.'}
+      <SheetContent className='flex h-full flex-col gap-0 p-0 sm:max-w-[450px]'>
+        <SheetHeader className='px-6 pt-2 pb-2'>
+          <SheetTitle>Course details</SheetTitle>
+          <SheetDescription className='text-xs'>
+            Fill in the details to save the course.
           </SheetDescription>
         </SheetHeader>
         <Separator />
-        <ScrollArea className='flex-1'>
+
+        {/* Scrollable Area */}
+        <ScrollArea className='relative w-full flex-1 overflow-hidden'>
           <Form {...form}>
             <form
               id='course-form'
               onSubmit={form.handleSubmit(onSubmit)}
-              className='space-y-4 px-6 py-4'
+              className='space-y-6 px-6 py-4'
             >
               <FormField
                 control={form.control}
@@ -180,6 +243,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='description'
@@ -198,53 +262,58 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='image'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL</FormLabel>
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
-                      <Input placeholder='https://...' {...field} />
+                      <FileUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        accept='image/*'
+                        placeholder='Upload course image'
+                        hideExistingValue={isEdit}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='preview_video_url'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Preview Video URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder='https://youtube.com/...' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className='grid grid-cols-2 gap-4'>
+
+              <div className='flex flex-row gap-4'>
                 <FormField
                   control={form.control}
                   name='category'
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className='flex-1'>
                       <FormLabel>Category</FormLabel>
                       <FormControl>
-                        <Input placeholder='Frontend, Backend...' {...field} />
+                        <Combobox
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={CATEGORY_OPTIONS}
+                          placeholder='Select category'
+                          searchPlaceholder='Search category...'
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name='level'
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className='flex-1'>
                       <FormLabel>Level</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder='Select level' />
@@ -252,7 +321,9 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value='Beginner'>Beginner</SelectItem>
-                          <SelectItem value='Intermediate'>Intermediate</SelectItem>
+                          <SelectItem value='Intermediate'>
+                            Intermediate
+                          </SelectItem>
                           <SelectItem value='Advanced'>Advanced</SelectItem>
                         </SelectContent>
                       </Select>
@@ -268,12 +339,18 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   <FormItem>
                     <FormLabel>Technologies</FormLabel>
                     <FormControl>
-                      <Input placeholder='React, TypeScript, Tailwind (comma-separated)' {...field} />
+                      <MultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={TECHNOLOGIES_OPTIONS}
+                        placeholder='Select technologies...'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name='price'
@@ -287,6 +364,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                   </FormItem>
                 )}
               />
+
               <div className='grid grid-cols-3 gap-4'>
                 <FormField
                   control={form.control}
@@ -295,7 +373,10 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                     <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
                       <FormLabel className='text-sm'>Free</FormLabel>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -307,7 +388,10 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                     <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
                       <FormLabel className='text-sm'>New</FormLabel>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -319,7 +403,10 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
                     <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
                       <FormLabel className='text-sm'>Published</FormLabel>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -328,13 +415,14 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
             </form>
           </Form>
         </ScrollArea>
+
         <Separator />
         <SheetFooter className='flex flex-row justify-end gap-2 px-6 py-4'>
           <Button variant='outline' onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button type='submit' form='course-form'>
-            {isEdit ? 'Update Course' : 'Add Course'}
+            Save Course
           </Button>
         </SheetFooter>
       </SheetContent>

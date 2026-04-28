@@ -1,4 +1,4 @@
-import { GitCommit, Zap } from 'lucide-react'
+import { GitCommit } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 const FOOTER_COLS = [
@@ -15,10 +15,7 @@ export function LandingFooter() {
         <div className='grid gap-8 md:grid-cols-4'>
           <div className='space-y-3 md:col-span-1'>
             <div className='flex items-center gap-2'>
-              <div className='flex size-6 items-center justify-center rounded-md bg-foreground'>
-                <Zap className='size-3 text-background' />
-              </div>
-              <span className='text-sm font-semibold'>Sammi</span>
+              <span className='text-sm font-semibold'>Edu Center</span>
             </div>
             <p className='text-sm leading-relaxed text-muted-foreground'>
               {t('footerDescription')}
@@ -43,7 +40,7 @@ export function LandingFooter() {
         </div>
 
         <div className='mt-10 flex flex-col items-start justify-between gap-3 border-t pt-6 text-xs text-muted-foreground md:flex-row md:items-center'>
-          <span>© {new Date().getFullYear()} Sammi. {t('footerRights')}</span>
+          <span>© {new Date().getFullYear()} Edu center. {t('footerRights')}</span>
           <a
             href='https://github.com'
             target='_blank'

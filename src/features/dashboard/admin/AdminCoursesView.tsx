@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import {
   flexRender,
   getCoreRowModel,
@@ -11,22 +12,10 @@ import {
   type SortingState,
   type VisibilityState,
 } from '@tanstack/react-table'
+import { type Course } from '@/data/mock-data'
 import { PlusIcon, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { type Course } from '@/data/mock-data'
 import { useAdminStore } from '@/stores/admin-store'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { ConfirmDialog } from '@/components/confirm-dialog'
-import {
-  DataTableBulkActions,
-  DataTablePagination,
-  DataTableToolbar,
-} from '@/components/data-table'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -37,10 +26,23 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import {
+  DataTableBulkActions,
+  DataTablePagination,
+  DataTableToolbar,
+} from '@/components/data-table'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { getCoursesColumns } from './courses/columns'
 import { CourseSheet } from './courses/course-sheet'
 
 export default function AdminCoursesView() {
+  const navigate = useNavigate()
   const { courses, deleteCourse } = useAdminStore()
 
   const [sorting, setSorting] = useState<SortingState>([])
@@ -56,6 +58,13 @@ export default function AdminCoursesView() {
   const handleEdit = (course: Course) => {
     setSelectedCourse(course)
     setSheetOpen(true)
+  }
+
+  const handleSheetOpenChange = (open: boolean) => {
+    setSheetOpen(open)
+    if (!open) {
+      setSelectedCourse(null)
+    }
   }
 
   const handleDelete = (course: Course) => {
@@ -181,6 +190,17 @@ export default function AdminCoursesView() {
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() ? 'selected' : undefined}
+                      className='cursor-pointer'
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement
+                        if (target.closest('button, a, input, [role="checkbox"], [role="menu"], [role="menuitem"]')) {
+                          return
+                        }
+                        navigate({
+                          to: '/dashboard/courses/$id',
+                          params: { id: row.original.id },
+                        })
+                      }}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
@@ -219,7 +239,7 @@ export default function AdminCoursesView() {
 
       <CourseSheet
         open={sheetOpen}
-        onOpenChange={setSheetOpen}
+        onOpenChange={handleSheetOpenChange}
         course={selectedCourse}
       />
 
