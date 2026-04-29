@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { AdminProjectDetail } from '@/features/dashboard/admin/projects/project-detail'
+import { AdminProjectDetail } from '@/features/dashboard/projects/project-detail'
 
 export const Route = createFileRoute('/_authenticated/dashboard/projects/$id')({
   component: ProjectDetailRoute,

@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthActions } from '@/stores/selectors'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,7 +37,7 @@ type OtpFormProps = React.HTMLAttributes<HTMLFormElement>
 export function OtpForm({ className, ...props }: OtpFormProps) {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
-  const { auth } = useAuthStore()
+  const { setUser, setAccessToken } = useAuthActions()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,8 +65,8 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
         role: 'user' as const,
         exp: Date.now() + 24 * 60 * 60 * 1000,
       }
-      auth.setUser(newUser)
-      auth.setAccessToken('mock-user-token')
+      setUser(newUser)
+      setAccessToken('mock-user-token')
       sessionStorage.removeItem('sammi_pending_email')
       setIsLoading(false)
       toast.success(`Welcome, ${newUser.firstName}!`)

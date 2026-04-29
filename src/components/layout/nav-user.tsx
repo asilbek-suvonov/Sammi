@@ -15,7 +15,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import useDialogState from '@/hooks/use-dialog-state'
-import { useProfileStore } from '@/stores/profile-store'
+import { useProfile } from '@/stores/selectors'
 import { Link } from '@tanstack/react-router'
 import { ChevronsUpDown, LogOut, Settings } from 'lucide-react'
 
@@ -30,7 +30,7 @@ type NavUserProps = {
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
   const [open, setOpen] = useDialogState()
-  const { profile } = useProfileStore()
+  const profile = useProfile()
 
   const avatarUrl = profile.avatarUrl || user.avatar
   const displayName = profile.nickname || user.name

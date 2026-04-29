@@ -6,7 +6,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { IconFacebook, IconGithub } from '@/assets/brand-icons'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthActions } from '@/stores/selectors'
 import { sleep, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -41,7 +41,7 @@ export function UserAuthForm({
 }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
+  const { setUser, setAccessToken } = useAuthActions()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,8 +99,8 @@ export function UserAuthForm({
         }
 
         // Set user and access token
-        auth.setUser(mockUser)
-        auth.setAccessToken('mock-access-token')
+        setUser(mockUser)
+        setAccessToken('mock-access-token')
 
         // Redirect to requested page after auth, otherwise default dashboard.
         if (redirectTo?.startsWith('/')) {

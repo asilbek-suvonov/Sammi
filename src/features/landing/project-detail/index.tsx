@@ -3,13 +3,13 @@ import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
 import { Badge } from '@/components/ui/badge'
-import { useAdminStore } from '@/stores/admin-store'
+import { useProjects } from '@/stores/selectors'
 import { Check, Clock3, FolderGit2, Layers3, Users } from 'lucide-react'
 
 interface Props { id: string }
 
 export function ProjectDetailPage({ id }: Props) {
-  const { projects } = useAdminStore()
+  const projects = useProjects()
   const project = projects.find((p) => p.id === id)
 
   if (!project) return (

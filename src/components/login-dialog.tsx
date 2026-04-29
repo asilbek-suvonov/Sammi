@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthActions } from '@/stores/selectors'
 
 interface LoginDialogProps {
   trigger?: ReactNode
@@ -33,7 +33,7 @@ export function LoginDialog({
 }: LoginDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const { auth } = useAuthStore()
+  const { setUser, setAccessToken } = useAuthActions()
 
   const open = controlledOpen ?? internalOpen
   const setOpen = onOpenChange ?? setInternalOpen
@@ -49,7 +49,7 @@ export function LoginDialog({
     }
     setSubmitting(true)
     setTimeout(() => {
-      auth.setUser({
+      setUser({
         accountNo: `USR-${Date.now()}`,
         firstName,
         lastName: '',
@@ -57,7 +57,7 @@ export function LoginDialog({
         role: 'user',
         exp: Date.now() + 24 * 60 * 60 * 1000,
       })
-      auth.setAccessToken('mock-user-token')
+      setAccessToken('mock-user-token')
       setSubmitting(false)
       setOpen(false)
       toast.success(`Welcome, ${firstName}!`)

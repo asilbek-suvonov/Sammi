@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthActions, useAuthUser } from '@/stores/selectors'
 import { useNavigate } from '@tanstack/react-router'
 import { LayoutDashboard, LogOut, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -19,10 +19,10 @@ interface UserNavProps {
 }
 
 export function UserNav({ onSignIn }: UserNavProps) {
-  const { auth } = useAuthStore()
+  const user = useAuthUser()
+  const { reset } = useAuthActions()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const user = auth.user
 
   if (!user) {
     return (
@@ -70,7 +70,7 @@ export function UserNav({ onSignIn }: UserNavProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant='destructive'
-          onClick={() => { auth.reset(); navigate({ to: '/' }) }}
+          onClick={() => { reset(); navigate({ to: '/' }) }}
         >
           <LogOut className='size-4' /> {t('logout')}
         </DropdownMenuItem>

@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { BookOpen, Briefcase, Laptop, Moon, Sun } from 'lucide-react'
 import { useSearch } from '@/context/search-provider'
 import { useTheme } from '@/context/theme-provider'
-import { useAdminStore } from '@/stores/admin-store'
+import { useAuthUser, useCourses, useProjects } from '@/stores/selectors'
 import {
   CommandDialog,
   CommandEmpty,
@@ -15,16 +15,16 @@ import {
 } from '@/components/ui/command'
 import { buildSidebarData } from './layout/data/sidebar-data'
 import { ScrollArea } from './ui/scroll-area'
-import { useAuthStore } from '@/stores/auth-store'
 
 export function CommandMenu() {
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
-  const { auth } = useAuthStore()
-  const { courses, projects } = useAdminStore()
-  const role = auth.user?.role ?? 'user'
-  const email = auth.user?.email ?? 'member@sammi.local'
+  const user = useAuthUser()
+  const courses = useCourses()
+  const projects = useProjects()
+  const role = user?.role ?? 'user'
+  const email = user?.email ?? 'member@sammi.local'
   const sidebarData = buildSidebarData(role, email)
 
   const runCommand = React.useCallback(

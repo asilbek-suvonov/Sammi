@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthActions } from '@/stores/selectors'
 import { cn, sleep } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,7 +33,7 @@ export function AdminAuthForm({
 }: React.HTMLAttributes<HTMLFormElement>) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
+  const { setUser, setAccessToken } = useAuthActions()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,8 +59,8 @@ export function AdminAuthForm({
           role: 'admin' as const,
           exp: Date.now() + 24 * 60 * 60 * 1000,
         }
-        auth.setUser(adminUser)
-        auth.setAccessToken('mock-admin-token')
+        setUser(adminUser)
+        setAccessToken('mock-admin-token')
         setIsLoading(false)
         navigate({ to: '/dashboard/overview', replace: true })
         return 'Welcome back, Admin!'

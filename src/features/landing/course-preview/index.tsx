@@ -1,19 +1,23 @@
-import { CurriculumSheet } from '@/components/preview/curriculum-sheet'
 import { LessonPlayer } from '@/components/preview/lesson-player'
 import { Button } from '@/components/ui/button'
-import { useAdminStore } from '@/stores/admin-store'
-import { useUserStore } from '@/stores/user-store'
+import { useCourses, useUserActions } from '@/stores/selectors'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { GraduationCap, LayoutList } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+
+const CurriculumSheet = lazy(() =>
+  import('@/components/preview/curriculum-sheet').then((m) => ({
+    default: m.CurriculumSheet,
+  }))
+)
 
 interface Props { courseId: string }
 
 export function CoursePreviewPage({ courseId }: Props) {
   const navigate = useNavigate()
-  const { markLessonWatched, getWatchedLessons, enrollCourse, isEnrolled } = useUserStore()
-  const { courses } = useAdminStore()
+  const { markLessonWatched, getWatchedLessons, enrollCourse, isEnrolled } = useUserActions()
+  const courses = useCourses()
 
   const course = courses.find((c) => c.id === courseId)
   const allLessons = useMemo(() => course?.modules.flatMap((m) => m.lessons) ?? [], [course])
@@ -96,19 +100,21 @@ export function CoursePreviewPage({ courseId }: Props) {
         </div>
       </header>
 
-      <CurriculumSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        course={course}
-        currentLessonId={currentLessonId}
-        watchedLessons={watchedLessons}
-        openModules={openModules}
-        onToggleModule={toggleModule}
-        onSelectLesson={selectLesson}
-        watchedCount={watchedCount}
-        totalLessons={totalLessons}
-        courseProgress={courseProgress}
-      />
+      <Suspense fallback={null}>
+        <CurriculumSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          course={course}
+          currentLessonId={currentLessonId}
+          watchedLessons={watchedLessons}
+          openModules={openModules}
+          onToggleModule={toggleModule}
+          onSelectLesson={selectLesson}
+          watchedCount={watchedCount}
+          totalLessons={totalLessons}
+          courseProgress={courseProgress}
+        />
+      </Suspense>
 
       <main className='flex-1 overflow-y-auto'>
         <LessonPlayer

@@ -1,10 +1,10 @@
 import { SourceCard } from '@/components/cards/source-card'
-import { useAdminStore } from '@/stores/admin-store'
+import { useSources } from '@/stores/selectors'
 import { useTranslation } from 'react-i18next'
 
 export function SourcesSection() {
   const { t } = useTranslation()
-  const { sources } = useAdminStore()
+  const sources = useSources()
 
   return (
     <section id='sources' className='space-y-6'>

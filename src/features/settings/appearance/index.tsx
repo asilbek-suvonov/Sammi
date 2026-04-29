@@ -105,7 +105,7 @@ export function SettingsAppearance() {
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {fontDescriptions[f] ?? ""}
-                  </span>
+                  </span> 
                 </div>
               </DropdownMenuRadioItem>
             ))}

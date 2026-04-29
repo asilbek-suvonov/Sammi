@@ -1,7 +1,6 @@
-/* eslint-disable react-refresh/only-export-components */
-import AdminSources from '@/features/dashboard/admin/AdminSources'
-import UserSources from '@/features/dashboard/user/UserSources'
-import { useAuthStore } from '@/stores/auth-store'
+import AdminSources from '@/features/dashboard/sources/admin-sources'
+import UserSources from '@/features/dashboard/sources/user-sources'
+import { RoleSwitch } from '@/components/shared/role-switch'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/dashboard/sources')({
@@ -9,24 +8,5 @@ export const Route = createFileRoute('/_authenticated/dashboard/sources')({
 })
 
 function SourcesPage() {
-  const { auth } = useAuthStore()
-  const isAdmin = auth.user?.role === 'admin'
-
-  return isAdmin ? <AdminSources /> : <UserSources />
+  return <RoleSwitch admin={<AdminSources />} user={<UserSources />} />
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
