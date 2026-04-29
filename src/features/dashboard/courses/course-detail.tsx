@@ -154,7 +154,7 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
               <img
                 src={course.image}
                 alt={course.title}
-                className='h-20 w-32 shrink-0 rounded-md border object-cover'
+                className='h-full w-[200px] shrink-0 rounded-md border object-cover'
               />
             )}
             <div className='min-w-0 space-y-2'>

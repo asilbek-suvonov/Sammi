@@ -59,10 +59,10 @@ const UserProjectsView = () => {
             {filtered.map((project) => (
               <div
                 key={project.id}
-                className='group overflow-hidden rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md'
+                className='group overflow-hidden rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md p-4'
               >
                 <Link to='/project/$id' params={{ id: project.id }}>
-                  <div className='relative h-36 overflow-hidden'>
+                  <div className='relative h-45 overflow-hidden rounded-md'>
                     <img
                       src={project.image}
                       alt={project.title}

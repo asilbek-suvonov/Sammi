@@ -89,8 +89,8 @@ const UserOverview = () => {
                   params={{ id: course.id }}
                   className='group block'
                 >
-                  <div className='overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md'>
-                    <div className='relative h-32 overflow-hidden'>
+                  <div className='overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md p-4'>
+                    <div className='relative h-45 overflow-hidden rounded-md'>
                       <img
                         src={course.image}
                         alt={course.title}
