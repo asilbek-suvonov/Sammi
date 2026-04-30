@@ -82,7 +82,7 @@ const UserCoursesView = () => {
                     <div className='absolute left-2 top-2'>
                       <Badge
                         variant={levelVariant(course.level)}
-                        className='bg-accent text-[10px]'
+                        className='bg-accent text-black dark:text-white text-[10px]'
                       >
                         {course.level}
                       </Badge>
