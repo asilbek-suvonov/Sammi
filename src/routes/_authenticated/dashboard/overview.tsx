@@ -1,18 +1,12 @@
-/* eslint-disable react-refresh/only-export-components */
-import AdminOverview from '@/features/dashboard/admin/AdminOverview'
-import UserOverview from '@/features/dashboard/user/UserOverview'
-import { useAuthStore } from '@/stores/auth-store'
+import AdminOverview from '@/features/dashboard/overview/admin-overview'
+import UserOverview from '@/features/dashboard/overview/user-overview'
+import { RoleSwitch } from '@/components/shared/role-switch'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/dashboard/overview')({
   component: Overview,
 })
 
-
 function Overview() {
-  const { auth } = useAuthStore()
-  const isAdmin = auth.user?.role === 'admin'
-
-  return isAdmin ? <AdminOverview /> : <UserOverview />
+  return <RoleSwitch admin={<AdminOverview />} user={<UserOverview />} />
 }
-

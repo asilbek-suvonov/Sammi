@@ -1,7 +1,6 @@
-/* eslint-disable react-refresh/only-export-components */
-import AdminCoursesView from '@/features/dashboard/admin/AdminCoursesView'
-import UserCoursesView from '@/features/dashboard/user/UserCoursesView'
-import { useAuthStore } from '@/stores/auth-store'
+import AdminCoursesView from '@/features/dashboard/courses/admin-courses-view'
+import UserCoursesView from '@/features/dashboard/courses/user-courses-view'
+import { RoleSwitch } from '@/components/shared/role-switch'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/dashboard/courses/')({
@@ -9,8 +8,7 @@ export const Route = createFileRoute('/_authenticated/dashboard/courses/')({
 })
 
 function CoursesPage() {
-  const { auth } = useAuthStore()
-  const isAdmin = auth.user?.role === 'admin'
-
-  return isAdmin ? <AdminCoursesView /> : <UserCoursesView />
+  return (
+    <RoleSwitch admin={<AdminCoursesView />} user={<UserCoursesView />} />
+  )
 }

@@ -5,9 +5,11 @@ import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
 import { Badge } from '@/components/ui/badge'
-import { useAuthStore } from '@/stores/auth-store'
-import { useUserStore } from '@/stores/user-store'
-import { useAdminStore } from '@/stores/admin-store'
+import {
+  useAuthUser,
+  useCourses,
+  useUserActions,
+} from '@/stores/selectors'
 import { getCourseStats } from '@/lib/course-stats'
 import { levelVariant } from '@/lib/variants'
 import { useNavigate } from '@tanstack/react-router'
@@ -18,10 +20,9 @@ interface Props { id: string }
 
 export function CourseDetailPage({ id }: Props) {
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
-  const { enrollCourse, isEnrolled } = useUserStore()
-  const { courses } = useAdminStore()
-  const user = auth.user
+  const user = useAuthUser()
+  const { enrollCourse, isEnrolled } = useUserActions()
+  const courses = useCourses()
   const [openModules, setOpenModules] = useState<string[]>([])
 
   const [loginOpen, setLoginOpen] = useState(false)

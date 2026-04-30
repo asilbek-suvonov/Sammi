@@ -1,7 +1,6 @@
-/* eslint-disable react-refresh/only-export-components */
-import AdminProjectsView from '@/features/dashboard/admin/AdminProjectsView'
-import UserProjectsView from '@/features/dashboard/user/UserProjectsView'
-import { useAuthStore } from '@/stores/auth-store'
+import AdminProjectsView from '@/features/dashboard/projects/admin-projects-view'
+import UserProjectsView from '@/features/dashboard/projects/user-projects-view'
+import { RoleSwitch } from '@/components/shared/role-switch'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/dashboard/projects/')({
@@ -9,8 +8,7 @@ export const Route = createFileRoute('/_authenticated/dashboard/projects/')({
 })
 
 function ProjectsPage() {
-  const { auth } = useAuthStore()
-  const isAdmin = auth.user?.role === 'admin'
-
-  return isAdmin ? <AdminProjectsView /> : <UserProjectsView />
+  return (
+    <RoleSwitch admin={<AdminProjectsView />} user={<UserProjectsView />} />
+  )
 }

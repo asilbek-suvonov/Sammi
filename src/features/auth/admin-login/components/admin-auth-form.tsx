@@ -3,10 +3,13 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
+import { AxiosError } from 'axios'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
-import { cn, sleep } from '@/lib/utils'
+import api from '@/api'
+import { ENDPOINTS } from '@/endpoints/api_endpoints'
+import { useAuthActions } from '@/stores/selectors'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -19,11 +22,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 
-const ADMIN_LOGIN = 'Asilbek1234'
-const ADMIN_PASSWORD = 'Asil2008'
+const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
+
+interface LoginResponse {
+  access: string
+  refresh: string
+}
 
 const formSchema = z.object({
-  login: z.string().min(1, 'Please enter your login'),
+  email: z.email('Please enter a valid email'),
   password: z.string().min(1, 'Please enter your password'),
 })
 
@@ -33,43 +40,47 @@ export function AdminAuthForm({
 }: React.HTMLAttributes<HTMLFormElement>) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
+  const { setUser, setAccessToken } = useAuthActions()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { login: '', password: '' },
+    defaultValues: { email: '', password: '' },
   })
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    if (data.login !== ADMIN_LOGIN || data.password !== ADMIN_PASSWORD) {
-      form.setError('login', { message: 'Invalid admin credentials' })
-      form.setError('password', { message: 'Please check login/password' })
-      return
-    }
-
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true)
-    toast.promise(sleep(1200), {
-      loading: 'Signing in as admin...',
-      success: () => {
-        const adminUser = {
-          accountNo: 'ADMIN001',
-          firstName: 'Asilbek',
-          lastName: 'Admin',
-          email: 'admin@sammi.local',
-          role: 'admin' as const,
-          exp: Date.now() + 24 * 60 * 60 * 1000,
-        }
-        auth.setUser(adminUser)
-        auth.setAccessToken('mock-admin-token')
-        setIsLoading(false)
-        navigate({ to: '/dashboard/overview', replace: true })
-        return 'Welcome back, Admin!'
-      },
-      error: () => {
-        setIsLoading(false)
-        return 'Could not sign in'
-      },
-    })
+    try {
+      const res = await api.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, {
+        email: data.email,
+        password: data.password,
+      })
+
+      const { access, refresh } = res.data
+
+      localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
+      setAccessToken(access)
+      setUser({
+        accountNo: 'ADMIN001',
+        firstName: 'Admin',
+        lastName: '',
+        email: data.email,
+        role: 'admin',
+        exp: Date.now() + 24 * 60 * 60 * 1000,
+      })
+
+      toast.success('Welcome back, Admin!')
+      navigate({ to: '/dashboard/overview', replace: true })
+    } catch (error) {
+      const message =
+        error instanceof AxiosError
+          ? error.response?.data?.message ?? error.message
+          : 'Could not sign in — please try again'
+      form.setError('email', { message: '' })
+      form.setError('password', { message })
+      toast.error(message)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -81,12 +92,12 @@ export function AdminAuthForm({
       >
         <FormField
           control={form.control}
-          name='login'
+          name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Login</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder='Admin login' {...field} />
+                <Input placeholder='admin@example.com' type='email' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

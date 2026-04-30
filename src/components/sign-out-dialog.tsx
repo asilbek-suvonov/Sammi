@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthActions } from '@/stores/selectors'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 
 interface SignOutDialogProps {
@@ -9,10 +9,10 @@ interface SignOutDialogProps {
 
 export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
+  const { reset } = useAuthActions()
 
   const handleSignOut = () => {
-    auth.reset()
+    reset()
     navigate({
       to: '/',
       replace: true,

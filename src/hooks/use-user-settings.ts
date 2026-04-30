@@ -1,7 +1,11 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
-import { useProfileStore } from '@/stores/profile-store'
+import {
+  useAuthActions,
+  useAuthUser,
+  useProfile,
+  useSetProfile,
+} from '@/stores/selectors'
 
 const MAX_AVATAR_DIMENSION = 256
 const AVATAR_QUALITY = 0.85
@@ -44,9 +48,10 @@ export interface UserSettingsData {
 }
 
 export function useUserSettings() {
-  const { auth } = useAuthStore()
-  const { profile, setProfile } = useProfileStore()
-  const user = auth.user
+  const user = useAuthUser()
+  const { setUser } = useAuthActions()
+  const profile = useProfile()
+  const setProfile = useSetProfile()
 
   const data: UserSettingsData = {
     firstName: profile.firstName ?? user?.firstName ?? '',
@@ -71,7 +76,7 @@ export function useUserSettings() {
         })
 
         if (user) {
-          auth.setUser({
+          setUser({
             ...user,
             firstName: updates.firstName ?? user.firstName,
             lastName: updates.lastName ?? user.lastName,
@@ -90,7 +95,7 @@ export function useUserSettings() {
         return false
       }
     },
-    [auth, data.avatarUrl, data.bio, data.firstName, data.lastName, data.nickname, data.username, setProfile, user]
+    [data.avatarUrl, data.bio, data.firstName, data.lastName, data.nickname, data.username, setProfile, setUser, user]
   )
 
   const uploadAvatar = useCallback(async (file: File): Promise<string | null> => {

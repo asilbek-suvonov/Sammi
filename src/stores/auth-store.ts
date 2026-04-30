@@ -20,6 +20,9 @@ interface AuthState {
     setAccessToken: (accessToken: string) => void
     resetAccessToken: () => void
     reset: () => void
+    loginModalOpen: boolean
+    openLoginModal: () => void
+    closeLoginModal: () => void
   }
 }
 
@@ -57,6 +60,11 @@ export const useAuthStore = create<AuthState>()((set) => {
             auth: { ...state.auth, user: null, accessToken: '' },
           }
         }),
+      loginModalOpen: false,
+      openLoginModal: () =>
+        set((state) => ({ ...state, auth: { ...state.auth, loginModalOpen: true } })),
+      closeLoginModal: () =>
+        set((state) => ({ ...state, auth: { ...state.auth, loginModalOpen: false } })),
     },
   }
 })
