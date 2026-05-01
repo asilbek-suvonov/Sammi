@@ -66,7 +66,7 @@ export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
   const startGoogleLogin = useGoogleLogin({
     scope: 'openid email profile',
     onSuccess: (tokenResponse) => {
-      authenticateWithGoogle({ access_token: tokenResponse.access_token })
+      authenticateWithGoogle({ token: tokenResponse.access_token })
     },
     onError: () => toast.error('Google orqali kirish bekor qilindi'),
   })

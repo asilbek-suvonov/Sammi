@@ -35,6 +35,10 @@ const defaultValues: ModuleFormValues = {
   title: '',
 }
 
+function createModuleId() {
+  return `m_${Date.now()}`
+}
+
 type ModuleSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -73,7 +77,7 @@ export function ModuleSheet({
       updateModule(courseId, module.id, { title: values.title })
       toast.success('Module updated')
     } else {
-      const id = `m_${Date.now()}`
+      const id = createModuleId()
       addModule(courseId, {
         id,
         title: values.title,

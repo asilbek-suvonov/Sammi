@@ -1,3 +1,3 @@
-export { useGoogleAuth } from './use-google-auth'
-export { useAuthLogin } from './use-login'
+export { useGoogleAuth } from './google/use-google-auth'
+export { useAuthLogin } from './Admin-auth/use-login'
 

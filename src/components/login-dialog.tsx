@@ -68,7 +68,7 @@ export function LoginDialog({
   const startGoogleLogin = useGoogleLogin({
     scope: 'openid email profile',
     onSuccess: (tokenResponse) => {
-      authenticateWithGoogle({ access_token: tokenResponse.access_token })
+      authenticateWithGoogle({ token: tokenResponse.access_token })
     },
     onError: () => toast.error('Google sign in was cancelled.'),
   })
