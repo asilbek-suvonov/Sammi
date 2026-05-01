@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react'
 
 export default function HeroMinimal() {
   return (
-    <div className='relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden px-4'>
+    <div className='relative flex min-h-[calc(70vh-4rem)] items-center justify-center overflow-hidden px-4'>
       <div className='mx-auto max-w-4xl text-center'>
         <h1 className='text-3xl font-bold tracking-tight sm:text-7xl'>
           Dasturlashni o'rganishning eng oson usuli
@@ -22,12 +22,6 @@ export default function HeroMinimal() {
           <Button variant='link'>Ko'proq →</Button>
         </div>
 
-        {/* Simple stats */}
-        <div className='mt-16 flex justify-center gap-8 text-sm text-muted-foreground'>
-          <div>5000+ o'quvchi</div>
-          <div>200+ dars</div>
-          <div>15+ loyiha</div>
-        </div>
       </div>
     </div>
   )

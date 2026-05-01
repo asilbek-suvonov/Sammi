@@ -4,10 +4,10 @@
   "version": "2.2.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --config vite.config.js --configLoader native",
-    "build": "tsc -b && vite build --config vite.config.js --configLoader native",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview --config vite.config.js --configLoader native",
+    "preview": "vite preview",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "knip": "knip"
