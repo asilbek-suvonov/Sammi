@@ -2,7 +2,12 @@
 
 /** Request body for Google OAuth login */
 export interface GoogleAuthRequest {
-  token: string
+  /**
+   * Most backends (Django dj-rest-auth / allauth style) expect `access_token`.
+   * Keep `token` as a fallback for older implementations.
+   */
+  access_token?: string
+  token?: string
 }
 
 /** Response from the auth/google endpoint */

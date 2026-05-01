@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { GoogleLogin } from '@react-oauth/google'
+import { useGoogleLogin } from '@react-oauth/google'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useGoogleAuth } from '@/api-hooks'
@@ -12,6 +12,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { useAuthActions } from '@/stores/selectors'
+import { msFromNow, nowMs } from '@/lib/time'
+import { IconGoogle } from '@/assets/brand-icons/icon-google'
+import { Button } from '@/components/ui/button'
 
 const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
 
@@ -45,12 +48,12 @@ export function LoginDialog({
       localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
       setAccessToken(access)
       setUser({
-        accountNo: `USR-${Date.now()}`,
+        accountNo: `USR-${nowMs()}`,
         firstName: 'User',
         lastName: '',
         email: '',
         role: 'user',
-        exp: Date.now() + 24 * 60 * 60 * 1000,
+        exp: msFromNow(24 * 60 * 60 * 1000),
       })
 
       setOpen(false)
@@ -60,6 +63,14 @@ export function LoginDialog({
     onError: () => {
       toast.error('Sign in failed — please try again.')
     },
+  })
+
+  const startGoogleLogin = useGoogleLogin({
+    scope: 'openid email profile',
+    onSuccess: (tokenResponse) => {
+      authenticateWithGoogle({ access_token: tokenResponse.access_token })
+    },
+    onError: () => toast.error('Google sign in was cancelled.'),
   })
 
   return (
@@ -77,23 +88,10 @@ export function LoginDialog({
               <span>Signing in...</span>
             </div>
           ) : (
-            <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                if (credentialResponse.credential) {
-                  authenticateWithGoogle({
-                    token: credentialResponse.credential,
-                  })
-                }
-              }}
-              onError={() => {
-                toast.error('Google sign in was cancelled.')
-              }}
-              size='large'
-              width='350'
-              text='continue_with'
-              shape='rectangular'
-              theme='outline'
-            />
+            <Button className='w-full gap-2' variant='outline' onClick={() => startGoogleLogin()}>
+              <IconGoogle className='size-4' />
+              Continue with Google
+            </Button>
           )}
         </div>
       </DialogContent>

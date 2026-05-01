@@ -1,6 +1,11 @@
 import api from '@/api'
-import { ENDPOINTS } from '@/endpoints/api_endpoints'
-import type { GoogleAuthRequest, GoogleAuthResponse } from './auth.types'
+import { ENDPOINTS } from '@/endpoints'
+import type {
+  GoogleAuthRequest,
+  GoogleAuthResponse,
+  LoginRequest,
+  LoginResponse,
+} from './auth.types'
 
 // ── Auth Service ──────────────────────────────────────────────
 
@@ -11,9 +16,29 @@ import type { GoogleAuthRequest, GoogleAuthResponse } from './auth.types'
 export const googleAuth = async (
   data: GoogleAuthRequest
 ): Promise<GoogleAuthResponse> => {
-  const response = await api.post<GoogleAuthResponse>(
-    ENDPOINTS.AUTH.AUTH_GOOGLE,
-    data
-  )
-  return response.data
+  // Prefer `access_token` (common backend expectation); keep `token` fallback.
+  if (data.access_token) {
+    try {
+      const res = await api.post<GoogleAuthResponse>(ENDPOINTS.AUTH.GOOGLE, {
+        access_token: data.access_token,
+      })
+      return res.data
+    } catch (_error) {
+      // Some backends still expect `token` instead of `access_token`.
+      const res = await api.post<GoogleAuthResponse>(ENDPOINTS.AUTH.GOOGLE, {
+        token: data.token ?? data.access_token,
+      })
+      return res.data
+    }
+  }
+
+  const res = await api.post<GoogleAuthResponse>(ENDPOINTS.AUTH.GOOGLE, {
+    token: data.token ?? '',
+  })
+  return res.data
+}
+
+export const login = async (data: LoginRequest): Promise<LoginResponse> => {
+  const res = await api.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, data)
+  return res.data
 }

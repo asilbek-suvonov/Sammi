@@ -1,5 +1,6 @@
 import { IconGithub } from '@/assets/brand-icons'
 import { IconGoogle } from '@/assets/brand-icons/icon-google'
+import { useGoogleAuth } from '@/api-hooks'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -10,7 +11,9 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { useGoogleLogin } from '@react-oauth/google' // Yangi import
+import { useAuthActions } from '@/stores/selectors'
+import { msFromNow, nowMs } from '@/lib/time'
+import { useGoogleLogin } from '@react-oauth/google'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -20,11 +23,13 @@ interface SignInDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
+const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
+
 export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
   const navigate = useNavigate()
+  const { setUser, setAccessToken } = useAuthActions()
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleClose = (value: boolean) => {
     onOpenChange(value)
@@ -34,49 +39,42 @@ export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
     }
   }
 
-  // Google orqali login qilish funksiyasi
-const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setIsLoading(true)
-      const accessToken = tokenResponse.access_token
-      
-      console.log('Google Token olindi:', accessToken)
+  const { mutate: authenticateWithGoogle, isPending: isGoogleLoading } = useGoogleAuth({
+    onSuccess: (data) => {
+      const { access, refresh } = data
 
-      try {
-        // Backend URL ni o'zgaruvchidan olish
-        const baseUrl = import.meta.env.VITE_API_BASE_URL;
-        
-        // Backendga so'rov yuborish
-        const response = await fetch(`${baseUrl}/auth/google`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: accessToken }),
-        })
+      localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
+      setAccessToken(access)
+      setUser({
+        accountNo: `USR-${nowMs()}`,
+        firstName: 'User',
+        lastName: '',
+        email: '',
+        role: 'user',
+        exp: msFromNow(24 * 60 * 60 * 1000),
+      })
 
-        const data = await response.json()
-
-        if (response.ok) {
-          toast.success('Muvaffaqiyatli kirdingiz!')
-          localStorage.setItem('auth_token', data.token) 
-          handleClose(false)
-          navigate({ to: '/dashboard' })
-        } else {
-          throw new Error(data.message || 'Xatolik yuz berdi')
-        }
-      } catch (error) {
-        toast.error(error.message || 'Server bilan bog‘lanishda xatolik')
-      } finally {
-        setIsLoading(false)
-      }
+      toast.success('Muvaffaqiyatli kirdingiz!')
+      handleClose(false)
+      navigate({ to: '/dashboard' })
     },
-    onError: () => {
-      toast.error('Google orqali kirish bekor qilindi')
+    onError: (error) => {
+      toast.error(error.message || "Server bilan bog'lanishda xatolik")
     },
   })
+
+  const startGoogleLogin = useGoogleLogin({
+    scope: 'openid email profile',
+    onSuccess: (tokenResponse) => {
+      authenticateWithGoogle({ access_token: tokenResponse.access_token })
+    },
+    onError: () => toast.error('Google orqali kirish bekor qilindi'),
+  })
+
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !email.includes('@')) {
-      toast.error('Iltimos, to‘g‘ri elektron pochta kiriting.')
+      toast.error("Iltimos, to'g'ri elektron pochta kiriting.")
       return
     }
     sessionStorage.setItem('sammi_pending_email', email)
@@ -101,13 +99,13 @@ const loginWithGoogle = useGoogleLogin({
             <Button
               variant='outline'
               className='w-full gap-2'
-              onClick={() => loginWithGoogle()} // Funksiyani chaqirish
-              disabled={isLoading}
+              onClick={() => startGoogleLogin()}
+              disabled={isGoogleLoading}
             >
-              <IconGoogle className='size-4' /> 
-              {isLoading ? 'Yuklanmoqda...' : 'Continue with Google'}
+              <IconGoogle className='size-4' />
+              {isGoogleLoading ? 'Yuklanmoqda...' : 'Continue with Google'}
             </Button>
-            
+
             <Button
               variant='outline'
               className='w-full gap-2'
@@ -123,11 +121,7 @@ const loginWithGoogle = useGoogleLogin({
               </span>
             </div>
 
-            <Button
-              variant='secondary'
-              className='w-full'
-              onClick={() => setEmailStep(true)}
-            >
+            <Button variant='secondary' className='w-full' onClick={() => setEmailStep(true)}>
               Continue with Email
             </Button>
           </div>
@@ -141,7 +135,7 @@ const loginWithGoogle = useGoogleLogin({
               autoFocus
             />
             <p className='text-xs text-muted-foreground'>
-              We'll send a verification code to this email.
+              We&apos;ll send a verification code to this email.
             </p>
             <div className='flex gap-2'>
               <Button
