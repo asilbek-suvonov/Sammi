@@ -6,8 +6,8 @@ import { Link } from '@tanstack/react-router'
 export function ProjectCard({ project }: { project: Project }) {
   return (
     <Link to='/project/$id' params={{ id: project.id }} className='group block'>
-
-      <Card className='cursor-pointer overflow-hidden border bg-card p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/10 hover:shadow-lg'>
+      {/* Sening dizayning saqlandi: p-3, dark:bg-neutral-900/30 va backdrop-blur */}
+      <Card className='cursor-pointer overflow-hidden border dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>
         
         <div className='relative overflow-hidden rounded-lg'>
           <img
@@ -20,7 +20,7 @@ export function ProjectCard({ project }: { project: Project }) {
           <div className='absolute right-2.5 top-2.5'>
             <Badge 
               variant='secondary' 
-              className='border-transparent bg-background/80 text-foreground backdrop-blur-md'
+              className='border-transparent bg-background/80 text-foreground backdrop-blur-md text-[10px]'
             >
               {project.type}
             </Badge>
@@ -28,7 +28,8 @@ export function ProjectCard({ project }: { project: Project }) {
         </div>
 
         <div className='px-1 pt-4 pb-2'>
-          <p className='text-[14px] font-medium leading-snug text-card-foreground'>
+          {/* Matn stili sening uslubingda */}
+          <p className='text-[14px] font-medium leading-snug text-foreground'>
             {project.title}
           </p>
         </div>
@@ -39,7 +40,7 @@ export function ProjectCard({ project }: { project: Project }) {
               <Badge 
                 key={item} 
                 variant='secondary' 
-                className='rounded-md px-2 py-0.5 text-[10px]'
+                className='rounded-md px-2 py-0.5 text-[10px] bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border-none'
               >
                 {item}
               </Badge>
