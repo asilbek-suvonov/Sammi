@@ -1,12 +1,12 @@
 import { IconGithub } from '@/assets/brand-icons'
 import { Card } from '@/components/ui/card'
-import type { Source } from '@/data/mock-data'
+import type { SourceCode } from '@/service/sources/sources.type'
 import { ExternalLink, FolderGit2 } from 'lucide-react'
 
-export function SourceCard({ source }: { source: Source }) {
+export function SourceCard({ source }: { source: SourceCode }) {
   return (
     <a
-      href={source.href}
+      href={source.github_url}
       target='_blank'
       rel='noreferrer'
       className='group block'
