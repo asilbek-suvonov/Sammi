@@ -81,3 +81,5 @@ export const API_ENDPOINTS = {
     LIST: "/lesson-progress/list",
   },
 } as const;
+
+export default API_ENDPOINTS;
