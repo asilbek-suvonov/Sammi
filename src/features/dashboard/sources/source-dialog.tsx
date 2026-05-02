@@ -24,6 +24,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
+function createSourceId() {
+  return String(Date.now())
+}
+
 const sourceSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   href: z.string().min(1, 'Link is required'),
@@ -73,7 +77,7 @@ export function SourceDialog({ open, onOpenChange, source }: SourceDialogProps) 
       toast.success('Source updated successfully')
     } else {
       addSource({
-        id: String(Date.now()),
+        id: createSourceId(),
         title: values.title,
         href: values.href,
         description: '',

@@ -1,10 +1,6 @@
-import { type ReactNode, useState } from 'react'
-import { GoogleLogin } from '@react-oauth/google'
-import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useNavigate } from '@tanstack/react-router'
-import { useGoogleAuth } from '@/api-hooks'
-import type { GoogleAuthResponse } from '@/service/auth'
+import { IconGithub } from '@/assets/brand-icons'
+import { IconGoogle } from '@/assets/brand-icons/icon-google'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -16,11 +12,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { IconGithub } from '@/assets/brand-icons'
-
-const USER_KEY = 'sammi_user'
-const ACCESS_TOKEN_KEY = 'sammi_access_token'
-const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
+import { useGoogleLogin } from '@react-oauth/google' // Yangi import
+import { useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface SignInDialogProps {
   trigger?: ReactNode
@@ -31,6 +26,8 @@ interface SignInDialogProps {
   onOpenChange?: (open: boolean) => void
 }
 
+const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
+
 export function SignInDialog({
   trigger,
   onSuccess,
@@ -40,11 +37,9 @@ export function SignInDialog({
   onOpenChange,
 }: SignInDialogProps) {
   const navigate = useNavigate()
-  const [internalOpen, setInternalOpen] = useState(false)
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
-
-  const open = controlledOpen ?? internalOpen
+  const [isLoading, setIsLoading] = useState(false)
 
   const setOpen = (value: boolean) => {
     ;(onOpenChange ?? setInternalOpen)(value)
@@ -54,33 +49,50 @@ export function SignInDialog({
     }
   }
 
-  const { mutate: authenticateWithGoogle, isPending } = useGoogleAuth({
-    onSuccess: (data: GoogleAuthResponse) => {
-      // User ma'lumotlarini saqlash
-      localStorage.setItem(USER_KEY, JSON.stringify(data))
+  // Google orqali login qilish funksiyasi
+const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setIsLoading(true)
+      const accessToken = tokenResponse.access_token
+      
+      console.log('Google Token olindi:', accessToken)
 
-      // Agar backend token qaytarsa saqlash
-      if (data.access) localStorage.setItem(ACCESS_TOKEN_KEY, data.access)
-      if (data.refresh) localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh)
+      try {
+        // Backend URL ni o'zgaruvchidan olish
+        const baseUrl = import.meta.env.VITE_API_BASE_URL;
+        
+        // Backendga so'rov yuborish
+        const response = await fetch(`${baseUrl}/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: accessToken }),
+        })
 
-      setOpen(false)
-      toast.success(
-        data.is_new_user
-          ? 'Xush kelibsiz! Akkaunt muvaffaqiyatli yaratildi.'
-          : 'Muvaffaqiyatli kirdingiz!'
-      )
-      onSuccess?.()
-      navigate({ to: '/dashboard' })
+        const data = await response.json()
+
+        if (response.ok) {
+          toast.success('Muvaffaqiyatli kirdingiz!')
+          localStorage.setItem('auth_token', data.token) 
+          handleClose(false)
+          navigate({ to: '/dashboard' })
+        } else {
+          throw new Error(data.message || 'Xatolik yuz berdi')
+        }
+      } catch (error) {
+        toast.error(error.message || 'Server bilan bog‘lanishda xatolik')
+      } finally {
+        setIsLoading(false)
+      }
     },
-    onError: (error: Error) => {
-      toast.error(error.message ?? 'Kirish amalga oshmadi — qayta urinib ko\'ring.')
+    onError: () => {
+      toast.error('Google orqali kirish bekor qilindi')
     },
   })
 
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !email.includes('@')) {
-      toast.error('Iltimos, to\'g\'ri elektron pochta kiriting.')
+      toast.error('Iltimos, to‘g‘ri elektron pochta kiriting.')
       return
     }
     sessionStorage.setItem('sammi_pending_email', email)
@@ -103,32 +115,17 @@ export function SignInDialog({
         </DialogHeader>
 
         {!emailStep ? (
-          <div className='flex flex-col items-center gap-3 pt-2'>
-            {isPending ? (
-              <div className='flex items-center gap-2 py-3 text-muted-foreground'>
-                <Loader2 className='h-4 w-4 animate-spin' />
-                <span>Yuklanmoqda...</span>
-              </div>
-            ) : (
-              <GoogleLogin
-                onSuccess={(credentialResponse) => {
-                  if (credentialResponse.credential) {
-                    authenticateWithGoogle({
-                      token: credentialResponse.credential,
-                    })
-                  }
-                }}
-                onError={() => {
-                  toast.error('Google orqali kirish bekor qilindi.')
-                }}
-                size='large'
-                width='350'
-                text='continue_with'
-                shape='rectangular'
-                theme='outline'
-              />
-            )}
-
+          <div className='space-y-3 pt-2'>
+            <Button
+              variant='outline'
+              className='w-full gap-2'
+              onClick={() => loginWithGoogle()} // Funksiyani chaqirish
+              disabled={isLoading}
+            >
+              <IconGoogle className='size-4' /> 
+              {isLoading ? 'Yuklanmoqda...' : 'Continue with Google'}
+            </Button>
+            
             <Button
               variant='outline'
               className='w-full gap-2'
@@ -149,7 +146,6 @@ export function SignInDialog({
             <Button
               variant='secondary'
               className='w-full'
-              disabled={isPending}
               onClick={() => setEmailStep(true)}
             >
               Continue with Email
@@ -165,7 +161,7 @@ export function SignInDialog({
               autoFocus
             />
             <p className='text-xs text-muted-foreground'>
-              We'll send a verification code to this email.
+              We&apos;ll send a verification code to this email.
             </p>
             <div className='flex gap-2'>
               <Button

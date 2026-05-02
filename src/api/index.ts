@@ -1,30 +1,36 @@
-import axios from 'axios'
+import axios, { type AxiosInstance } from 'axios'
+import { useAuthStore } from '@/stores/auth-store'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 30_000,
+const baseURL = import.meta.env.VITE_API_BASE_URL
+const timeout = Number(import.meta.env.VITE_API_TIMEOUT ?? 30000)
+
+export const apiClient: AxiosInstance = axios.create({
+  baseURL,
+  timeout,
   headers: {
     'Content-Type': 'application/json',
-    Accept: 'application/json',
   },
 })
 
-// ── Request interceptor: attach token if exists ──────────────────
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('sammi_access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+apiClient.interceptors.request.use(
+  (config) => {
+    const { accessToken } = useAuthStore.getState().auth
 
-// ── Response interceptor: unwrap data, handle errors ─────────────
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Optionally you can handle 401 / token refresh here later
-    return Promise.reject(error)
-  }
+    if (accessToken) {
+      config.headers = config.headers ?? {}
+      if (typeof (config.headers as { set?: unknown }).set === 'function') {
+        ;(config.headers as { set: (key: string, value: string) => void }).set(
+          'Authorization',
+          `Bearer ${accessToken}`
+        )
+      } else {
+        ;(config.headers as Record<string, string>).Authorization = `Bearer ${accessToken}`
+      }
+    }
+
+    return config
+  },
+  (error) => Promise.reject(error)
 )
 
-export default api
+export default apiClient
