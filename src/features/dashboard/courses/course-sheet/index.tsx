@@ -24,6 +24,10 @@ import {
   type CourseFormValues,
 } from './course-schema'
 
+function createCourseId() {
+  return String(Date.now())
+}
+
 type CourseSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -54,7 +58,7 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
       toast.success('Course updated successfully')
     } else {
       addCourse({
-        id: String(Date.now()),
+        id: createCourseId(),
         ...values,
         parts: 0,
         hours: 0,

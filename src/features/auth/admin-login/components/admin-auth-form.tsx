@@ -6,10 +6,10 @@ import { useNavigate } from '@tanstack/react-router'
 import { AxiosError } from 'axios'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
-import api from '@/api'
-import { ENDPOINTS } from '@/endpoints/api_endpoints'
+import { useAuthLogin } from '@/api-hooks'
 import { useAuthActions } from '@/stores/selectors'
 import { cn } from '@/lib/utils'
+import { msFromNow } from '@/lib/time'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -24,11 +24,6 @@ import { PasswordInput } from '@/components/password-input'
 
 const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
 
-interface LoginResponse {
-  access: string
-  refresh: string
-}
-
 const formSchema = z.object({
   email: z.email('Please enter a valid email'),
   password: z.string().min(1, 'Please enter your password'),
@@ -41,6 +36,7 @@ export function AdminAuthForm({
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const { setUser, setAccessToken } = useAuthActions()
+  const { mutateAsync: login } = useAuthLogin()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,12 +46,7 @@ export function AdminAuthForm({
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true)
     try {
-      const res = await api.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, {
-        email: data.email,
-        password: data.password,
-      })
-
-      const { access, refresh } = res.data
+      const { access, refresh } = await login({ email: data.email, password: data.password })
 
       localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
       setAccessToken(access)
@@ -65,7 +56,7 @@ export function AdminAuthForm({
         lastName: '',
         email: data.email,
         role: 'admin',
-        exp: Date.now() + 24 * 60 * 60 * 1000,
+        exp: msFromNow(24 * 60 * 60 * 1000),
       })
 
       toast.success('Welcome back, Admin!')

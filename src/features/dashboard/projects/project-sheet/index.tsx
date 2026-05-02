@@ -24,6 +24,10 @@ import {
   type ProjectFormValues,
 } from './project-schema'
 
+function createProjectId() {
+  return String(Date.now())
+}
+
 type ProjectSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -66,7 +70,7 @@ export function ProjectSheet({
       toast.success('Project updated successfully')
     } else {
       addProject({
-        id: String(Date.now()),
+        id: createProjectId(),
         ...shared,
         type: 'Full-Stack',
         price: '$0',

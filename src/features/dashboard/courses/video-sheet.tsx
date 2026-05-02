@@ -38,6 +38,10 @@ const defaultValues: VideoFormValues = {
   videoUrl: '',
 }
 
+function createVideoId() {
+  return `v_${Date.now()}`
+}
+
 type VideoSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -83,7 +87,7 @@ export function VideoSheet({
       toast.success('Video updated')
     } else {
       addLesson(courseId, moduleId, {
-        id: `v_${Date.now()}`,
+        id: createVideoId(),
         title: values.title,
         duration: '',
         videoUrl: values.videoUrl,

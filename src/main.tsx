@@ -25,6 +25,13 @@ import "./i18n/i18n"
 // .env faylidan Client ID ni olish
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
+if (!GOOGLE_CLIENT_ID) {
+  throw new Error(
+    'VITE_GOOGLE_CLIENT_ID is not defined. Please create a .env file and add your Google OAuth Client ID:\n' +
+    'VITE_GOOGLE_CLIENT_ID=your_actual_client_id_here'
+  )
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

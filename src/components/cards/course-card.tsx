@@ -1,27 +1,25 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Course } from '@/data/mock-data'
+import { Course } from '../../service/course/course.types' // Yangi interfeysdan foydalanamiz
 import { levelVariant } from '@/lib/variants'
 import { Link } from '@tanstack/react-router'
-import { Clock3, Layers3, Users } from 'lucide-react'
+import { Clock3, Layers3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export function CourseCard({ course }: { course: Course }) {
   const { t } = useTranslation()
 
   return (
-    <Link to='/course/$id' params={{ id: course.id }} className='group block'>
-      {/* Sening dizayning saqlandi: dark:bg-neutral-900/30 va backdrop-blur */}
-      <Card className='cursor-pointer overflow-hidden border  dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>
+    <Link to='/course/$id' params={{ id: course.id.toString() }} className='group block'>
+      <Card className='cursor-pointer overflow-hidden border dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>
         
         <div className='relative overflow-hidden rounded-lg'>
           <img
-            src={course.image}
+            src={course.image_url} // API dagi nom: image_url
             alt={course.title}
             className='h-45 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110'
           />
           <div className='absolute left-2.5 top-2.5'>
-            {/* Sening Badge uslubing */}
             <Badge 
               variant={levelVariant(course.level)} 
               className='rounded-md text-black dark:text-white bg-accent/80 text-[11px] backdrop-blur-md border border-white/10'
@@ -40,13 +38,13 @@ export function CourseCard({ course }: { course: Course }) {
         <CardContent className='px-2 pb-2'>
           <div className='flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground'>
             <span className='flex items-center gap-1'>
-              <Layers3 className='size-3' /> {course.parts} {t('coursesLessons')}
+              <Layers3 className='size-3' /> {course.technologies_list[0]} {/* Backenddan kelayotgan texnologiya */}
             </span>
             <span className='flex items-center gap-1'>
-              <Clock3 className='size-3' /> {course.hours}h
+              <Clock3 className='size-3' /> {course.is_free ? 'Free' : course.price}
             </span>
             <span className='flex items-center gap-1'>
-              <Users className='size-3' /> {course.students.toLocaleString()}
+              {course.is_new && <Badge className="bg-green-500 h-4 text-[9px]">NEW</Badge>}
             </span>
           </div>
         </CardContent>

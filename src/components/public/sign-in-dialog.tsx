@@ -7,6 +7,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
@@ -16,18 +17,28 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 interface SignInDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  trigger?: React.ReactNode
+  onSuccess?: () => void
+  title?: string
+  description?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
+export function SignInDialog({
+  trigger,
+  title = 'Welcome to Sammi',
+  description = 'Sign in to access courses and track progress.',
+  open: controlledOpen,
+  onOpenChange,
+}: SignInDialogProps) {
   const navigate = useNavigate()
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleClose = (value: boolean) => {
-    onOpenChange(value)
+  const setOpen = (value: boolean) => {
+    ;(onOpenChange?? setInternalOpen)(value)
     if (!value) {
       setEmailStep(false)
       setEmail('')
@@ -58,13 +69,13 @@ const loginWithGoogle = useGoogleLogin({
         if (response.ok) {
           toast.success('Muvaffaqiyatli kirdingiz!')
           localStorage.setItem('auth_token', data.token) 
-          handleClose(false)
+          setOpen(false)
           navigate({ to: '/dashboard' })
         } else {
           throw new Error(data.message || 'Xatolik yuz berdi')
         }
       } catch (error) {
-        toast.error(error.message || 'Server bilan bog‘lanishda xatolik')
+        toast.error('Server bilan bog‘lanishda xatolik')
       } finally {
         setIsLoading(false)
       }
@@ -73,6 +84,7 @@ const loginWithGoogle = useGoogleLogin({
       toast.error('Google orqali kirish bekor qilindi')
     },
   })
+
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !email.includes('@')) {
@@ -80,19 +92,21 @@ const loginWithGoogle = useGoogleLogin({
       return
     }
     sessionStorage.setItem('sammi_pending_email', email)
-    handleClose(false)
+    setOpen(false)
     navigate({ to: '/otp' })
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={controlledOpen} onOpenChange={setOpen}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+
       <DialogContent className='sm:max-w-sm'>
         <DialogHeader>
-          <DialogTitle>Welcome to Sammi</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             {emailStep
               ? 'Enter your email to receive a verification code.'
-              : 'Sign in to access courses and track progress.'}
+              : description}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,12 +125,14 @@ const loginWithGoogle = useGoogleLogin({
             <Button
               variant='outline'
               className='w-full gap-2'
+              disabled={isLoading}
               onClick={() => toast.info('GitHub auth coming soon!')}
             >
-              <IconGithub className='size-4' /> Continue with GitHub
+              <IconGithub className='size-4' />
+              Continue with GitHub
             </Button>
 
-            <div className='relative py-1'>
+            <div className='relative w-full py-1'>
               <Separator />
               <span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground'>
                 or
@@ -141,7 +157,7 @@ const loginWithGoogle = useGoogleLogin({
               autoFocus
             />
             <p className='text-xs text-muted-foreground'>
-              We'll send a verification code to this email.
+              We&apos;ll send a verification code to this email.
             </p>
             <div className='flex gap-2'>
               <Button
