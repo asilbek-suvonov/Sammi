@@ -1,17 +1,26 @@
-// ── Auth Service Types ────────────────────────────────────────
-
 /** Request body for Google OAuth login */
 export interface GoogleAuthRequest {
   token: string
 }
 
-/** Response from the auth/google endpoint */
+/**
+ * Backend /auth/google/ response (swagger bo'yicha)
+ * 200 = mavjud user, 201 = yangi user
+ */
 export interface GoogleAuthResponse {
-  access: string
-  refresh: string
+  id: number
+  email: string
+  full_name: string
+  avatar_url: string
+  country: string
+  language_code: string
+  created_at: string
+  is_new_user: boolean
+  // Agar backend token ham qaytarsa:
+  access?: string
+  refresh?: string
 }
 
-/** Response from the standard login endpoint */
 export interface LoginRequest {
   email: string
   password: string

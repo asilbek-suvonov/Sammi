@@ -5,4 +5,7 @@ export const ENDPOINTS = {
     LOGIN: '/login/',
     AUTH_GOOGLE: '/auth/google/',
   },
+  COURSES: {
+    LIST: '/course/list',
+  },
 } as const;

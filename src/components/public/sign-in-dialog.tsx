@@ -1,122 +1,145 @@
-import { IconGithub } from '@/assets/brand-icons'
-import { IconGoogle } from '@/assets/brand-icons/icon-google'
-import { Button } from '@/components/ui/button'
+import { type ReactNode, useState } from 'react'
+import { GoogleLogin } from '@react-oauth/google'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useNavigate } from '@tanstack/react-router'
+import { useGoogleAuth } from '@/api-hooks'
+import type { GoogleAuthResponse } from '@/service/auth'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { useGoogleLogin } from '@react-oauth/google' // Yangi import
-import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { IconGithub } from '@/assets/brand-icons'
+
+const USER_KEY = 'sammi_user'
+const ACCESS_TOKEN_KEY = 'sammi_access_token'
+const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
 
 interface SignInDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  trigger?: ReactNode
+  onSuccess?: () => void
+  title?: string
+  description?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function SignInDialog({ open, onOpenChange }: SignInDialogProps) {
+export function SignInDialog({
+  trigger,
+  onSuccess,
+  title = 'Welcome to Sammi',
+  description = 'Sign in to access courses and track progress.',
+  open: controlledOpen,
+  onOpenChange,
+}: SignInDialogProps) {
   const navigate = useNavigate()
+  const [internalOpen, setInternalOpen] = useState(false)
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
 
-  const handleClose = (value: boolean) => {
-    onOpenChange(value)
+  const open = controlledOpen ?? internalOpen
+
+  const setOpen = (value: boolean) => {
+    ;(onOpenChange ?? setInternalOpen)(value)
     if (!value) {
       setEmailStep(false)
       setEmail('')
     }
   }
 
-  // Google orqali login qilish funksiyasi
-const loginWithGoogle = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setIsLoading(true)
-      const accessToken = tokenResponse.access_token
-      
-      console.log('Google Token olindi:', accessToken)
+  const { mutate: authenticateWithGoogle, isPending } = useGoogleAuth({
+    onSuccess: (data: GoogleAuthResponse) => {
+      // User ma'lumotlarini saqlash
+      localStorage.setItem(USER_KEY, JSON.stringify(data))
 
-      try {
-        // Backend URL ni o'zgaruvchidan olish
-        const baseUrl = import.meta.env.VITE_API_BASE_URL;
-        
-        // Backendga so'rov yuborish
-        const response = await fetch(`${baseUrl}/auth/google`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: accessToken }),
-        })
+      // Agar backend token qaytarsa saqlash
+      if (data.access) localStorage.setItem(ACCESS_TOKEN_KEY, data.access)
+      if (data.refresh) localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh)
 
-        const data = await response.json()
-
-        if (response.ok) {
-          toast.success('Muvaffaqiyatli kirdingiz!')
-          localStorage.setItem('auth_token', data.token) 
-          handleClose(false)
-          navigate({ to: '/dashboard' })
-        } else {
-          throw new Error(data.message || 'Xatolik yuz berdi')
-        }
-      } catch (error) {
-        toast.error(error.message || 'Server bilan bog‘lanishda xatolik')
-      } finally {
-        setIsLoading(false)
-      }
+      setOpen(false)
+      toast.success(
+        data.is_new_user
+          ? 'Xush kelibsiz! Akkaunt muvaffaqiyatli yaratildi.'
+          : 'Muvaffaqiyatli kirdingiz!'
+      )
+      onSuccess?.()
+      navigate({ to: '/dashboard' })
     },
-    onError: () => {
-      toast.error('Google orqali kirish bekor qilindi')
+    onError: (error: Error) => {
+      toast.error(error.message ?? 'Kirish amalga oshmadi — qayta urinib ko\'ring.')
     },
   })
+
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !email.includes('@')) {
-      toast.error('Iltimos, to‘g‘ri elektron pochta kiriting.')
+      toast.error('Iltimos, to\'g\'ri elektron pochta kiriting.')
       return
     }
     sessionStorage.setItem('sammi_pending_email', email)
-    handleClose(false)
+    setOpen(false)
     navigate({ to: '/otp' })
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+
       <DialogContent className='sm:max-w-sm'>
         <DialogHeader>
-          <DialogTitle>Welcome to Sammi</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             {emailStep
               ? 'Enter your email to receive a verification code.'
-              : 'Sign in to access courses and track progress.'}
+              : description}
           </DialogDescription>
         </DialogHeader>
 
         {!emailStep ? (
-          <div className='space-y-3 pt-2'>
+          <div className='flex flex-col items-center gap-3 pt-2'>
+            {isPending ? (
+              <div className='flex items-center gap-2 py-3 text-muted-foreground'>
+                <Loader2 className='h-4 w-4 animate-spin' />
+                <span>Yuklanmoqda...</span>
+              </div>
+            ) : (
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  if (credentialResponse.credential) {
+                    authenticateWithGoogle({
+                      token: credentialResponse.credential,
+                    })
+                  }
+                }}
+                onError={() => {
+                  toast.error('Google orqali kirish bekor qilindi.')
+                }}
+                size='large'
+                width='350'
+                text='continue_with'
+                shape='rectangular'
+                theme='outline'
+              />
+            )}
+
             <Button
               variant='outline'
               className='w-full gap-2'
-              onClick={() => loginWithGoogle()} // Funksiyani chaqirish
-              disabled={isLoading}
-            >
-              <IconGoogle className='size-4' /> 
-              {isLoading ? 'Yuklanmoqda...' : 'Continue with Google'}
-            </Button>
-            
-            <Button
-              variant='outline'
-              className='w-full gap-2'
+              disabled={isPending}
               onClick={() => toast.info('GitHub auth coming soon!')}
             >
-              <IconGithub className='size-4' /> Continue with GitHub
+              <IconGithub className='size-4' />
+              Continue with GitHub
             </Button>
 
-            <div className='relative py-1'>
+            <div className='relative w-full py-1'>
               <Separator />
               <span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground'>
                 or
@@ -126,6 +149,7 @@ const loginWithGoogle = useGoogleLogin({
             <Button
               variant='secondary'
               className='w-full'
+              disabled={isPending}
               onClick={() => setEmailStep(true)}
             >
               Continue with Email
