@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { useGoogleLogin } from '@react-oauth/google' // Yangi import
+import { useGoogleLogin } from '@react-oauth/google'
 import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { toast } from 'sonner'
 
 interface SignInDialogProps {
-  trigger?: React.ReactNode
+  trigger?: ReactNode
   onSuccess?: () => void
   title?: string
   description?: string
@@ -27,37 +27,45 @@ interface SignInDialogProps {
 
 export function SignInDialog({
   trigger,
+  onSuccess,
   title = 'Welcome to Sammi',
   description = 'Sign in to access courses and track progress.',
   open: controlledOpen,
   onOpenChange,
 }: SignInDialogProps) {
   const navigate = useNavigate()
+  
+  // State management
+  const [internalOpen, setInternalOpen] = useState(false)
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const setOpen = (value: boolean) => {
-    ;(onOpenChange?? setInternalOpen)(value)
+  // Controlled vs Uncontrolled open state
+  const isOpen = controlledOpen ?? internalOpen
+  const setIsOpen = (value: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(value)
+    } else {
+      setInternalOpen(value)
+    }
+
+    // Modal yopilganda formani tozalash
     if (!value) {
-      setEmailStep(false)
-      setEmail('')
+      setTimeout(() => {
+        setEmailStep(false)
+        setEmail('')
+      }, 200)
     }
   }
 
-  // Google orqali login qilish funksiyasi
-const loginWithGoogle = useGoogleLogin({
+  const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setIsLoading(true)
       const accessToken = tokenResponse.access_token
       
-      console.log('Google Token olindi:', accessToken)
-
       try {
-        // Backend URL ni o'zgaruvchidan olish
-        const baseUrl = import.meta.env.VITE_API_BASE_URL;
-        
-        // Backendga so'rov yuborish
+        const baseUrl = import.meta.env.VITE_API_BASE_URL
         const response = await fetch(`${baseUrl}/auth/google`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -69,13 +77,14 @@ const loginWithGoogle = useGoogleLogin({
         if (response.ok) {
           toast.success('Muvaffaqiyatli kirdingiz!')
           localStorage.setItem('auth_token', data.token) 
-          setOpen(false)
+          setIsOpen(false)
+          onSuccess?.()
           navigate({ to: '/dashboard' })
         } else {
           throw new Error(data.message || 'Xatolik yuz berdi')
         }
-      } catch (error) {
-        toast.error('Server bilan bog‘lanishda xatolik')
+      } catch (error: any) {
+        toast.error(error.message || 'Server bilan bog‘lanishda xatolik')
       } finally {
         setIsLoading(false)
       }
@@ -92,12 +101,12 @@ const loginWithGoogle = useGoogleLogin({
       return
     }
     sessionStorage.setItem('sammi_pending_email', email)
-    setOpen(false)
+    setIsOpen(false)
     navigate({ to: '/otp' })
   }
 
   return (
-    <Dialog open={controlledOpen} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogContent className='sm:max-w-sm'>
@@ -115,7 +124,7 @@ const loginWithGoogle = useGoogleLogin({
             <Button
               variant='outline'
               className='w-full gap-2'
-              onClick={() => loginWithGoogle()} // Funksiyani chaqirish
+              onClick={() => loginWithGoogle()}
               disabled={isLoading}
             >
               <IconGoogle className='size-4' /> 
@@ -143,6 +152,7 @@ const loginWithGoogle = useGoogleLogin({
               variant='secondary'
               className='w-full'
               onClick={() => setEmailStep(true)}
+              disabled={isLoading}
             >
               Continue with Email
             </Button>
@@ -155,6 +165,7 @@ const loginWithGoogle = useGoogleLogin({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoFocus
+              required
             />
             <p className='text-xs text-muted-foreground'>
               We&apos;ll send a verification code to this email.
