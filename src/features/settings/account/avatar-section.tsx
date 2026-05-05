@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Camera, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUserSettings } from '@/hooks/use-user-settings'
@@ -18,13 +18,9 @@ export function AvatarSection({
 }: Props) {
   const { data, save, uploadAvatar, removeAvatar } = useUserSettings()
   const fileRef = useRef<HTMLInputElement>(null)
-  const [avatarUrl, setAvatarUrl] = useState(data.avatarUrl)
   const [avatarUploading, setAvatarUploading] = useState(false)
 
-  useEffect(() => {
-    setAvatarUrl(data.avatarUrl)
-  }, [data.avatarUrl])
-
+  const avatarUrl = data.avatarUrl
   const initials = (previewFirstName?.[0] ?? data.email?.[0] ?? 'U').toUpperCase()
 
   const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,14 +31,12 @@ export function AvatarSection({
     const url = await uploadAvatar(file)
     setAvatarUploading(false)
     if (!url) return
-    setAvatarUrl(url)
     if (save({ avatarUrl: url })) {
       toast.success('Profile picture updated')
     }
   }
 
   const handleRemoveAvatar = () => {
-    setAvatarUrl('')
     removeAvatar()
     toast.success('Profile picture removed')
   }

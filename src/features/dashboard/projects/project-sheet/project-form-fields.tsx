@@ -1,5 +1,6 @@
+import { useMemo } from 'react'
 import { type Control } from 'react-hook-form'
-import { TECHNOLOGIES_OPTIONS } from '@/data/tech-options'
+import { useTechnologies } from '@/api-hooks/technology/use-technologies'
 import { FileUpload } from '@/components/ui/file-upload'
 import {
   FormControl,
@@ -27,6 +28,13 @@ type Props = {
 }
 
 export function ProjectFormFields({ control, isEdit }: Props) {
+  const { data: technologies = [] } = useTechnologies()
+
+  const techOptions = useMemo(
+    () => technologies.map((t) => ({ label: t.name, value: String(t.id) })),
+    [technologies]
+  )
+
   return (
     <>
       <FormField
@@ -95,9 +103,9 @@ export function ProjectFormFields({ control, isEdit }: Props) {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value='Easy'>Easy</SelectItem>
-                <SelectItem value='Medium'>Medium</SelectItem>
-                <SelectItem value='Hard'>Hard</SelectItem>
+                <SelectItem value='beginner'>Beginner</SelectItem>
+                <SelectItem value='intermediate'>Intermediate</SelectItem>
+                <SelectItem value='advanced'>Advanced</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -113,9 +121,9 @@ export function ProjectFormFields({ control, isEdit }: Props) {
             <FormLabel>Technologies</FormLabel>
             <FormControl>
               <MultiSelect
-                value={field.value}
-                onChange={field.onChange}
-                options={TECHNOLOGIES_OPTIONS}
+                value={field.value.map(String)}
+                onChange={(vals) => field.onChange(vals.map(Number))}
+                options={techOptions}
                 placeholder='Select technologies...'
               />
             </FormControl>

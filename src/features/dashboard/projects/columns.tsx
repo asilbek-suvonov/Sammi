@@ -1,6 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { ExternalLink } from 'lucide-react'
-import { type Project } from '@/data/mock-data'
+import type { ProjectListItem } from '@/service/projects/projects.type'
 import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
@@ -15,22 +15,22 @@ import {
 import { ImagePreview } from '@/components/image-preview'
 
 type ProjectsColumnsProps = {
-  onEdit: (project: Project) => void
-  onDelete: (project: Project) => void
+  onEdit: (project: ProjectListItem) => void
+  onDelete: (project: ProjectListItem) => void
 }
 
 const difficultyVariantMap: Record<string, 'secondary' | 'default' | 'destructive'> = {
-  Easy: 'secondary',
-  Medium: 'default',
-  Hard: 'destructive',
+  beginner: 'secondary',
+  intermediate: 'default',
+  advanced: 'destructive',
 }
 
 export function getProjectsColumns({
   onEdit,
   onDelete,
-}: ProjectsColumnsProps): ColumnDef<Project>[] {
+}: ProjectsColumnsProps): ColumnDef<ProjectListItem>[] {
   return [
-    selectColumn<Project>(),
+    selectColumn<ProjectListItem>(),
     {
       accessorKey: 'title',
       header: ({ column }) => (
@@ -38,9 +38,9 @@ export function getProjectsColumns({
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-3 max-w-[220px]'>
-          {row.original.image && (
+          {row.original.image_url && (
             <ImagePreview
-              src={row.original.image}
+              src={row.original.image_url}
               alt={row.original.title}
               className='h-8 w-14 rounded object-cover shrink-0'
             />
@@ -58,27 +58,27 @@ export function getProjectsColumns({
         const difficulty = row.getValue('difficulty') as string | undefined
         if (!difficulty) return <span className='text-muted-foreground'>—</span>
         return (
-          <Badge variant={difficultyVariantMap[difficulty] ?? 'outline'}>
-            {difficulty}
+          <Badge variant={difficultyVariantMap[difficulty] ?? 'outline'} className='capitalize'>
+            {row.original.difficulty_display || difficulty}
           </Badge>
         )
       },
       filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
     },
     {
-      accessorKey: 'tech',
+      accessorKey: 'technologies',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Technologies' />
       ),
       cell: ({ row }) => {
-        const tech = (row.getValue('tech') as string[]) ?? []
+        const tech = row.original.technologies ?? []
         const visible = tech.slice(0, 2)
         const hidden = tech.slice(2)
         return (
           <div className='flex flex-wrap items-center gap-1 max-w-[180px]'>
             {visible.map((t) => (
-              <Badge key={t} variant='outline' className='text-xs'>
-                {t}
+              <Badge key={t.id} variant='outline' className='text-xs'>
+                {t.name}
               </Badge>
             ))}
             {hidden.length > 0 && (
@@ -92,10 +92,10 @@ export function getProjectsColumns({
                   <div className='flex flex-wrap gap-1'>
                     {hidden.map((t) => (
                       <span
-                        key={t}
+                        key={t.id}
                         className='rounded-sm bg-primary-foreground/10 px-1.5 py-0.5 text-[11px]'
                       >
-                        {t}
+                        {t.name}
                       </span>
                     ))}
                   </div>
@@ -147,20 +147,13 @@ export function getProjectsColumns({
       },
     },
     {
-      accessorKey: 'is_published',
+      accessorKey: 'total_steps',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Status' />
+        <DataTableColumnHeader column={column} title='Steps' />
       ),
-      cell: ({ row }) =>
-        row.getValue('is_published') ? (
-          <Badge className='bg-green-600 text-white hover:bg-green-700'>
-            Published
-          </Badge>
-        ) : (
-          <Badge variant='outline'>Draft</Badge>
-        ),
-      filterFn: (row, id, value: string[]) =>
-        value.includes(String(row.getValue(id))),
+      cell: ({ row }) => (
+        <span className='text-sm font-medium'>{row.getValue('total_steps')}</span>
+      ),
     },
     {
       id: 'actions',

@@ -58,7 +58,7 @@ export const API_ENDPOINTS = {
   },
 
   COURSE: {
-    CREATE: "/course",
+    CREATE: "/course/",
     UPDATE: "/course/:id/",
     PATCH: "/course/:id/",
     DELETE: "/course/delete/:id/",

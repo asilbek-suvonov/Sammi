@@ -35,6 +35,7 @@ import { Route as AuthenticatedDashboardCoursesIndexRouteImport } from './routes
 import { Route as ApiAuthCallbackGithubRouteImport } from './routes/api/auth/callback/github'
 import { Route as AuthenticatedDashboardProjectsIdRouteImport } from './routes/_authenticated/dashboard/projects/$id'
 import { Route as AuthenticatedDashboardCoursesIdRouteImport } from './routes/_authenticated/dashboard/courses/$id'
+import { Route as authAuthGithubCallbackRouteImport } from './routes/(auth)/auth.github.callback'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -177,6 +178,11 @@ const AuthenticatedDashboardCoursesIdRoute =
     path: '/courses/$id',
     getParentRoute: () => AuthenticatedDashboardRouteRoute,
   } as any)
+const authAuthGithubCallbackRoute = authAuthGithubCallbackRouteImport.update({
+  id: '/(auth)/auth/github/callback',
+  path: '/auth/github/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/auth/github/callback': typeof authAuthGithubCallbackRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/dashboard/projects/$id': typeof AuthenticatedDashboardProjectsIdRoute
   '/api/auth/callback/github': typeof ApiAuthCallbackGithubRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/auth/github/callback': typeof authAuthGithubCallbackRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/dashboard/projects/$id': typeof AuthenticatedDashboardProjectsIdRoute
   '/api/auth/callback/github': typeof ApiAuthCallbackGithubRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/(auth)/auth/github/callback': typeof authAuthGithubCallbackRoute
   '/_authenticated/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/_authenticated/dashboard/projects/$id': typeof AuthenticatedDashboardProjectsIdRoute
   '/api/auth/callback/github': typeof ApiAuthCallbackGithubRoute
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/'
+    | '/auth/github/callback'
     | '/dashboard/courses/$id'
     | '/dashboard/projects/$id'
     | '/api/auth/callback/github'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/settings/account'
     | '/settings/appearance'
     | '/settings'
+    | '/auth/github/callback'
     | '/dashboard/courses/$id'
     | '/dashboard/projects/$id'
     | '/api/auth/callback/github'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/'
+    | '/(auth)/auth/github/callback'
     | '/_authenticated/dashboard/courses/$id'
     | '/_authenticated/dashboard/projects/$id'
     | '/api/auth/callback/github'
@@ -544,6 +556,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/courses/$id'
       preLoaderRoute: typeof AuthenticatedDashboardCoursesIdRouteImport
       parentRoute: typeof AuthenticatedDashboardRouteRoute
+    }
+    '/(auth)/auth/github/callback': {
+      id: '/(auth)/auth/github/callback'
+      path: '/auth/github/callback'
+      fullPath: '/auth/github/callback'
+      preLoaderRoute: typeof authAuthGithubCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

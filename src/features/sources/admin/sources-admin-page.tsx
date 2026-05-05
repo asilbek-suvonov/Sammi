@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, ExternalLink, Github, Search } from 'lucide-react'
+import { Plus, Pencil, Trash2, ExternalLink, Search } from 'lucide-react'
+import { IconGithub as Github } from '@/assets/brand-icons'
 import {
   useSources,
   useDeleteSource,

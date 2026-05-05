@@ -1,14 +1,14 @@
 import { z } from 'zod'
-import { type Project } from '@/data/mock-data'
+import type { Difficulty, ProjectDetail, ProjectListItem } from '@/service/projects/projects.type'
 
 export const projectSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
   image: z.string().min(1, 'Image is required'),
-  difficulty: z.enum(['Easy', 'Medium', 'Hard', '']),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
   github_url: z.string(),
   demo_url: z.string(),
-  technologies: z.array(z.string()),
+  technologies: z.array(z.number()),
   is_published: z.boolean(),
 })
 
@@ -18,22 +18,31 @@ export const projectDefaultValues: ProjectFormValues = {
   title: '',
   description: '',
   image: '',
-  difficulty: '',
+  difficulty: 'beginner',
   github_url: '',
   demo_url: '',
   technologies: [],
   is_published: false,
 }
 
-export function projectToFormValues(project: Project): ProjectFormValues {
+const normalizeDifficulty = (value: string | undefined): Difficulty => {
+  const v = (value ?? '').toLowerCase()
+  if (v === 'intermediate') return 'intermediate'
+  if (v === 'advanced') return 'advanced'
+  return 'beginner'
+}
+
+export function projectToFormValues(
+  project: ProjectListItem | ProjectDetail
+): ProjectFormValues {
   return {
     title: project.title,
     description: project.description,
-    image: project.image,
-    difficulty: project.difficulty ?? '',
+    image: project.image_url ?? '',
+    difficulty: normalizeDifficulty(project.difficulty),
     github_url: project.github_url ?? '',
     demo_url: project.demo_url ?? '',
-    technologies: project.tech ?? [],
-    is_published: project.is_published ?? false,
+    technologies: project.technologies?.map((t) => t.id) ?? [],
+    is_published: 'is_published' in project ? Boolean(project.is_published) : false,
   }
 }

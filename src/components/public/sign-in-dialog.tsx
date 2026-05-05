@@ -11,12 +11,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { useGoogleLogin } from '@react-oauth/google'
+import { useGithubSignIn } from '@/hooks/auth/use-github-signin'
+import { useGoogleSignIn } from '@/hooks/auth/use-google-signin'
 import { useNavigate } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { googleAuth, type GoogleAuthResponse } from '@/service/auth'
-import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 
 // --- Interfaces ---
 interface SignInDialogProps {
@@ -39,7 +38,6 @@ interface GoogleProfile {
   locale?: string
 }
 
-// --- Constants & Helpers ---
 const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
 
 const fetchGoogleProfile = async (accessToken: string): Promise<GoogleProfile> => {
@@ -60,7 +58,10 @@ const profileToAuthUser = (p: GoogleProfile): AuthUser => ({
   role: 'user',
 })
 
-const mergeBackendUser = (base: AuthUser, data: GoogleAuthResponse): AuthUser => ({
+const mergeBackendUser = (
+  base: AuthUser,
+  data: GoogleAuthResponse
+): AuthUser => ({
   ...base,
   id: data.id,
   email: data.email || base.email,
@@ -80,12 +81,9 @@ export function SignInDialog({
   onOpenChange,
 }: SignInDialogProps) {
   const navigate = useNavigate()
-  const login = useAuthStore((s) => s.auth.login)
-
   const [internalOpen, setInternalOpen] = useState(false)
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
-  const [signingIn, setSigningIn] = useState(false)
 
   const isOpen = controlledOpen ?? internalOpen
   const setIsOpen = (value: boolean) => {
@@ -96,7 +94,6 @@ export function SignInDialog({
     }
   }
 
-  // --- Google Login ---
   const loginWithGoogle = useGoogleLogin({
     flow: 'implicit',
     scope: 'openid email profile',
@@ -104,6 +101,7 @@ export function SignInDialog({
       setSigningIn(true)
       try {
         const profile = await fetchGoogleProfile(tokenResponse.access_token)
+
         let user = profileToAuthUser(profile)
         let accessToken = tokenResponse.access_token
         let refreshToken = ''
@@ -115,12 +113,12 @@ export function SignInDialog({
             refreshToken = data.refresh ?? ''
             user = mergeBackendUser(user, data)
           }
-        } catch (e) {
-          console.error("Backend auth failed, using Google profile only", e)
+        } catch {
+          // Backend not reachable — fall back to Google profile + access_token.
         }
 
         login({ accessToken, refreshToken, user })
-        toast.success(`Welcome back, ${user.firstName || user.fullName}!`)
+        toast.success(`Welcome, ${user.firstName || user.email}!`)
         setIsOpen(false)
         onSuccess?.()
         navigate({ to: '/dashboard' })
@@ -130,37 +128,15 @@ export function SignInDialog({
         setSigningIn(false)
       }
     },
-    onError: () => toast.error('Google sign-in canceled'),
+    onError: () => {
+      toast.error('Google sign-in canceled')
+    },
+    onNonOAuthError: () => {
+      toast.error(
+        'Google sign-in could not start. Add http://localhost:5173 to your OAuth client’s Authorized JavaScript origins.'
+      )
+    },
   })
-
-  // --- GitHub Login ---
-  const loginWithGithub = () => {
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID
-
-    if (!clientId) {
-      toast.error('GitHub Client ID is not configured')
-      return
-    }
-
-    // State for CSRF protection
-    const state = Math.random().toString(36).substring(7)
-    try {
-      localStorage.setItem('github_oauth_state', state)
-    } catch {
-      // ignore storage errors
-    }
-
-    const params = new URLSearchParams({ client_id: clientId, scope: 'user:email', state })
-
-    // Only include redirect_uri if developer explicitly set it in env.
-    // If omitted, GitHub will redirect to the Authorization callback URL
-    // registered for the OAuth App (recommended when possible).
-    const explicitCallback = import.meta.env.VITE_GITHUB_CALLBACK_URL
-    if (explicitCallback) params.set('redirect_uri', explicitCallback)
-
-    const githubUrl = `https://github.com/login/oauth/authorize?${params.toString()}`
-    window.location.assign(githubUrl)
-  }
 
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
@@ -188,22 +164,22 @@ export function SignInDialog({
         {!emailStep ? (
           <div className="space-y-3 pt-2">
             <Button
-              variant="outline"
-              className="w-full gap-2"
+              variant='outline'
+              className='w-full gap-2'
               onClick={() => loginWithGoogle()}
               disabled={signingIn}
             >
-              <IconGoogle className="size-4" />
-              {signingIn ? 'Signing in...' : 'Continue with Google'}
+              <IconGoogle className='size-4' />
+              {signingIn ? 'Signing in…' : 'Continue with Google'}
             </Button>
 
             <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={loginWithGithub}
+              variant='outline'
+              className='w-full gap-2'
+              onClick={() => toast.info('GitHub auth coming soon!')}
               disabled={signingIn}
             >
-              <IconGithub className="size-4" />
+              <IconGithub className='size-4' />
               Continue with GitHub
             </Button>
 

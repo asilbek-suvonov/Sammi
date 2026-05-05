@@ -3,7 +3,9 @@ import { useNavigate } from '@tanstack/react-router'
 import { BookOpen, Briefcase, Laptop, Moon, Sun } from 'lucide-react'
 import { useSearch } from '@/context/search-provider'
 import { useTheme } from '@/context/theme-provider'
-import { useAuthUser, useCourses, useProjects } from '@/stores/selectors'
+import { useCourses } from '@/api-hooks/course/use-courses'
+import { useProjects } from '@/api-hooks/projects/use-projects'
+import { useAuthUser } from '@/stores/selectors'
 import {
   CommandDialog,
   CommandEmpty,
@@ -21,8 +23,9 @@ export function CommandMenu() {
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
   const user = useAuthUser()
-  const courses = useCourses()
-  const projects = useProjects()
+  const { data: courses = [] } = useCourses()
+  const { data: projectData } = useProjects()
+  const projects = projectData?.results ?? []
   const role = user?.role ?? 'user'
   const email = user?.email ?? 'member@sammi.local'
   const sidebarData = buildSidebarData(role, email)
@@ -78,16 +81,18 @@ export function CommandMenu() {
             {courses.map((course) => (
               <CommandItem
                 key={course.id}
-                value={`course-${course.title}-${course.instructor}-${course.level}`}
+                value={`course-${course.title}-${course.category_name}-${course.level}`}
                 onSelect={() =>
-                  runCommand(() => navigate({ to: '/course/$id', params: { id: course.id } }))
+                  runCommand(() =>
+                    navigate({ to: '/course/$id', params: { id: String(course.id) } })
+                  )
                 }
               >
                 <BookOpen className='size-4 shrink-0 text-muted-foreground' />
                 <div className='flex flex-col'>
                   <span className='text-sm'>{course.title}</span>
                   <span className='text-xs text-muted-foreground'>
-                    {course.level} · {course.hours}h · {course.price}
+                    {course.level} · {course.is_free ? 'Free' : course.price}
                   </span>
                 </div>
               </CommandItem>
@@ -101,10 +106,10 @@ export function CommandMenu() {
             {projects.map((project) => (
               <CommandItem
                 key={project.id}
-                value={`project-${project.title}-${project.type}-${project.tech.join(' ')}`}
+                value={`project-${project.title}-${project.difficulty}-${project.technologies.map((t) => t.name).join(' ')}`}
                 onSelect={() =>
                   runCommand(() =>
-                    navigate({ to: '/project/$id', params: { id: project.id } })
+                    navigate({ to: '/project/$id', params: { id: String(project.id) } })
                   )
                 }
               >
@@ -112,7 +117,7 @@ export function CommandMenu() {
                 <div className='flex flex-col'>
                   <span className='text-sm'>{project.title}</span>
                   <span className='text-xs text-muted-foreground'>
-                    {project.type} · {project.duration} · {project.price}
+                    {project.difficulty_display || project.difficulty} · {project.total_duration_str}
                   </span>
                 </div>
               </CommandItem>

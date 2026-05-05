@@ -1,9 +1,12 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { type Course } from '@/data/mock-data'
-import { useCourseActions } from '@/stores/selectors'
+import {
+  useCreateCourse,
+  useUpdateCourse,
+} from '@/api-hooks/course/use-courses'
+import type { Course, CourseRequest } from '@/service/course/course.types'
+import { dataUrlToFile } from '@/lib/data-url'
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -24,10 +27,6 @@ import {
   type CourseFormValues,
 } from './course-schema'
 
-function createCourseId() {
-  return String(Date.now())
-}
-
 type CourseSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -35,8 +34,10 @@ type CourseSheetProps = {
 }
 
 export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
-  const { addCourse, updateCourse } = useCourseActions()
   const isEdit = !!course
+  const createMutation = useCreateCourse()
+  const updateMutation = useUpdateCourse()
+  const submitting = createMutation.isPending || updateMutation.isPending
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
@@ -49,26 +50,25 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
     }
   }, [open, course, form])
 
-  const onSubmit = (values: CourseFormValues) => {
+  const onSubmit = async (values: CourseFormValues) => {
+    const image = await dataUrlToFile(values.image, 'course-image')
+    const payload: CourseRequest = {
+      title: values.title,
+      description: values.description,
+      level: values.level,
+      price: values.price,
+      category: values.category || undefined,
+      technologies: values.technologies,
+      is_free: values.is_free,
+      is_new: values.is_new,
+      is_published: values.is_published,
+      image: image instanceof File ? image : undefined,
+    }
+
     if (isEdit && course) {
-      updateCourse(course.id, {
-        ...course,
-        ...values,
-      })
-      toast.success('Course updated successfully')
+      await updateMutation.mutateAsync({ id: course.id, data: payload })
     } else {
-      addCourse({
-        id: createCourseId(),
-        ...values,
-        parts: 0,
-        hours: 0,
-        students: 0,
-        rating: 0,
-        instructor: 'Admin',
-        modules: [],
-        language: 'uz',
-      })
-      toast.success('Course added successfully')
+      await createMutation.mutateAsync(payload)
     }
     onOpenChange(false)
   }
@@ -98,11 +98,11 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
 
         <Separator />
         <SheetFooter className='flex flex-row justify-end gap-2 px-6 py-4'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button variant='outline' onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button type='submit' form='course-form'>
-            Save Course
+          <Button type='submit' form='course-form' disabled={submitting}>
+            {submitting ? 'Saving...' : 'Save Course'}
           </Button>
         </SheetFooter>
       </SheetContent>

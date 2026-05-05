@@ -1,9 +1,11 @@
 import { lazy, Suspense, useMemo } from 'react'
-import { toast } from 'sonner'
+import {
+  useDeleteSource,
+  useSources,
+} from '@/api-hooks/sources/useSources'
+import type { SourceCode } from '@/service/sources/sources.type'
 import { useEntityCrud } from '@/hooks/use-entity-crud'
 import { useEntityTable } from '@/hooks/use-entity-table'
-import { type AdminSource } from '@/stores/admin-store'
-import { useSourceActions, useSources } from '@/stores/selectors'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { EntityTablePage } from '@/components/data-table'
 import { Main } from '@/components/layout/main'
@@ -14,8 +16,9 @@ const SourceDialog = lazy(() =>
 )
 
 export default function AdminSources() {
-  const sources = useSources()
-  const { deleteSource } = useSourceActions()
+  const { data, isLoading } = useSources()
+  const sources = useMemo(() => data?.results ?? [], [data])
+  const deleteMutation = useDeleteSource()
 
   const {
     editorOpen,
@@ -27,7 +30,7 @@ export default function AdminSources() {
     askDelete,
     cancelDelete,
     confirmDelete,
-  } = useEntityCrud<AdminSource>()
+  } = useEntityCrud<SourceCode>()
 
   const columns = useMemo(
     () => getSourcesColumns({ onEdit: openEdit, onDelete: askDelete }),
@@ -37,26 +40,25 @@ export default function AdminSources() {
   const { table } = useEntityTable({ data: sources, columns })
 
   const handleConfirmDelete = () => {
-    confirmDelete((source) => {
-      deleteSource(source.id)
-      toast.success('Source deleted successfully')
-    })
+    confirmDelete((source) => deleteMutation.mutate(source.slug))
   }
 
-  const handleBulkDelete = (ids: string[]) => {
-    ids.forEach((id) => deleteSource(id))
-    toast.success(`${ids.length} source(s) deleted`)
+  const handleBulkDelete = (ids: (string | number)[]) => {
+    ids.forEach((id) => {
+      const source = sources.find((s) => s.id === id)
+      if (source) deleteMutation.mutate(source.slug)
+    })
   }
 
   return (
     <>
       <Main fixed>
-        <EntityTablePage<AdminSource>
+        <EntityTablePage<SourceCode>
           title='Sources'
           description='Manage code sources and repository links.'
           addLabel='Add Source'
           searchPlaceholder='Search sources...'
-          emptyMessage='No sources found.'
+          emptyMessage={isLoading ? 'Loading...' : 'No sources found.'}
           entityName='source'
           table={table}
           onAdd={openCreate}

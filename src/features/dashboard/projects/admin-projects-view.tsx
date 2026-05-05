@@ -1,10 +1,12 @@
 import { lazy, Suspense, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { type Project } from '@/data/mock-data'
-import { toast } from 'sonner'
+import {
+  useDeleteProject,
+  useProjects,
+} from '@/api-hooks/projects/use-projects'
+import type { ProjectListItem } from '@/service/projects/projects.type'
 import { useEntityCrud } from '@/hooks/use-entity-crud'
 import { useEntityTable } from '@/hooks/use-entity-table'
-import { useProjectActions, useProjects } from '@/stores/selectors'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { EntityTablePage } from '@/components/data-table'
 import { Main } from '@/components/layout/main'
@@ -16,8 +18,9 @@ const ProjectSheet = lazy(() =>
 
 export default function AdminProjectsView() {
   const navigate = useNavigate()
-  const projects = useProjects()
-  const { deleteProject } = useProjectActions()
+  const { data, isLoading } = useProjects()
+  const projects = useMemo(() => data?.results ?? [], [data])
+  const deleteMutation = useDeleteProject()
 
   const {
     editorOpen,
@@ -29,7 +32,7 @@ export default function AdminProjectsView() {
     askDelete,
     cancelDelete,
     confirmDelete,
-  } = useEntityCrud<Project>()
+  } = useEntityCrud<ProjectListItem>()
 
   const columns = useMemo(
     () => getProjectsColumns({ onEdit: openEdit, onDelete: askDelete }),
@@ -39,26 +42,22 @@ export default function AdminProjectsView() {
   const { table } = useEntityTable({ data: projects, columns })
 
   const handleConfirmDelete = () => {
-    confirmDelete((project) => {
-      deleteProject(project.id)
-      toast.success('Project deleted successfully')
-    })
+    confirmDelete((project) => deleteMutation.mutate(project.id))
   }
 
-  const handleBulkDelete = (ids: string[]) => {
-    ids.forEach((id) => deleteProject(id))
-    toast.success(`${ids.length} project(s) deleted`)
+  const handleBulkDelete = (ids: (string | number)[]) => {
+    ids.forEach((id) => deleteMutation.mutate(id))
   }
 
   return (
     <>
       <Main fixed>
-        <EntityTablePage<Project>
+        <EntityTablePage<ProjectListItem>
           title='Projects'
           description='Manage your projects — add, edit, or remove.'
           addLabel='Add Project'
           searchPlaceholder='Search projects...'
-          emptyMessage='No projects found.'
+          emptyMessage={isLoading ? 'Loading...' : 'No projects found.'}
           entityName='project'
           table={table}
           filters={[
@@ -66,17 +65,9 @@ export default function AdminProjectsView() {
               columnId: 'difficulty',
               title: 'Difficulty',
               options: [
-                { label: 'Easy', value: 'Easy' },
-                { label: 'Medium', value: 'Medium' },
-                { label: 'Hard', value: 'Hard' },
-              ],
-            },
-            {
-              columnId: 'is_published',
-              title: 'Status',
-              options: [
-                { label: 'Published', value: 'true' },
-                { label: 'Draft', value: 'false' },
+                { label: 'Beginner', value: 'beginner' },
+                { label: 'Intermediate', value: 'intermediate' },
+                { label: 'Advanced', value: 'advanced' },
               ],
             },
           ]}
@@ -85,7 +76,7 @@ export default function AdminProjectsView() {
           onRowClick={(project) =>
             navigate({
               to: '/dashboard/projects/$id',
-              params: { id: project.id },
+              params: { id: String(project.id) },
             })
           }
         />

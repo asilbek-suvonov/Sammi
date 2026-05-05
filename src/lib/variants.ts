@@ -1,5 +1,6 @@
 export function levelVariant(level: string): 'secondary' | 'outline' | 'destructive' {
-  if (level === 'Beginner') return 'secondary'
-  if (level === 'Advanced') return 'destructive'
+  const normalized = level?.toLowerCase()
+  if (normalized === 'beginner') return 'secondary'
+  if (normalized === 'advanced') return 'destructive'
   return 'outline'
 }

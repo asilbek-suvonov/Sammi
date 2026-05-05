@@ -1,6 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { ExternalLink } from 'lucide-react'
-import { type AdminSource } from '@/stores/admin-store'
+import type { SourceCode } from '@/service/sources/sources.type'
+import { Badge } from '@/components/ui/badge'
 import {
   DataTableColumnHeader,
   EntityActionsCell,
@@ -8,16 +9,16 @@ import {
 } from '@/components/data-table'
 
 type SourcesColumnsProps = {
-  onEdit: (source: AdminSource) => void
-  onDelete: (source: AdminSource) => void
+  onEdit: (source: SourceCode) => void
+  onDelete: (source: SourceCode) => void
 }
 
 export function getSourcesColumns({
   onEdit,
   onDelete,
-}: SourcesColumnsProps): ColumnDef<AdminSource>[] {
+}: SourcesColumnsProps): ColumnDef<SourceCode>[] {
   return [
-    selectColumn<AdminSource>(),
+    selectColumn<SourceCode>(),
     {
       accessorKey: 'title',
       header: ({ column }) => (
@@ -28,23 +29,12 @@ export function getSourcesColumns({
       ),
     },
     {
-      accessorKey: 'description',
+      accessorKey: 'github_url',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Description' />
-      ),
-      cell: ({ row }) => (
-        <span className='text-muted-foreground text-sm max-w-[240px] truncate block'>
-          {(row.getValue('description') as string) || '—'}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'href',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Link' />
+        <DataTableColumnHeader column={column} title='GitHub' />
       ),
       cell: ({ row }) => {
-        const url = row.getValue('href') as string
+        const url = row.getValue('github_url') as string
         if (!url) return <span className='text-muted-foreground'>—</span>
         return (
           <a
@@ -55,6 +45,36 @@ export function getSourcesColumns({
           >
             Open <ExternalLink className='h-3 w-3' />
           </a>
+        )
+      },
+    },
+    {
+      accessorKey: 'is_published',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title='Status' />
+      ),
+      cell: ({ row }) =>
+        row.getValue('is_published') ? (
+          <Badge className='bg-green-600 text-white hover:bg-green-700'>
+            Published
+          </Badge>
+        ) : (
+          <Badge variant='outline'>Draft</Badge>
+        ),
+      filterFn: (row, id, value: string[]) =>
+        value.includes(String(row.getValue(id))),
+    },
+    {
+      accessorKey: 'created_at',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title='Created' />
+      ),
+      cell: ({ row }) => {
+        const value = row.getValue('created_at') as string | undefined
+        return (
+          <span className='text-muted-foreground text-sm'>
+            {value ? new Date(value).toLocaleDateString() : '—'}
+          </span>
         )
       },
     },

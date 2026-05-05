@@ -1,83 +1,48 @@
-import { LessonPlayer } from '@/components/preview/lesson-player'
+import { Link } from '@tanstack/react-router'
+import { GraduationCap } from 'lucide-react'
+import ReactPlayer from 'react-player'
+import { useCourse } from '@/api-hooks/course/use-courses'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useCourses, useUserActions } from '@/stores/selectors'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { GraduationCap, LayoutList } from 'lucide-react'
-import { lazy, Suspense, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-
-const CurriculumSheet = lazy(() =>
-  import('@/components/preview/curriculum-sheet').then((m) => ({
-    default: m.CurriculumSheet,
-  }))
-)
+import { useUserActions } from '@/stores/selectors'
 
 interface Props { courseId: string }
 
 export function CoursePreviewPage({ courseId }: Props) {
-  const navigate = useNavigate()
-  const { markLessonWatched, getWatchedLessons, enrollCourse, isEnrolled } = useUserActions()
-  const courses = useCourses()
+  const { data: course, isLoading } = useCourse(courseId)
+  const { enrollCourse, isEnrolled } = useUserActions()
 
-  const course = courses.find((c) => c.id === courseId)
-  const allLessons = useMemo(() => course?.modules.flatMap((m) => m.lessons) ?? [], [course])
-
-  const [currentLessonId, setCurrentLessonId] = useState(allLessons[0]?.id ?? '')
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [justWatched, setJustWatched] = useState(false)
-  const [openModules, setOpenModules] = useState<string[]>(course?.modules.map((m) => m.id) ?? [])
+  if (isLoading) {
+    return (
+      <div className='flex h-screen items-center justify-center text-sm text-muted-foreground'>
+        Yuklanmoqda...
+      </div>
+    )
+  }
 
   if (!course) {
     return (
       <div className='flex h-screen flex-col items-center justify-center gap-4'>
         <p className='text-muted-foreground'>Course not found.</p>
-        <Button asChild variant='outline'><Link to='/'>Go Home</Link></Button>
+        <Button asChild variant='outline'>
+          <Link to='/'>Go Home</Link>
+        </Button>
       </div>
     )
   }
 
-  if (!isEnrolled(course.id)) enrollCourse(course.id)
+  if (!isEnrolled(String(course.id))) enrollCourse(String(course.id))
 
-  const watchedLessons = getWatchedLessons(course.id)
-  const totalLessons = allLessons.length
-  const watchedCount = watchedLessons.length
-  const courseProgress = totalLessons > 0 ? Math.round((watchedCount / totalLessons) * 100) : 0
-  const currentIndex = allLessons.findIndex((l) => l.id === currentLessonId)
-  const currentLesson = allLessons[currentIndex]
-  const isCurrentWatched = watchedLessons.includes(currentLessonId)
-
-  const flash = () => { setJustWatched(true); setTimeout(() => setJustWatched(false), 2500) }
-
-  const handleMarkWatched = () => {
-    if (!isCurrentWatched) { markLessonWatched(course.id, currentLessonId); flash(); toast.success("Dars ko'rilgan deb belgilandi!") }
-  }
-
-  const handleNext = () => {
-    const next = allLessons[currentIndex + 1]
-    if (next) { if (!isCurrentWatched) markLessonWatched(course.id, currentLessonId); setCurrentLessonId(next.id); setJustWatched(false) }
-    else { toast.success('🎉 Kurs tugatildi!'); navigate({ to: '/' }) }
-  }
-
-  const handlePrev = () => {
-    const prev = allLessons[currentIndex - 1]
-    if (prev) { setCurrentLessonId(prev.id); setJustWatched(false) }
-  }
-
-  const handleVideoEnded = () => {
-    if (!isCurrentWatched) { markLessonWatched(course.id, currentLessonId); flash(); toast.success("Video tugadi — dars ko'rilgan deb belgilandi!") }
-  }
-
-  const toggleModule = (id: string) =>
-    setOpenModules((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
-
-  const selectLesson = (id: string) => { setCurrentLessonId(id); setJustWatched(false); setSheetOpen(false) }
+  const videoSrc = course.preview_video_url_full || course.preview_video_url
 
   return (
     <div className='flex h-screen flex-col overflow-hidden bg-background text-foreground'>
       <header className='shrink-0 border-b bg-background/95 backdrop-blur'>
         <div className='mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6'>
           <Link to='/' className='flex items-center gap-2'>
-            <span className='hidden text-sm font-semibold tracking-tight sm:block'>Edu Center</span>
+            <span className='hidden text-sm font-semibold tracking-tight sm:block'>
+              Sammi
+            </span>
           </Link>
           <div className='flex flex-1 items-center justify-center px-4'>
             <div className='flex items-center gap-2 text-sm'>
@@ -85,52 +50,38 @@ export function CoursePreviewPage({ courseId }: Props) {
               <span className='line-clamp-1 font-medium'>{course.title}</span>
             </div>
           </div>
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            className='gap-1.5'
-            aria-expanded={sheetOpen}
-            aria-controls='lessons-panel'
-            onClick={() => setSheetOpen((o) => !o)}
-          >
-            <LayoutList className='size-4' />
-            <span className='hidden sm:inline'>Darslar</span>
-          </Button>
+          <Badge variant='outline' className='capitalize'>{course.level}</Badge>
         </div>
       </header>
 
-      <Suspense fallback={null}>
-        <CurriculumSheet
-          open={sheetOpen}
-          onOpenChange={setSheetOpen}
-          course={course}
-          currentLessonId={currentLessonId}
-          watchedLessons={watchedLessons}
-          openModules={openModules}
-          onToggleModule={toggleModule}
-          onSelectLesson={selectLesson}
-          watchedCount={watchedCount}
-          totalLessons={totalLessons}
-          courseProgress={courseProgress}
-        />
-      </Suspense>
-
       <main className='flex-1 overflow-y-auto'>
-        <LessonPlayer
-          lesson={currentLesson}
-          lessonIndex={currentIndex}
-          totalLessons={totalLessons}
-          isCurrentWatched={isCurrentWatched}
-          justWatched={justWatched}
-          hasPrev={currentIndex > 0}
-          courseProgress={courseProgress}
-          watchedCount={watchedCount}
-          onMarkWatched={handleMarkWatched}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onVideoEnded={handleVideoEnded}
-        />
+        <div className='mx-auto max-w-6xl space-y-4 px-4 py-6 md:px-6'>
+          <div className='overflow-hidden rounded-xl border bg-black shadow-sm'>
+            <div className='aspect-video w-full'>
+              {videoSrc ? (
+                <ReactPlayer src={videoSrc} width='100%' height='100%' controls />
+              ) : (
+                <div className='flex h-full items-center justify-center text-sm text-white/60'>
+                  Preview video not available
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className='space-y-3'>
+            <h1 className='text-xl font-semibold leading-snug'>{course.title}</h1>
+            <p className='text-sm leading-relaxed text-muted-foreground'>
+              {course.description}
+            </p>
+            {course.technologies_list?.length > 0 && (
+              <div className='flex flex-wrap gap-1.5'>
+                {course.technologies_list.map((t) => (
+                  <Badge key={t} variant='secondary'>{t}</Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </main>
     </div>
   )

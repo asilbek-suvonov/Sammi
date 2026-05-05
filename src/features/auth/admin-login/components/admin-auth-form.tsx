@@ -6,7 +6,6 @@ import { useNavigate } from '@tanstack/react-router'
 import { AxiosError } from 'axios'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuthLogin } from '@/api-hooks'
 import { useAuthActions } from '@/stores/selectors'
 import { cn } from '@/lib/utils'
 import { msFromNow } from '@/lib/time'
@@ -21,6 +20,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { useAuthLogin } from '@/api-hooks/auth/index';
 
 const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
 

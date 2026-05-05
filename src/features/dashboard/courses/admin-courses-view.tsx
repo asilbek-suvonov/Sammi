@@ -1,10 +1,12 @@
 import { lazy, Suspense, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { type Course } from '@/data/mock-data'
-import { toast } from 'sonner'
+import {
+  useCourses,
+  useDeleteCourse,
+} from '@/api-hooks/course/use-courses'
+import type { Course } from '@/service/course/course.types'
 import { useEntityCrud } from '@/hooks/use-entity-crud'
 import { useEntityTable } from '@/hooks/use-entity-table'
-import { useCourseActions, useCourses } from '@/stores/selectors'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { EntityTablePage } from '@/components/data-table'
 import { Main } from '@/components/layout/main'
@@ -16,8 +18,8 @@ const CourseSheet = lazy(() =>
 
 export default function AdminCoursesView() {
   const navigate = useNavigate()
-  const courses = useCourses()
-  const { deleteCourse } = useCourseActions()
+  const { data: courses = [], isLoading } = useCourses()
+  const deleteMutation = useDeleteCourse()
 
   const {
     editorOpen,
@@ -39,15 +41,11 @@ export default function AdminCoursesView() {
   const { table } = useEntityTable({ data: courses, columns })
 
   const handleConfirmDelete = () => {
-    confirmDelete((course) => {
-      deleteCourse(course.id)
-      toast.success('Course deleted successfully')
-    })
+    confirmDelete((course) => deleteMutation.mutate(course.id))
   }
 
-  const handleBulkDelete = (ids: string[]) => {
-    ids.forEach((id) => deleteCourse(id))
-    toast.success(`${ids.length} course(s) deleted`)
+  const handleBulkDelete = (ids: (string | number)[]) => {
+    ids.forEach((id) => deleteMutation.mutate(id))
   }
 
   return (
@@ -58,7 +56,7 @@ export default function AdminCoursesView() {
           description='Manage your courses — add, edit, or remove.'
           addLabel='Add Course'
           searchPlaceholder='Search courses...'
-          emptyMessage='No courses found.'
+          emptyMessage={isLoading ? 'Loading...' : 'No courses found.'}
           entityName='course'
           table={table}
           filters={[
@@ -66,17 +64,9 @@ export default function AdminCoursesView() {
               columnId: 'level',
               title: 'Level',
               options: [
-                { label: 'Beginner', value: 'Beginner' },
-                { label: 'Intermediate', value: 'Intermediate' },
-                { label: 'Advanced', value: 'Advanced' },
-              ],
-            },
-            {
-              columnId: 'is_published',
-              title: 'Status',
-              options: [
-                { label: 'Published', value: 'true' },
-                { label: 'Draft', value: 'false' },
+                { label: 'Beginner', value: 'beginner' },
+                { label: 'Intermediate', value: 'intermediate' },
+                { label: 'Advanced', value: 'advanced' },
               ],
             },
           ]}
@@ -85,7 +75,7 @@ export default function AdminCoursesView() {
           onRowClick={(course) =>
             navigate({
               to: '/dashboard/courses/$id',
-              params: { id: course.id },
+              params: { id: String(course.id) },
             })
           }
         />
