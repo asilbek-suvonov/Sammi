@@ -1,8 +1,8 @@
 export const API_ENDPOINTS = {
   AUTH: {
-    GITHUB: "/auth/github",
-    GOOGLE: "/auth/google",
-    LOGIN: "/login",
+    GITHUB: "/auth/github/",
+    GOOGLE: "/auth/google/",
+    LOGIN: "/login/", 
   },
 
   ACCOUNTS: {
@@ -81,3 +81,5 @@ export const API_ENDPOINTS = {
     LIST: "/lesson-progress/list",
   },
 } as const;
+
+export default API_ENDPOINTS;

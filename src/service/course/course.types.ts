@@ -19,3 +19,12 @@ export interface CourseListResponse {
   previous: string | null;
   results: Course[];
 }
+
+export interface CourseQueryParams {
+  page?: number;
+  search?: string;
+  ordering?: string;
+  level?: Course['level'];
+  category?: string;
+  is_free?: boolean;
+}

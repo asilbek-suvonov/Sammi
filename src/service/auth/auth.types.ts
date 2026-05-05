@@ -1,12 +1,9 @@
-/** Request body for Google OAuth login */
+/** Optional backend exchange — frontend sends Google access_token,
+ *  backend verifies it with Google and returns the app's own JWT. */
 export interface GoogleAuthRequest {
-  token: string
+  access_token: string
 }
 
-/**
- * Backend /auth/google/ response (swagger bo'yicha)
- * 200 = mavjud user, 201 = yangi user
- */
 export interface GoogleAuthResponse {
   id: number
   email: string
@@ -16,7 +13,6 @@ export interface GoogleAuthResponse {
   language_code: string
   created_at: string
   is_new_user: boolean
-  // Agar backend token ham qaytarsa:
   access?: string
   refresh?: string
 }

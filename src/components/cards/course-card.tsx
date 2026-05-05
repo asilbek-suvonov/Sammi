@@ -1,14 +1,11 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Course } from '../../service/course/course.types' // Yangi interfeysdan foydalanamiz
+import type { Course } from '../../service/course/course.types' // Yangi interfeysdan foydalanamiz
 import { levelVariant } from '@/lib/variants'
 import { Link } from '@tanstack/react-router'
 import { Clock3, Layers3 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 
 export function CourseCard({ course }: { course: Course }) {
-  const { t } = useTranslation()
-
   return (
     <Link to='/course/$id' params={{ id: course.id.toString() }} className='group block'>
       <Card className='cursor-pointer overflow-hidden border dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>

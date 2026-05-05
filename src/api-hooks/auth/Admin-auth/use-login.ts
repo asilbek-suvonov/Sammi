@@ -1,5 +1,6 @@
+import { login } from '@/service/auth/admin-auth/login.service'
+import type { LoginRequest, LoginResponse } from '@/service/auth/admin-auth/login.type'
 import { useMutation } from '@tanstack/react-query'
-import { login, type LoginRequest, type LoginResponse } from '@/service/auth'
 
 export const useAuthLogin = (options?: {
   onSuccess?: (data: LoginResponse) => void

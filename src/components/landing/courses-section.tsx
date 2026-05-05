@@ -13,8 +13,7 @@ export function CoursesSection() {
   const navigate = useNavigate()
   const [signInOpen, setSignInOpen] = useState(false)
 
-  // Yangi hookni chaqiramiz
-  const { data, isLoading } = useCourses()
+  const { data: courses = [], isLoading } = useCourses()
 
   const handleViewAll = () => {
     if (accessToken) {
@@ -24,7 +23,6 @@ export function CoursesSection() {
     }
   }
 
-  // Yuklanayotgan vaqtda skeleton yoki bo'sh joy ko'rsatish
   if (isLoading) return <div className="h-40 flex items-center justify-center">Yuklanmoqda...</div>
 
   return (
@@ -38,8 +36,7 @@ export function CoursesSection() {
           onSeeAll={handleViewAll}
         />
         <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-3'>
-          {/* data.results ichidan birinchi 6 tasini olamiz */}
-          {data?.results.slice(0, 6).map((course) => (
+          {courses.slice(0, 6).map((course) => (
             <CourseCard key={course.id} course={course} />
           ))}
         </div>

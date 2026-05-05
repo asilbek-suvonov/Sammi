@@ -72,21 +72,7 @@ export function ImagePreview({
           <DialogDescription className='sr-only'>
             Image preview
           </DialogDescription>
-          <div className='
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          '>
+          <div>
             <img
               src={src}
               alt={alt}

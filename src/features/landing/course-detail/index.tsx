@@ -1,6 +1,5 @@
 import { CourseCurriculum } from '@/components/course/course-curriculum'
 import { CourseSideCard } from '@/components/course/course-side-card'
-import { LoginDialog } from '@/components/login-dialog'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
@@ -15,6 +14,7 @@ import { levelVariant } from '@/lib/variants'
 import { useNavigate } from '@tanstack/react-router'
 import { Clock3, Layers3, Star, Users } from 'lucide-react'
 import { useState } from 'react'
+import { SignInDialog } from '@/components/public/sign-in-dialog'
 
 interface Props { id: string }
 
@@ -87,7 +87,7 @@ export function CourseDetailPage({ id }: Props) {
           <CourseSideCard course={course} totalLessons={totalLessons} enrolled={enrolled} onWatch={handleWatch} />
         </div>
       </main>
-      <LoginDialog
+      <SignInDialog
         open={loginOpen}
         onOpenChange={setLoginOpen}
         onSuccess={goToPreview}

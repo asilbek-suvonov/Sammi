@@ -13,8 +13,10 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useNavigate } from '@tanstack/react-router'
-import { ReactNode, useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
+import { googleAuth, type GoogleAuthResponse } from '@/service/auth'
+import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 
 interface SignInDialogProps {
   trigger?: ReactNode
@@ -25,6 +27,51 @@ interface SignInDialogProps {
   onOpenChange?: (open: boolean) => void
 }
 
+interface GoogleProfile {
+  sub: string
+  email: string
+  email_verified: boolean
+  name: string
+  given_name: string
+  family_name: string
+  picture: string
+  locale?: string
+}
+
+const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
+
+const fetchGoogleProfile = async (accessToken: string): Promise<GoogleProfile> => {
+  const res = await fetch(GOOGLE_USERINFO_URL, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!res.ok) throw new Error(`Google userinfo failed (${res.status})`)
+  return res.json()
+}
+
+const profileToAuthUser = (p: GoogleProfile): AuthUser => ({
+  email: p.email,
+  fullName: p.name,
+  firstName: p.given_name,
+  lastName: p.family_name,
+  avatarUrl: p.picture,
+  languageCode: p.locale,
+  role: 'user',
+})
+
+const mergeBackendUser = (
+  base: AuthUser,
+  data: GoogleAuthResponse
+): AuthUser => ({
+  ...base,
+  id: data.id,
+  email: data.email || base.email,
+  fullName: data.full_name || base.fullName,
+  avatarUrl: data.avatar_url || base.avatarUrl,
+  country: data.country,
+  languageCode: data.language_code || base.languageCode,
+  isNewUser: data.is_new_user,
+})
+
 export function SignInDialog({
   trigger,
   onSuccess,
@@ -34,23 +81,18 @@ export function SignInDialog({
   onOpenChange,
 }: SignInDialogProps) {
   const navigate = useNavigate()
-  
-  // State management
+  const login = useAuthStore((s) => s.auth.login)
+
   const [internalOpen, setInternalOpen] = useState(false)
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
 
-  // Controlled vs Uncontrolled open state
   const isOpen = controlledOpen ?? internalOpen
   const setIsOpen = (value: boolean) => {
-    if (onOpenChange) {
-      onOpenChange(value)
-    } else {
-      setInternalOpen(value)
-    }
+    if (onOpenChange) onOpenChange(value)
+    else setInternalOpen(value)
 
-    // Modal yopilganda formani tozalash
     if (!value) {
       setTimeout(() => {
         setEmailStep(false)
@@ -60,44 +102,53 @@ export function SignInDialog({
   }
 
   const loginWithGoogle = useGoogleLogin({
+    flow: 'implicit',
+    scope: 'openid email profile',
     onSuccess: async (tokenResponse) => {
-      setIsLoading(true)
-      const accessToken = tokenResponse.access_token
-      
+      setSigningIn(true)
       try {
-        const baseUrl = import.meta.env.VITE_API_BASE_URL
-        const response = await fetch(`${baseUrl}/auth/google`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: accessToken }),
-        })
+        const profile = await fetchGoogleProfile(tokenResponse.access_token)
 
-        const data = await response.json()
+        let user = profileToAuthUser(profile)
+        let accessToken = tokenResponse.access_token
+        let refreshToken = ''
 
-        if (response.ok) {
-          toast.success('Muvaffaqiyatli kirdingiz!')
-          localStorage.setItem('auth_token', data.token) 
-          setIsOpen(false)
-          onSuccess?.()
-          navigate({ to: '/dashboard' })
-        } else {
-          throw new Error(data.message || 'Xatolik yuz berdi')
+        try {
+          const data = await googleAuth({ access_token: tokenResponse.access_token })
+          if (data?.access) {
+            accessToken = data.access
+            refreshToken = data.refresh ?? ''
+            user = mergeBackendUser(user, data)
+          }
+        } catch {
+          // Backend not reachable — fall back to Google profile + access_token.
         }
-      } catch (error: any) {
-        toast.error(error.message || 'Server bilan bog‘lanishda xatolik')
+
+        login({ accessToken, refreshToken, user })
+        toast.success(`Welcome, ${user.firstName || user.email}!`)
+        setIsOpen(false)
+        onSuccess?.()
+        navigate({ to: '/dashboard' })
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Sign-in failed')
       } finally {
-        setIsLoading(false)
+        setSigningIn(false)
       }
     },
     onError: () => {
-      toast.error('Google orqali kirish bekor qilindi')
+      toast.error('Google sign-in canceled')
+    },
+    onNonOAuthError: () => {
+      toast.error(
+        'Google sign-in could not start. Add http://localhost:5173 to your OAuth client’s Authorized JavaScript origins.'
+      )
     },
   })
 
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !email.includes('@')) {
-      toast.error('Iltimos, to‘g‘ri elektron pochta kiriting.')
+      toast.error('Please enter a valid email')
       return
     }
     sessionStorage.setItem('sammi_pending_email', email)
@@ -125,17 +176,17 @@ export function SignInDialog({
               variant='outline'
               className='w-full gap-2'
               onClick={() => loginWithGoogle()}
-              disabled={isLoading}
+              disabled={signingIn}
             >
-              <IconGoogle className='size-4' /> 
-              {isLoading ? 'Yuklanmoqda...' : 'Continue with Google'}
+              <IconGoogle className='size-4' />
+              {signingIn ? 'Signing in…' : 'Continue with Google'}
             </Button>
-            
+
             <Button
               variant='outline'
               className='w-full gap-2'
-              disabled={isLoading}
               onClick={() => toast.info('GitHub auth coming soon!')}
+              disabled={signingIn}
             >
               <IconGithub className='size-4' />
               Continue with GitHub
@@ -152,7 +203,7 @@ export function SignInDialog({
               variant='secondary'
               className='w-full'
               onClick={() => setEmailStep(true)}
-              disabled={isLoading}
+              disabled={signingIn}
             >
               Continue with Email
             </Button>
