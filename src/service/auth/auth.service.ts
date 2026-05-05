@@ -1,9 +1,8 @@
 import api from '@/api'
-import type { GoogleAuthRequest, GoogleAuthResponse } from './auth.types'
 import API_ENDPOINTS from '@/endpoints/api_endpoints'
+import type { GoogleAuthRequest, GoogleAuthResponse } from './auth.types'
 
-export const googleAuth = async (
+export const googleAuth = (
   data: GoogleAuthRequest
-): Promise<GoogleAuthResponse> => {
-  return api.post<GoogleAuthResponse>(API_ENDPOINTS.AUTH.GOOGLE, data)
-}
+): Promise<GoogleAuthResponse> =>
+  api.post<GoogleAuthResponse>(API_ENDPOINTS.AUTH.GOOGLE, data)

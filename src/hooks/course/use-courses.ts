@@ -1,21 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
-import { getCourseList } from '../../service/course/course.service' 
-import { CourseListResponse } from '../../service/course/course.types'
+import { getCourseList } from '../../service/course/course.service'
+import type { Course, CourseListResponse, CourseQueryParams } from '../../service/course/course.types'
 
-// Query Key larni alohida obyektda saqlash yaxshi amaliyot (Key Management)
 export const courseKeys = {
   all: ['courses'] as const,
-  list: (params?: any) => [...courseKeys.all, 'list', params] as const,
+  list: (params?: CourseQueryParams) => [...courseKeys.all, 'list', params] as const,
 }
 
-/**
- * Kurslar ro'yxatini olish uchun Hook
- */
-export function useCourses(params?: any) {
-  return useQuery<CourseListResponse>({
+const toCourseArray = (raw: unknown): Course[] => {
+  if (Array.isArray(raw)) return raw as Course[]
+  if (raw && typeof raw === 'object' && 'results' in raw) {
+    const results = (raw as CourseListResponse).results
+    return Array.isArray(results) ? results : []
+  }
+  return []
+}
+
+export function useCourses(params?: CourseQueryParams) {
+  return useQuery<Course[]>({
     queryKey: courseKeys.list(params),
-    queryFn: () => getCourseList(params),
-    // 10 soniya davomida ma'lumotni "yangi" deb hisoblaydi (Sening QueryClient sozlamangga mos)
-    staleTime: 10 * 1000, 
+    queryFn: async () => toCourseArray(await getCourseList(params)),
+    staleTime: 10 * 1000,
   })
 }

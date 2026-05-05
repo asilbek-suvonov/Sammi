@@ -38,11 +38,22 @@ export const apiClient: AxiosInstance = axios.create({
 })
 
 
+const isPublicAuthEndpoint = (url?: string) => {
+  if (!url) return false
+  return (
+    url.includes('/auth/google') ||
+    url.includes('/auth/github') ||
+    url.includes('/login') ||
+    url.includes('/send-otp') ||
+    url.includes('/verify-otp')
+  )
+}
+
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const { accessToken } = useAuthStore.getState().auth
 
-    if (accessToken) {
+    if (accessToken && !isPublicAuthEndpoint(config.url)) {
       config.headers.set('Authorization', `Bearer ${accessToken}`)
     }
 
