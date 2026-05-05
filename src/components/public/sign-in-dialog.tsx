@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { googleAuth, type GoogleAuthResponse } from '@/service/auth'
 import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 
+// --- Interfaces ---
 interface SignInDialogProps {
   trigger?: ReactNode
   onSuccess?: () => void
@@ -38,6 +39,7 @@ interface GoogleProfile {
   locale?: string
 }
 
+// --- Constants & Helpers ---
 const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
 
 const fetchGoogleProfile = async (accessToken: string): Promise<GoogleProfile> => {
@@ -58,10 +60,7 @@ const profileToAuthUser = (p: GoogleProfile): AuthUser => ({
   role: 'user',
 })
 
-const mergeBackendUser = (
-  base: AuthUser,
-  data: GoogleAuthResponse
-): AuthUser => ({
+const mergeBackendUser = (base: AuthUser, data: GoogleAuthResponse): AuthUser => ({
   ...base,
   id: data.id,
   email: data.email || base.email,
@@ -92,15 +91,12 @@ export function SignInDialog({
   const setIsOpen = (value: boolean) => {
     if (onOpenChange) onOpenChange(value)
     else setInternalOpen(value)
-
     if (!value) {
-      setTimeout(() => {
-        setEmailStep(false)
-        setEmail('')
-      }, 200)
+      setTimeout(() => { setEmailStep(false); setEmail('') }, 200)
     }
   }
 
+  // --- Google Login ---
   const loginWithGoogle = useGoogleLogin({
     flow: 'implicit',
     scope: 'openid email profile',
@@ -108,7 +104,6 @@ export function SignInDialog({
       setSigningIn(true)
       try {
         const profile = await fetchGoogleProfile(tokenResponse.access_token)
-
         let user = profileToAuthUser(profile)
         let accessToken = tokenResponse.access_token
         let refreshToken = ''
@@ -120,12 +115,12 @@ export function SignInDialog({
             refreshToken = data.refresh ?? ''
             user = mergeBackendUser(user, data)
           }
-        } catch {
-          // Backend not reachable — fall back to Google profile + access_token.
+        } catch (e) {
+          console.error("Backend auth failed, using Google profile only", e)
         }
 
         login({ accessToken, refreshToken, user })
-        toast.success(`Welcome, ${user.firstName || user.email}!`)
+        toast.success(`Welcome back, ${user.firstName || user.fullName}!`)
         setIsOpen(false)
         onSuccess?.()
         navigate({ to: '/dashboard' })
@@ -135,15 +130,37 @@ export function SignInDialog({
         setSigningIn(false)
       }
     },
-    onError: () => {
-      toast.error('Google sign-in canceled')
-    },
-    onNonOAuthError: () => {
-      toast.error(
-        'Google sign-in could not start. Add http://localhost:5173 to your OAuth client’s Authorized JavaScript origins.'
-      )
-    },
+    onError: () => toast.error('Google sign-in canceled'),
   })
+
+  // --- GitHub Login ---
+  const loginWithGithub = () => {
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID
+
+    if (!clientId) {
+      toast.error('GitHub Client ID is not configured')
+      return
+    }
+
+    // State for CSRF protection
+    const state = Math.random().toString(36).substring(7)
+    try {
+      localStorage.setItem('github_oauth_state', state)
+    } catch {
+      // ignore storage errors
+    }
+
+    const params = new URLSearchParams({ client_id: clientId, scope: 'user:email', state })
+
+    // Only include redirect_uri if developer explicitly set it in env.
+    // If omitted, GitHub will redirect to the Authorization callback URL
+    // registered for the OAuth App (recommended when possible).
+    const explicitCallback = import.meta.env.VITE_GITHUB_CALLBACK_URL
+    if (explicitCallback) params.set('redirect_uri', explicitCallback)
+
+    const githubUrl = `https://github.com/login/oauth/authorize?${params.toString()}`
+    window.location.assign(githubUrl)
+  }
 
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,48 +177,46 @@ export function SignInDialog({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-      <DialogContent className='sm:max-w-sm'>
+      <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {emailStep
-              ? 'Enter your email to receive a verification code.'
-              : description}
+            {emailStep ? 'Enter your email for verification.' : description}
           </DialogDescription>
         </DialogHeader>
 
         {!emailStep ? (
-          <div className='space-y-3 pt-2'>
+          <div className="space-y-3 pt-2">
             <Button
-              variant='outline'
-              className='w-full gap-2'
+              variant="outline"
+              className="w-full gap-2"
               onClick={() => loginWithGoogle()}
               disabled={signingIn}
             >
-              <IconGoogle className='size-4' />
-              {signingIn ? 'Signing in…' : 'Continue with Google'}
+              <IconGoogle className="size-4" />
+              {signingIn ? 'Signing in...' : 'Continue with Google'}
             </Button>
 
             <Button
-              variant='outline'
-              className='w-full gap-2'
-              onClick={() => toast.info('GitHub auth coming soon!')}
+              variant="outline"
+              className="w-full gap-2"
+              onClick={loginWithGithub}
               disabled={signingIn}
             >
-              <IconGithub className='size-4' />
+              <IconGithub className="size-4" />
               Continue with GitHub
             </Button>
 
-            <div className='relative w-full py-1'>
+            <div className="relative w-full py-1">
               <Separator />
-              <span className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground'>
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
                 or
               </span>
             </div>
 
             <Button
-              variant='secondary'
-              className='w-full'
+              variant="secondary"
+              className="w-full"
               onClick={() => setEmailStep(true)}
               disabled={signingIn}
             >
@@ -209,28 +224,25 @@ export function SignInDialog({
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleEmailContinue} className='space-y-3 pt-2'>
+          <form onSubmit={handleEmailContinue} className="space-y-3 pt-2">
             <Input
-              type='email'
-              placeholder='you@example.com'
+              type="email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoFocus
               required
             />
-            <p className='text-xs text-muted-foreground'>
-              We&apos;ll send a verification code to this email.
-            </p>
-            <div className='flex gap-2'>
+            <div className="flex gap-2">
               <Button
-                type='button'
-                variant='ghost'
-                className='flex-1'
+                type="button"
+                variant="ghost"
+                className="flex-1"
                 onClick={() => setEmailStep(false)}
               >
                 Back
               </Button>
-              <Button type='submit' className='flex-1'>
+              <Button type="submit" className="flex-1">
                 Continue
               </Button>
             </div>
