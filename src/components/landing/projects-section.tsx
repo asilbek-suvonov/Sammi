@@ -1,17 +1,20 @@
 import { useState } from 'react'
+import { useProjects } from '@/api-hooks/projects/use-projects'
 import { ProjectCard } from '@/components/cards/project-card'
 import { SectionHeader } from '@/components/landing/section-header'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
-import { useAccessToken, useProjects } from '@/stores/selectors'
+import { useAccessToken } from '@/stores/selectors'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 export function ProjectsSection() {
   const { t } = useTranslation()
-  const projects = useProjects()
   const accessToken = useAccessToken()
   const navigate = useNavigate()
   const [signInOpen, setSignInOpen] = useState(false)
+
+  const { data, isLoading } = useProjects()
+  const projects = data?.results ?? []
 
   const handleViewAll = () => {
     if (accessToken) {
@@ -19,6 +22,14 @@ export function ProjectsSection() {
     } else {
       setSignInOpen(true)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className='flex h-40 items-center justify-center text-sm text-muted-foreground'>
+        Yuklanmoqda...
+      </div>
+    )
   }
 
   return (

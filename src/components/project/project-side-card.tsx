@@ -1,10 +1,10 @@
 import { ContactDialog } from '@/components/contact-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import type { Project } from '@/data/mock-data'
+import type { ProjectDetail } from '@/service/projects/projects.type'
 import { ExternalLink, FolderGit2, MessageCircle } from 'lucide-react'
 
-export function ProjectSideCard({ project }: { project: Project }) {
+export function ProjectSideCard({ project }: { project: ProjectDetail }) {
   const hasLinks = Boolean(project.demo_url || project.github_url)
 
   const handleGetProject = () => {
@@ -17,9 +17,11 @@ export function ProjectSideCard({ project }: { project: Project }) {
       <div className='space-y-6 rounded-xl border bg-card p-6 shadow-sm'>
         <div>
           <p className='text-xs font-medium uppercase tracking-widest text-muted-foreground'>
-            Project Price
+            Difficulty
           </p>
-          <p className='mt-1 text-4xl font-black'>{project.price}</p>
+          <p className='mt-1 text-2xl font-semibold capitalize'>
+            {project.difficulty_display || project.difficulty}
+          </p>
         </div>
 
         <div className='space-y-3'>
@@ -51,10 +53,8 @@ export function ProjectSideCard({ project }: { project: Project }) {
 
         <div className='space-y-3 border-t pt-4 text-sm'>
           {[
-            { label: 'Type', value: project.type },
-            { label: 'Modules', value: project.modules },
-            { label: 'Duration', value: project.duration },
-            { label: 'Students', value: project.students.toLocaleString() },
+            { label: 'Steps', value: project.total_steps },
+            { label: 'Duration', value: project.total_duration_str },
           ].map(({ label, value }) => (
             <div key={label} className='flex items-center justify-between'>
               <span className='text-muted-foreground'>{label}</span>
@@ -64,9 +64,9 @@ export function ProjectSideCard({ project }: { project: Project }) {
           <div className='flex items-start justify-between gap-4'>
             <span className='text-muted-foreground'>Tech</span>
             <div className='flex flex-wrap justify-end gap-1'>
-              {project.tech.map((t) => (
-                <Badge key={t} variant='secondary' className='text-[11px]'>
-                  {t}
+              {project.technologies.map((t) => (
+                <Badge key={t.id} variant='secondary' className='text-[11px]'>
+                  {t.name}
                 </Badge>
               ))}
             </div>

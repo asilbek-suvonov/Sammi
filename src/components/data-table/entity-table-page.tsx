@@ -28,7 +28,9 @@ type Filter = {
   }[]
 }
 
-type Props<T extends { id: string }> = {
+type EntityId = string | number
+
+type Props<T extends { id: EntityId }> = {
   title: string
   description: string
   addLabel: string
@@ -37,7 +39,7 @@ type Props<T extends { id: string }> = {
   table: TanstackTable<T>
   filters?: Filter[]
   onAdd: () => void
-  onBulkDelete: (ids: string[]) => void
+  onBulkDelete: (ids: EntityId[]) => void
   onRowClick?: (row: T) => void
   entityName: string
 }
@@ -45,7 +47,7 @@ type Props<T extends { id: string }> = {
 const ROW_CLICK_IGNORE_SELECTOR =
   'button, a, input, [role="checkbox"], [role="menu"], [role="menuitem"]'
 
-export function EntityTablePage<T extends { id: string }>({
+export function EntityTablePage<T extends { id: EntityId }>({
   title,
   description,
   addLabel,

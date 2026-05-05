@@ -2,9 +2,11 @@ import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
-import { type AdminSource } from '@/stores/admin-store'
-import { useSourceActions } from '@/stores/selectors'
+import {
+  useCreateSource,
+  useUpdateSource,
+} from '@/api-hooks/sources/useSources'
+import type { SourceCode } from '@/service/sources/sources.type'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -24,31 +26,29 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
-function createSourceId() {
-  return String(Date.now())
-}
-
 const sourceSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  href: z.string().min(1, 'Link is required'),
+  github_url: z.string().url('Must be a valid URL'),
 })
 
 type SourceFormValues = z.infer<typeof sourceSchema>
 
 const defaultValues: SourceFormValues = {
   title: '',
-  href: '',
+  github_url: '',
 }
 
 type SourceDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  source?: AdminSource | null
+  source?: SourceCode | null
 }
 
 export function SourceDialog({ open, onOpenChange, source }: SourceDialogProps) {
-  const { addSource, updateSource } = useSourceActions()
   const isEdit = !!source
+  const createMutation = useCreateSource()
+  const updateMutation = useUpdateSource()
+  const submitting = createMutation.isPending || updateMutation.isPending
 
   const form = useForm<SourceFormValues>({
     resolver: zodResolver(sourceSchema),
@@ -57,33 +57,19 @@ export function SourceDialog({ open, onOpenChange, source }: SourceDialogProps) 
 
   useEffect(() => {
     if (open) {
-      if (source) {
-        form.reset({
-          title: source.title,
-          href: source.href,
-        })
-      } else {
-        form.reset(defaultValues)
-      }
+      form.reset(
+        source
+          ? { title: source.title, github_url: source.github_url }
+          : defaultValues
+      )
     }
   }, [open, source, form])
 
-  const onSubmit = (values: SourceFormValues) => {
+  const onSubmit = async (values: SourceFormValues) => {
     if (isEdit && source) {
-      updateSource(source.id, {
-        title: values.title,
-        href: values.href,
-      })
-      toast.success('Source updated successfully')
+      await updateMutation.mutateAsync({ slug: source.slug, data: values })
     } else {
-      addSource({
-        id: createSourceId(),
-        title: values.title,
-        href: values.href,
-        description: '',
-        stars: 0,
-      })
-      toast.success('Source added successfully')
+      await createMutation.mutateAsync(values)
     }
     onOpenChange(false)
   }
@@ -120,10 +106,10 @@ export function SourceDialog({ open, onOpenChange, source }: SourceDialogProps) 
             />
             <FormField
               control={form.control}
-              name='href'
+              name='github_url'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Demo / Link URL</FormLabel>
+                  <FormLabel>GitHub URL</FormLabel>
                   <FormControl>
                     <Input placeholder='https://github.com/...' {...field} />
                   </FormControl>
@@ -134,11 +120,11 @@ export function SourceDialog({ open, onOpenChange, source }: SourceDialogProps) 
           </form>
         </Form>
         <DialogFooter className='gap-2'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button variant='outline' onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button type='submit' form='source-form'>
-            {isEdit ? 'Update Source' : 'Add Source'}
+          <Button type='submit' form='source-form' disabled={submitting}>
+            {submitting ? 'Saving...' : isEdit ? 'Update Source' : 'Add Source'}
           </Button>
         </DialogFooter>
       </DialogContent>

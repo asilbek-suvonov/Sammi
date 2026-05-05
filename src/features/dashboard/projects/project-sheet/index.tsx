@@ -1,9 +1,15 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { type Project } from '@/data/mock-data'
-import { useProjectActions } from '@/stores/selectors'
+import {
+  useCreateProject,
+  useUpdateProject,
+} from '@/api-hooks/projects/use-projects'
+import type {
+  ProjectDetail,
+  ProjectListItem,
+  ProjectRequest,
+} from '@/service/projects/projects.type'
 import { Button } from '@/components/ui/button'
 import { Form } from '@/components/ui/form'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -16,6 +22,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { dataUrlToFile } from '@/lib/data-url'
 import { ProjectFormFields } from './project-form-fields'
 import {
   projectDefaultValues,
@@ -24,14 +31,10 @@ import {
   type ProjectFormValues,
 } from './project-schema'
 
-function createProjectId() {
-  return String(Date.now())
-}
-
 type ProjectSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  project?: Project | null
+  project?: ProjectListItem | ProjectDetail | null
 }
 
 export function ProjectSheet({
@@ -39,8 +42,10 @@ export function ProjectSheet({
   onOpenChange,
   project,
 }: ProjectSheetProps) {
-  const { addProject, updateProject } = useProjectActions()
   const isEdit = !!project
+  const createMutation = useCreateProject()
+  const updateMutation = useUpdateProject()
+  const submitting = createMutation.isPending || updateMutation.isPending
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
@@ -53,33 +58,23 @@ export function ProjectSheet({
     }
   }, [open, project, form])
 
-  const onSubmit = (values: ProjectFormValues) => {
-    const shared = {
+  const onSubmit = async (values: ProjectFormValues) => {
+    const image = await dataUrlToFile(values.image, 'project-image')
+    const payload: ProjectRequest = {
       title: values.title,
       description: values.description,
-      image: values.image,
-      difficulty: (values.difficulty as Project['difficulty']) || undefined,
+      difficulty: values.difficulty,
       github_url: values.github_url || undefined,
       demo_url: values.demo_url || undefined,
-      tech: values.technologies,
+      technologies: values.technologies,
       is_published: values.is_published,
+      image: image instanceof File ? image : undefined,
     }
 
     if (isEdit && project) {
-      updateProject(project.id, { ...project, ...shared })
-      toast.success('Project updated successfully')
+      await updateMutation.mutateAsync({ id: project.id, data: payload })
     } else {
-      addProject({
-        id: createProjectId(),
-        ...shared,
-        type: 'Full-Stack',
-        price: '$0',
-        students: 0,
-        features: [],
-        modules: 0,
-        duration: '0h',
-      })
-      toast.success('Project added successfully')
+      await createMutation.mutateAsync(payload)
     }
     onOpenChange(false)
   }
@@ -107,11 +102,11 @@ export function ProjectSheet({
         </ScrollArea>
         <Separator />
         <SheetFooter className='flex flex-row justify-end gap-2 px-6 py-4'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button variant='outline' onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button type='submit' form='project-form'>
-            Save Project
+          <Button type='submit' form='project-form' disabled={submitting}>
+            {submitting ? 'Saving...' : 'Save Project'}
           </Button>
         </SheetFooter>
       </SheetContent>

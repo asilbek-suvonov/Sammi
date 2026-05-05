@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { CourseCard } from '@/components/cards/course-card'
 import { SectionHeader } from '@/components/landing/section-header'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
-import { useAccessToken } from '@/stores/selectors' // AccessToken qolsin
-import { useCourses } from '../../hooks/course/use-courses'    // Biz yozgan yangi hook
+import { useAccessToken } from '@/stores/selectors'
+import { useCourses } from '@/api-hooks/course/use-courses'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 

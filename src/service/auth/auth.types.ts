@@ -1,5 +1,4 @@
-/** Optional backend exchange — frontend sends Google access_token,
- *  backend verifies it with Google and returns the app's own JWT. */
+
 export interface GoogleAuthRequest {
   access_token: string
 }

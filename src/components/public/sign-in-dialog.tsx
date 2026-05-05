@@ -11,12 +11,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { useGoogleLogin } from '@react-oauth/google'
+import { useGithubSignIn } from '@/hooks/auth/use-github-signin'
+import { useGoogleSignIn } from '@/hooks/auth/use-google-signin'
 import { useNavigate } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import { googleAuth, type GoogleAuthResponse } from '@/service/auth'
-import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 
 interface SignInDialogProps {
   trigger?: ReactNode
@@ -27,51 +26,6 @@ interface SignInDialogProps {
   onOpenChange?: (open: boolean) => void
 }
 
-interface GoogleProfile {
-  sub: string
-  email: string
-  email_verified: boolean
-  name: string
-  given_name: string
-  family_name: string
-  picture: string
-  locale?: string
-}
-
-const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
-
-const fetchGoogleProfile = async (accessToken: string): Promise<GoogleProfile> => {
-  const res = await fetch(GOOGLE_USERINFO_URL, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
-  if (!res.ok) throw new Error(`Google userinfo failed (${res.status})`)
-  return res.json()
-}
-
-const profileToAuthUser = (p: GoogleProfile): AuthUser => ({
-  email: p.email,
-  fullName: p.name,
-  firstName: p.given_name,
-  lastName: p.family_name,
-  avatarUrl: p.picture,
-  languageCode: p.locale,
-  role: 'user',
-})
-
-const mergeBackendUser = (
-  base: AuthUser,
-  data: GoogleAuthResponse
-): AuthUser => ({
-  ...base,
-  id: data.id,
-  email: data.email || base.email,
-  fullName: data.full_name || base.fullName,
-  avatarUrl: data.avatar_url || base.avatarUrl,
-  country: data.country,
-  languageCode: data.language_code || base.languageCode,
-  isNewUser: data.is_new_user,
-})
-
 export function SignInDialog({
   trigger,
   onSuccess,
@@ -81,12 +35,9 @@ export function SignInDialog({
   onOpenChange,
 }: SignInDialogProps) {
   const navigate = useNavigate()
-  const login = useAuthStore((s) => s.auth.login)
-
   const [internalOpen, setInternalOpen] = useState(false)
   const [emailStep, setEmailStep] = useState(false)
   const [email, setEmail] = useState('')
-  const [signingIn, setSigningIn] = useState(false)
 
   const isOpen = controlledOpen ?? internalOpen
   const setIsOpen = (value: boolean) => {
@@ -101,49 +52,14 @@ export function SignInDialog({
     }
   }
 
-  const loginWithGoogle = useGoogleLogin({
-    flow: 'implicit',
-    scope: 'openid email profile',
-    onSuccess: async (tokenResponse) => {
-      setSigningIn(true)
-      try {
-        const profile = await fetchGoogleProfile(tokenResponse.access_token)
+  const closeAndForward = () => {
+    setIsOpen(false)
+    onSuccess?.()
+  }
 
-        let user = profileToAuthUser(profile)
-        let accessToken = tokenResponse.access_token
-        let refreshToken = ''
-
-        try {
-          const data = await googleAuth({ access_token: tokenResponse.access_token })
-          if (data?.access) {
-            accessToken = data.access
-            refreshToken = data.refresh ?? ''
-            user = mergeBackendUser(user, data)
-          }
-        } catch {
-          // Backend not reachable — fall back to Google profile + access_token.
-        }
-
-        login({ accessToken, refreshToken, user })
-        toast.success(`Welcome, ${user.firstName || user.email}!`)
-        setIsOpen(false)
-        onSuccess?.()
-        navigate({ to: '/dashboard' })
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Sign-in failed')
-      } finally {
-        setSigningIn(false)
-      }
-    },
-    onError: () => {
-      toast.error('Google sign-in canceled')
-    },
-    onNonOAuthError: () => {
-      toast.error(
-        'Google sign-in could not start. Add http://localhost:5173 to your OAuth client’s Authorized JavaScript origins.'
-      )
-    },
-  })
+  const google = useGoogleSignIn(closeAndForward)
+  const github = useGithubSignIn(closeAndForward)
+  const signingIn = google.signingIn || github.signingIn
 
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
@@ -175,21 +91,21 @@ export function SignInDialog({
             <Button
               variant='outline'
               className='w-full gap-2'
-              onClick={() => loginWithGoogle()}
+              onClick={() => google.start()}
               disabled={signingIn}
             >
               <IconGoogle className='size-4' />
-              {signingIn ? 'Signing in…' : 'Continue with Google'}
+              {google.signingIn ? 'Signing in…' : 'Continue with Google'}
             </Button>
 
             <Button
               variant='outline'
               className='w-full gap-2'
-              onClick={() => toast.info('GitHub auth coming soon!')}
+              onClick={() => github.start()}
               disabled={signingIn}
             >
               <IconGithub className='size-4' />
-              Continue with GitHub
+              {github.signingIn ? 'Signing in…' : 'Continue with GitHub'}
             </Button>
 
             <div className='relative w-full py-1'>

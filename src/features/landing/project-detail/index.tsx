@@ -1,29 +1,35 @@
+import { useProject } from '@/api-hooks/projects/use-projects'
 import { ProjectSideCard } from '@/components/project/project-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
 import { Badge } from '@/components/ui/badge'
-import { useProjects } from '@/stores/selectors'
-import { Check, Clock3, FolderGit2, Layers3, Users } from 'lucide-react'
+import { Check, Clock3, FolderGit2, Layers3, PlayCircle } from 'lucide-react'
 
 interface Props { id: string }
 
 export function ProjectDetailPage({ id }: Props) {
-  const projects = useProjects()
-  const project = projects.find((p) => p.id === id)
+  const { data: project, isLoading } = useProject(id)
 
-  if (!project) return (
-    <div className='flex min-h-screen items-center justify-center'>
-      <p className='text-muted-foreground'>Project not found.</p>
-    </div>
-  )
+  if (isLoading) {
+    return (
+      <div className='flex min-h-screen items-center justify-center text-sm text-muted-foreground'>
+        Yuklanmoqda...
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div className='flex min-h-screen items-center justify-center'>
+        <p className='text-muted-foreground'>Project not found.</p>
+      </div>
+    )
+  }
 
   return (
     <div className='min-h-screen bg-background text-foreground'>
-      <PublicHeader
-        logoAsLink
-        right={<PublicNavRight />}
-      />
+      <PublicHeader logoAsLink right={<PublicNavRight />} />
 
       <main className='mx-auto max-w-6xl px-4 py-10 md:px-6'>
         <PageBreadcrumb label={project.title} />
@@ -31,44 +37,93 @@ export function ProjectDetailPage({ id }: Props) {
           <div className='space-y-8'>
             <div className='space-y-4'>
               <div className='flex flex-wrap gap-2'>
-                <Badge variant='outline'>{project.type}</Badge>
-                {project.tech.map((t) => <Badge key={t} variant='secondary'>{t}</Badge>)}
+                <Badge variant='outline' className='capitalize'>
+                  {project.difficulty_display || project.difficulty}
+                </Badge>
+                {project.technologies.map((t) => (
+                  <Badge key={t.id} variant='secondary'>{t.name}</Badge>
+                ))}
               </div>
               <h1 className='text-3xl font-bold tracking-tight md:text-4xl'>{project.title}</h1>
               <p className='text-base leading-relaxed text-muted-foreground'>{project.description}</p>
               <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
-                <span className='flex items-center gap-1.5'><Users className='size-4' /> {project.students.toLocaleString()} students</span>
-                <span className='flex items-center gap-1.5'><Layers3 className='size-4' /> {project.modules} modules</span>
-                <span className='flex items-center gap-1.5'><Clock3 className='size-4' /> {project.duration}</span>
+                <span className='flex items-center gap-1.5'>
+                  <Layers3 className='size-4' /> {project.total_steps} steps
+                </span>
+                <span className='flex items-center gap-1.5'>
+                  <Clock3 className='size-4' /> {project.total_duration_str}
+                </span>
               </div>
             </div>
+
             <div className='overflow-hidden rounded-xl border'>
-              <img src={project.image} alt={project.title} className='h-64 w-full object-cover md:h-80' />
+              <img
+                src={project.image_url}
+                alt={project.title}
+                className='h-64 w-full object-cover md:h-80'
+              />
             </div>
-            <div className='space-y-3'>
-              <h2 className='text-xl font-semibold'>What You'll Build</h2>
-              <ul className='space-y-2'>
-                {project.features.map((feature) => (
-                  <li key={feature} className='flex items-center gap-3 text-sm text-muted-foreground'>
-                    <span className='flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10'>
-                      <Check className='size-3 text-primary' />
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
+
+            {project.features.length > 0 && (
+              <div className='space-y-3'>
+                <h2 className='text-xl font-semibold'>What You&apos;ll Build</h2>
+                <ul className='space-y-2'>
+                  {[...project.features]
+                    .sort((a, b) => a.order - b.order)
+                    .map((feature) => (
+                      <li
+                        key={feature.id}
+                        className='flex items-center gap-3 text-sm text-muted-foreground'
+                      >
+                        <span className='flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10'>
+                          <Check className='size-3 text-primary' />
+                        </span>
+                        {feature.text}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
+
+            {project.steps.length > 0 && (
+              <div className='space-y-3'>
+                <h2 className='text-xl font-semibold'>Steps</h2>
+                <ul className='space-y-2'>
+                  {[...project.steps]
+                    .sort((a, b) => a.order - b.order)
+                    .map((step) => (
+                      <li
+                        key={step.id}
+                        className='flex items-center justify-between rounded-lg border bg-card px-3 py-2 text-sm'
+                      >
+                        <span className='flex items-center gap-2'>
+                          <PlayCircle className='size-4 text-muted-foreground' />
+                          <span className='truncate'>{step.title}</span>
+                        </span>
+                        <span className='font-mono text-xs text-muted-foreground'>
+                          {Math.round(step.duration / 60)}m
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
+
             <div className='space-y-3'>
               <h2 className='text-xl font-semibold'>Tech Stack</h2>
               <div className='flex flex-wrap gap-2'>
-                {project.tech.map((t) => (
-                  <div key={t} className='flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm font-medium'>
-                    <FolderGit2 className='size-4 text-muted-foreground' /> {t}
+                {project.technologies.map((t) => (
+                  <div
+                    key={t.id}
+                    className='flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm font-medium'
+                  >
+                    <FolderGit2 className='size-4 text-muted-foreground' /> {t.name}
                   </div>
                 ))}
               </div>
             </div>
           </div>
+
           <ProjectSideCard project={project} />
         </div>
       </main>

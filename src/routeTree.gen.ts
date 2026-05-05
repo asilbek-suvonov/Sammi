@@ -34,6 +34,7 @@ import { Route as AuthenticatedDashboardProjectsIndexRouteImport } from './route
 import { Route as AuthenticatedDashboardCoursesIndexRouteImport } from './routes/_authenticated/dashboard/courses/index'
 import { Route as AuthenticatedDashboardProjectsIdRouteImport } from './routes/_authenticated/dashboard/projects/$id'
 import { Route as AuthenticatedDashboardCoursesIdRouteImport } from './routes/_authenticated/dashboard/courses/$id'
+import { Route as authAuthGithubCallbackRouteImport } from './routes/(auth)/auth.github.callback'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -171,6 +172,11 @@ const AuthenticatedDashboardCoursesIdRoute =
     path: '/courses/$id',
     getParentRoute: () => AuthenticatedDashboardRouteRoute,
   } as any)
+const authAuthGithubCallbackRoute = authAuthGithubCallbackRouteImport.update({
+  id: '/(auth)/auth/github/callback',
+  path: '/auth/github/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/auth/github/callback': typeof authAuthGithubCallbackRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/dashboard/projects/$id': typeof AuthenticatedDashboardProjectsIdRoute
   '/dashboard/courses/': typeof AuthenticatedDashboardCoursesIndexRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/auth/github/callback': typeof authAuthGithubCallbackRoute
   '/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/dashboard/projects/$id': typeof AuthenticatedDashboardProjectsIdRoute
   '/dashboard/courses': typeof AuthenticatedDashboardCoursesIndexRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/(auth)/auth/github/callback': typeof authAuthGithubCallbackRoute
   '/_authenticated/dashboard/courses/$id': typeof AuthenticatedDashboardCoursesIdRoute
   '/_authenticated/dashboard/projects/$id': typeof AuthenticatedDashboardProjectsIdRoute
   '/_authenticated/dashboard/courses/': typeof AuthenticatedDashboardCoursesIndexRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/'
+    | '/auth/github/callback'
     | '/dashboard/courses/$id'
     | '/dashboard/projects/$id'
     | '/dashboard/courses/'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/settings/account'
     | '/settings/appearance'
     | '/settings'
+    | '/auth/github/callback'
     | '/dashboard/courses/$id'
     | '/dashboard/projects/$id'
     | '/dashboard/courses'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/'
+    | '/(auth)/auth/github/callback'
     | '/_authenticated/dashboard/courses/$id'
     | '/_authenticated/dashboard/projects/$id'
     | '/_authenticated/dashboard/courses/'
@@ -346,6 +358,7 @@ export interface RootRouteChildren {
   CourseIdRoute: typeof CourseIdRoute
   CoursePreviewRoute: typeof CoursePreviewRoute
   ProjectIdRoute: typeof ProjectIdRoute
+  authAuthGithubCallbackRoute: typeof authAuthGithubCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -525,6 +538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardCoursesIdRouteImport
       parentRoute: typeof AuthenticatedDashboardRouteRoute
     }
+    '/(auth)/auth/github/callback': {
+      id: '/(auth)/auth/github/callback'
+      path: '/auth/github/callback'
+      fullPath: '/auth/github/callback'
+      preLoaderRoute: typeof authAuthGithubCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -603,6 +623,7 @@ const rootRouteChildren: RootRouteChildren = {
   CourseIdRoute: CourseIdRoute,
   CoursePreviewRoute: CoursePreviewRoute,
   ProjectIdRoute: ProjectIdRoute,
+  authAuthGithubCallbackRoute: authAuthGithubCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

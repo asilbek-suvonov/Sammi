@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Github, ExternalLink, Search, BookOpen, Calendar } from 'lucide-react'
+import { ExternalLink, Search, BookOpen, Calendar } from 'lucide-react'
+import { IconGithub as Github } from '@/assets/brand-icons'
 import { useSources } from '@/api-hooks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

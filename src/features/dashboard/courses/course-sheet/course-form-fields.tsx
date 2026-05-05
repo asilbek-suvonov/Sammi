@@ -1,5 +1,6 @@
+import { useMemo } from 'react'
 import { type Control } from 'react-hook-form'
-import { Combobox } from '@/components/ui/combobox'
+import { useTechnologies } from '@/api-hooks/technology/use-technologies'
 import { FileUpload } from '@/components/ui/file-upload'
 import {
   FormControl,
@@ -19,11 +20,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  CATEGORY_OPTIONS,
-  TECHNOLOGIES_OPTIONS,
-  type CourseFormValues,
-} from './course-schema'
+import { type CourseFormValues } from './course-schema'
 
 type Props = {
   control: Control<CourseFormValues>
@@ -31,6 +28,13 @@ type Props = {
 }
 
 export function CourseFormFields({ control, isEdit }: Props) {
+  const { data: technologies = [] } = useTechnologies()
+
+  const techOptions = useMemo(
+    () => technologies.map((t) => ({ label: t.name, value: String(t.id) })),
+    [technologies]
+  )
+
   return (
     <>
       <FormField
@@ -94,13 +98,7 @@ export function CourseFormFields({ control, isEdit }: Props) {
             <FormItem className='flex-1'>
               <FormLabel>Category</FormLabel>
               <FormControl>
-                <Combobox
-                  value={field.value}
-                  onChange={field.onChange}
-                  options={CATEGORY_OPTIONS}
-                  placeholder='Select category'
-                  searchPlaceholder='Search category...'
-                />
+                <Input placeholder='Frontend, Backend, ...' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -120,9 +118,9 @@ export function CourseFormFields({ control, isEdit }: Props) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='Beginner'>Beginner</SelectItem>
-                  <SelectItem value='Intermediate'>Intermediate</SelectItem>
-                  <SelectItem value='Advanced'>Advanced</SelectItem>
+                  <SelectItem value='beginner'>Beginner</SelectItem>
+                  <SelectItem value='intermediate'>Intermediate</SelectItem>
+                  <SelectItem value='advanced'>Advanced</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -130,6 +128,7 @@ export function CourseFormFields({ control, isEdit }: Props) {
           )}
         />
       </div>
+
       <FormField
         control={control}
         name='technologies'
@@ -138,9 +137,9 @@ export function CourseFormFields({ control, isEdit }: Props) {
             <FormLabel>Technologies</FormLabel>
             <FormControl>
               <MultiSelect
-                value={field.value}
-                onChange={field.onChange}
-                options={TECHNOLOGIES_OPTIONS}
+                value={field.value.map(String)}
+                onChange={(vals) => field.onChange(vals.map(Number))}
+                options={techOptions}
                 placeholder='Select technologies...'
               />
             </FormControl>
