@@ -27,7 +27,7 @@ export function ProjectSideCard({ project }: { project: ProjectDetail }) {
         <div className='space-y-3'>
           {hasLinks ? (
             <Button type='button' className='w-full gap-2' size='lg' onClick={handleGetProject}>
-              <ExternalLink className='size-5' /> Get Project
+              Get Project
             </Button>
           ) : (
             <ContactDialog
@@ -36,7 +36,7 @@ export function ProjectSideCard({ project }: { project: ProjectDetail }) {
               description='Leave your details and we will send you access instructions.'
               trigger={
                 <Button type='button' className='w-full gap-2' size='lg'>
-                  <FolderGit2 className='size-5' /> Get Project
+                   Get Project
                 </Button>
               }
             />
@@ -45,33 +45,13 @@ export function ProjectSideCard({ project }: { project: ProjectDetail }) {
             subject={project.title}
             trigger={
               <Button type='button' variant='outline' className='w-full gap-2' size='lg'>
-                <MessageCircle className='size-5' /> Contact
+                Contact
               </Button>
             }
           />
         </div>
 
-        <div className='space-y-3 border-t pt-4 text-sm'>
-          {[
-            { label: 'Steps', value: project.total_steps },
-            { label: 'Duration', value: project.total_duration_str },
-          ].map(({ label, value }) => (
-            <div key={label} className='flex items-center justify-between'>
-              <span className='text-muted-foreground'>{label}</span>
-              <span className='font-medium'>{value}</span>
-            </div>
-          ))}
-          <div className='flex items-start justify-between gap-4'>
-            <span className='text-muted-foreground'>Tech</span>
-            <div className='flex flex-wrap justify-end gap-1'>
-              {project.technologies.map((t) => (
-                <Badge key={t.id} variant='secondary' className='text-[11px]'>
-                  {t.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </div>
+     
       </div>
     </div>
   )
