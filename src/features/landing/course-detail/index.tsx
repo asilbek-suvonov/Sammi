@@ -57,10 +57,10 @@ export function CourseDetailPage({ id }: Props) {
 
       <main className='mx-auto max-w-6xl px-4 py-10 md:px-6'>
         <PageBreadcrumb label={course.title} />
-        <div className='grid gap-10 lg:grid-cols-[1fr_340px]'>
+        <div className='grid gap-5 lg:grid-cols-[1fr_340px]'>
           <div className='space-y-8'>
             <div className='space-y-4'>
-              <div className='flex flex-wrap gap-2'>
+              <div className='flex flex-wrap gap-1'>
                 <Badge variant={levelVariant(course.level)} className='capitalize'>
                   {course.level}
                 </Badge>
@@ -70,8 +70,8 @@ export function CourseDetailPage({ id }: Props) {
                 {course.is_free && <Badge>Free</Badge>}
                 {course.is_new && <Badge>New</Badge>}
               </div>
-              <h1 className='text-3xl font-bold tracking-tight md:text-4xl'>{course.title}</h1>
-              <p className='text-base leading-relaxed text-muted-foreground'>{course.description}</p>
+              <h1 className='text-3xl font-bold tracking-tight md:text-4xl mb-1'>{course.title}</h1>
+              <p className='text-md leading-relaxed text-muted-foreground'>{course.description}</p>
               {course.technologies_list?.length > 0 && (
                 <div className='flex flex-wrap gap-2'>
                   {course.technologies_list.map((tech) => (
@@ -83,18 +83,7 @@ export function CourseDetailPage({ id }: Props) {
             <div className='overflow-hidden rounded-xl border'>
               <img src={course.image_url} alt={course.title} className='h-64 w-full object-cover md:h-80' />
             </div>
-            {course.preview_video_url && (
-              <div className='space-y-3'>
-                <h2 className='text-xl font-semibold'>Preview</h2>
-                <div className='overflow-hidden rounded-xl border bg-black'>
-                  <video
-                    src={course.preview_video_url}
-                    controls
-                    className='aspect-video w-full'
-                  />
-                </div>
-              </div>
-            )}
+           
           </div>
           <CourseSideCard course={course} enrolled={enrolled} onWatch={handleWatch} />
         </div>
