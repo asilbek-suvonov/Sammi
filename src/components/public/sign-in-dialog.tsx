@@ -82,8 +82,6 @@ export function SignInDialog({
       return
     }
     
-    // eslint-disable-next-line no-console
-    console.log('🔍 Sending OTP to:', email)
     sendOtp({ email })
   }
 

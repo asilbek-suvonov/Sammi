@@ -6,6 +6,7 @@ import type { AuthResponse } from '@/service/auth/github/github.type'
 import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 
 const GITHUB_AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
+const GITHUB_PROCESSING_KEY = 'sammi_github_processing'
 
 const responseToUser = (data: AuthResponse): AuthUser => ({
   id: data.id,
@@ -38,6 +39,7 @@ export function useGithubSignIn(onDone?: () => void) {
 
   const { mutate: githubMutate, isPending } = useGithubAuth({
     onSuccess: (data) => {
+      sessionStorage.removeItem(GITHUB_PROCESSING_KEY)
       const user = responseToUser(data)
       const accessToken = data.access ?? ''
       const refreshToken = data.refresh ?? ''
@@ -48,7 +50,7 @@ export function useGithubSignIn(onDone?: () => void) {
       setSigningIn(false)
     },
     onError: (err) => {
-      // 400 toast already shown by interceptor
+      sessionStorage.removeItem(GITHUB_PROCESSING_KEY)
       const errStatus = (err as { status?: number }).status
       if (!errStatus || errStatus === 0) {
         toast.error('GitHub orqali kirish muvaffaqiyatsiz')
@@ -58,20 +60,24 @@ export function useGithubSignIn(onDone?: () => void) {
   })
 
   useEffect(() => {
-    const redirectUri = `${window.location.origin}/auth/github/callback`
-
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return
       const payload = event.data as { source?: string; code?: string; state?: string }
       if (payload?.source !== 'sammi-github-oauth' || !payload.code) return
+
+      // Bir vaqtda mount bo'lgan bir nechta SignInDialog dan faqat bittasi ishlatilsin
+      if (sessionStorage.getItem(GITHUB_PROCESSING_KEY)) return
+      sessionStorage.setItem(GITHUB_PROCESSING_KEY, '1')
+
       const expected = sessionStorage.getItem('sammi_github_oauth_state')
       if (expected && payload.state && payload.state !== expected) {
         toast.error('GitHub kirish: state mos kelmadi')
+        sessionStorage.removeItem(GITHUB_PROCESSING_KEY)
         return
       }
       sessionStorage.removeItem('sammi_github_oauth_state')
       popupRef.current?.close()
-      githubMutate({ code: payload.code, redirect_uri: redirectUri })
+      githubMutate({ code: payload.code })
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)

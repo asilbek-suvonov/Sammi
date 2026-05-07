@@ -1,6 +1,5 @@
 export interface AuthRequest {
   code: string
-  redirect_uri?: string
 }
 
 export interface UserResponse {
