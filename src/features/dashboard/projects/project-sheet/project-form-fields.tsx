@@ -1,5 +1,3 @@
-import { useMemo } from 'react'
-import { type Control } from 'react-hook-form'
 import { useTechnologies } from '@/api-hooks/technology/use-technologies'
 import { FileUpload } from '@/components/ui/file-upload'
 import {
@@ -18,8 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { useMemo } from 'react'
+import { type Control } from 'react-hook-form'
 import { type ProjectFormValues } from './project-schema'
 
 type Props = {
@@ -156,22 +155,6 @@ export function ProjectFormFields({ control, isEdit }: Props) {
               <Input placeholder='https://demo.example.com' {...field} />
             </FormControl>
             <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
-        name='is_published'
-        render={({ field }) => (
-          <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
-            <FormLabel className='text-sm'>Published</FormLabel>
-            <FormControl>
-              <Switch
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            </FormControl>
           </FormItem>
         )}
       />

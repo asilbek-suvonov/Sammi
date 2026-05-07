@@ -1,8 +1,6 @@
 import { ContactDialog } from '@/components/contact-dialog'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { ProjectDetail } from '@/service/projects/projects.type'
-import { ExternalLink, FolderGit2, MessageCircle } from 'lucide-react'
 
 export function ProjectSideCard({ project }: { project: ProjectDetail }) {
   const hasLinks = Boolean(project.demo_url || project.github_url)

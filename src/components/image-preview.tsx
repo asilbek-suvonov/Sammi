@@ -67,6 +67,13 @@ export function ImagePreview({
         <DialogContent
           showCloseButton={false}
           className='max-w-3xl overflow-hidden border-0 bg-transparent p-0 shadow-none'
+          onPointerDownOutside={(e) => {
+            // Prevent Radix from closing on pointerdown so the overlay stays in DOM
+            // long enough for the subsequent click event to fire on the overlay
+            // (not on the underlying table row), avoiding unintended row navigation.
+            e.preventDefault()
+            setOpen(false)
+          }}
         >
           <DialogTitle className='sr-only'>{alt}</DialogTitle>
           <DialogDescription className='sr-only'>

@@ -31,7 +31,7 @@ type CourseSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   course?: Course | null
-}
+} 
 
 export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
   const isEdit = !!course

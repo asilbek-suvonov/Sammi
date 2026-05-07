@@ -22,6 +22,7 @@ import { Separator } from '@/components/ui/separator'
 
 type DataTableFacetedFilterProps<TData, TValue> = {
   column?: Column<TData, TValue>
+  
   title?: string
   options: {
     label: string

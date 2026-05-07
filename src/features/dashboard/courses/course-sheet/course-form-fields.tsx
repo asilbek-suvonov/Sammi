@@ -1,26 +1,25 @@
-import { useMemo } from 'react'
-import { type Control } from 'react-hook-form'
-import { useTechnologies } from '@/api-hooks/technology/use-technologies'
-import { FileUpload } from '@/components/ui/file-upload'
+import { useTechnologies } from '@/api-hooks/technology/use-technologies';
+import { FileUpload } from '@/components/ui/file-upload';
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { MultiSelect } from '@/components/ui/multi-select'
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
-import { type CourseFormValues } from './course-schema'
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useMemo } from 'react';
+import { type Control } from 'react-hook-form';
+import { type CourseFormValues } from './course-schema';
 
 type Props = {
   control: Control<CourseFormValues>
@@ -161,54 +160,6 @@ export function CourseFormFields({ control, isEdit }: Props) {
           </FormItem>
         )}
       />
-
-      <div className='grid grid-cols-3 gap-4'>
-        <FormField
-          control={control}
-          name='is_free'
-          render={({ field }) => (
-            <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
-              <FormLabel className='text-sm'>Free</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name='is_new'
-          render={({ field }) => (
-            <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
-              <FormLabel className='text-sm'>New</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name='is_published'
-          render={({ field }) => (
-            <FormItem className='flex flex-col gap-2 rounded-lg border p-3'>
-              <FormLabel className='text-sm'>Published</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
     </>
   )
 }

@@ -370,6 +370,7 @@ export interface RootRouteChildren {
   CourseIdRoute: typeof CourseIdRoute
   CoursePreviewRoute: typeof CoursePreviewRoute
   ProjectIdRoute: typeof ProjectIdRoute
+  authAuthGithubCallbackRoute: typeof authAuthGithubCallbackRoute
   ApiAuthCallbackGithubRoute: typeof ApiAuthCallbackGithubRoute
 }
 
@@ -642,6 +643,7 @@ const rootRouteChildren: RootRouteChildren = {
   CourseIdRoute: CourseIdRoute,
   CoursePreviewRoute: CoursePreviewRoute,
   ProjectIdRoute: ProjectIdRoute,
+  authAuthGithubCallbackRoute: authAuthGithubCallbackRoute,
   ApiAuthCallbackGithubRoute: ApiAuthCallbackGithubRoute,
 }
 export const routeTree = rootRouteImport

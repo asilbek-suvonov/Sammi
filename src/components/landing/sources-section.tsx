@@ -1,9 +1,8 @@
-import { SourceCard } from '@/components/cards/source-card'
-import { useSources } from '@/api-hooks'
-import { useTranslation } from 'react-i18next'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card } from '@/components/ui/card'
-import { BookOpen } from 'lucide-react'
+import { useSources } from '@/api-hooks';
+import { SourceCard } from '@/components/cards/source-card';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from 'react-i18next';
 
 export function SourcesSection() {
   const { t } = useTranslation()
@@ -27,10 +26,9 @@ export function SourcesSection() {
           ))}
         </div>
       ) : sources.length === 0 ? (
-        <Card className='p-8 text-center'>
-          <BookOpen className='mx-auto h-8 w-8 text-muted-foreground/50' />
+        <div className='p-8 text-center'>
           <p className='mt-2 text-sm text-muted-foreground'>{t('noSourcesAvailable')}</p>
-        </Card>
+        </div>
       ) : (
         <div className='grid gap-4 md:grid-cols-3'>
           {sources.map((source) => (

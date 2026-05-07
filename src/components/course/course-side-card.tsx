@@ -1,8 +1,6 @@
 import { ContactDialog } from '@/components/contact-dialog'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Course } from '@/service/course/course.types'
-import { levelVariant } from '@/lib/variants'
 
 interface CourseSideCardProps {
   course: Course

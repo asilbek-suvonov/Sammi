@@ -1,5 +1,8 @@
 import { type ColumnDef } from '@tanstack/react-table'
+import { ImageIcon } from 'lucide-react'
+
 import type { Course } from '@/service/course/course.types'
+
 import { Badge } from '@/components/ui/badge'
 import {
   DataTableColumnHeader,
@@ -28,24 +31,42 @@ export function getCoursesColumns({
 }: CoursesColumnsProps): ColumnDef<Course>[] {
   return [
     selectColumn<Course>(),
+
+    {
+      accessorKey: 'image_url',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title='Image' />
+      ),
+      cell: ({ row }) =>
+        row.original.image_url ? (
+          <ImagePreview
+            src={row.original.image_url}
+            alt={row.original.title}
+            className='h-8 w-14 rounded object-cover'
+          />
+        ) : (
+          <div className='flex h-8 w-14 items-center justify-center rounded bg-muted'>
+            <ImageIcon className='size-4 text-muted-foreground' />
+          </div>
+        ),
+      size: 90, // column width kichrayadi
+    },
+
     {
       accessorKey: 'title',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Title' />
       ),
       cell: ({ row }) => (
-        <div className='flex items-center gap-3 max-w-[220px]'>
-          {row.original.image_url && (
-            <ImagePreview
-              src={row.original.image_url}
-              alt={row.original.title}
-              className='h-8 w-14 rounded object-cover shrink-0'
-            />
-          )}
-          <span className='truncate font-medium'>{row.getValue('title')}</span>
+        <div className='ml-2 max-w-[320px]'>
+          <span className='block truncate font-medium'>
+            {row.getValue('title')}
+          </span>
         </div>
       ),
     },
+
+    // LEVEL COLUMN
     {
       accessorKey: 'level',
       header: ({ column }) => (
@@ -53,25 +74,33 @@ export function getCoursesColumns({
       ),
       cell: ({ row }) => {
         const level = row.getValue('level') as string
+
         return (
-          <Badge variant={levelVariantMap[level] ?? 'outline'} className='capitalize'>
+          <Badge
+            variant={levelVariantMap[level] ?? 'outline'}
+            className='capitalize'
+          >
             {level}
           </Badge>
         )
       },
       filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
     },
+
+    // CATEGORY COLUMN
     {
       accessorKey: 'category_name',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Category' />
       ),
       cell: ({ row }) => (
-        <span className='text-muted-foreground text-sm'>
+        <span className='text-sm text-muted-foreground'>
           {(row.getValue('category_name') as string) || '—'}
         </span>
       ),
     },
+
+    // PRICE COLUMN
     {
       accessorKey: 'price',
       header: ({ column }) => (
@@ -84,6 +113,8 @@ export function getCoursesColumns({
           <span className='font-medium'>{row.getValue('price')}</span>
         ),
     },
+
+    // NEW COLUMN
     {
       accessorKey: 'is_new',
       header: ({ column }) => (
@@ -96,6 +127,8 @@ export function getCoursesColumns({
           <span className='text-muted-foreground'>—</span>
         ),
     },
+
+    // ACTIONS COLUMN
     {
       id: 'actions',
       enableHiding: false,

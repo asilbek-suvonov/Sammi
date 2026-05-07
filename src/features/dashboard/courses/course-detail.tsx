@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Main } from '@/components/layout/main'
 import { DashboardBreadcrumb } from '@/components/layout/dashboard-breadcrumb'
+import { ModulesSection } from '@/components/shared/modules-section'
 
 interface AdminCourseDetailProps {
   id: string
@@ -53,81 +54,44 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
         ]}
       />
 
-      <div className='flex flex-col gap-6 md:flex-row md:items-start md:justify-between'>
-        <div className='flex min-w-0 items-start gap-4'>
-          {course.image_url && (
-            <img
-              src={course.image_url}
-              alt={course.title}
-              className='h-full w-[200px] shrink-0 rounded-md border object-cover'
-            />
-          )}
-          <div className='min-w-0 space-y-2'>
-            <div className='flex flex-wrap items-center gap-2'>
-              <Badge variant='outline' className='capitalize'>{course.level}</Badge>
-              {course.category_name && (
-                <Badge variant='secondary'>{course.category_name}</Badge>
-              )}
-              {course.is_free && <Badge>Free</Badge>}
-              {course.is_new && <Badge>New</Badge>}
-            </div>
-            <h1 className='truncate text-2xl font-bold tracking-tight'>{course.title}</h1>
-            <p className='line-clamp-3 max-w-2xl text-sm text-muted-foreground'>
-              {course.description}
-            </p>
+      <div className='flex min-w-0 items-start gap-4'>
+        {course.image_url && (
+          <img
+            src={course.image_url}
+            alt={course.title}
+            className='h-full w-[200px] shrink-0 rounded-md border object-cover'
+          />
+        )}
+        <div className='min-w-0 space-y-2'>
+          <div className='flex flex-wrap items-center gap-2'>
+            <Badge variant='outline' className='capitalize'>{course.level}</Badge>
+            {course.category_name && <Badge variant='secondary'>{course.category_name}</Badge>}
+            {course.is_free && <Badge>Free</Badge>}
+            {course.is_new && <Badge>New</Badge>}
           </div>
+          <h1 className='truncate text-2xl font-bold tracking-tight'>{course.title}</h1>
+          <p className='line-clamp-3 max-w-2xl text-sm text-muted-foreground'>{course.description}</p>
         </div>
       </div>
 
       <Separator className='my-6' />
 
-      <div className='grid gap-4 md:grid-cols-2'>
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-base'>Technologies</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {course.technologies_list?.length ? (
-              <div className='flex flex-wrap gap-2'>
-                {course.technologies_list.map((t) => (
-                  <Badge key={t} variant='outline'>{t}</Badge>
-                ))}
-              </div>
-            ) : (
-              <p className='text-sm text-muted-foreground'>No technologies listed.</p>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className='text-base'>Pricing</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className='text-2xl font-semibold'>
-              {course.is_free ? 'Free' : course.price}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      
 
       {course.preview_video_url && (
-        <div className='mt-6'>
+        <div className='mt-4'>
           <Card>
-            <CardHeader>
-              <CardTitle className='text-base'>Preview</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className='text-base'>Preview</CardTitle></CardHeader>
             <CardContent>
               <div className='aspect-video overflow-hidden rounded-md border'>
-                <video
-                  src={course.preview_video_url}
-                  controls
-                  className='h-full w-full object-cover'
-                />
+                <video src={course.preview_video_url} controls className='h-full w-full object-cover' />
               </div>
             </CardContent>
           </Card>
         </div>
       )}
+
+      <ModulesSection />
     </Main>
   )
 }

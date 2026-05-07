@@ -1,5 +1,5 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, ImageIcon } from 'lucide-react'
 import type { ProjectListItem } from '@/service/projects/projects.type'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -38,12 +38,16 @@ export function getProjectsColumns({
       ),
       cell: ({ row }) => (
         <div className='flex items-center gap-3 max-w-[220px]'>
-          {row.original.image_url && (
+          {row.original.image_url ? (
             <ImagePreview
               src={row.original.image_url}
               alt={row.original.title}
               className='h-8 w-14 rounded object-cover shrink-0'
             />
+          ) : (
+            <div className='flex h-8 w-14 shrink-0 items-center justify-center rounded bg-muted'>
+              <ImageIcon className='size-4 text-muted-foreground' />
+            </div>
           )}
           <span className='truncate font-medium'>{row.getValue('title')}</span>
         </div>
