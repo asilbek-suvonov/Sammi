@@ -33,7 +33,7 @@ export function EntityActionsCell<T>({ entity, onEdit, onDelete }: Props<T>) {
           onClick={() => onDelete(entity)}
           className='text-destructive focus:text-destructive'
         >
-          <Trash2 className='mr-2 h-4 w-4' />
+          <Trash2 className='mr-2 h-4 w-4 text-red-500' />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

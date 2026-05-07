@@ -6,8 +6,8 @@ export const API_ENDPOINTS = {
   },
 
   ACCOUNTS: {
-    SEND_OTP: "/send-otp",
-    VERIFY_OTP: "/verify-otp",
+    SEND_OTP: "/send-otp/",
+    VERIFY_OTP: "/verify-otp/",
   },
 
   PROJECTS: {
