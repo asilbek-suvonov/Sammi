@@ -82,7 +82,7 @@ export function getProjectsColumns({
           <div className='flex flex-wrap items-center gap-1 max-w-[180px]'>
             {visible.map((t) => (
               <Badge key={t.id} variant='outline' className='text-xs'>
-                {t.name}
+                {t.label}
               </Badge>
             ))}
             {hidden.length > 0 && (
@@ -99,7 +99,7 @@ export function getProjectsColumns({
                         key={t.id}
                         className='rounded-sm bg-primary-foreground/10 px-1.5 py-0.5 text-[11px]'
                       >
-                        {t.name}
+                        {t.label}
                       </span>
                     ))}
                   </div>

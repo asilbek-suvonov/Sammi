@@ -21,19 +21,21 @@ export const courseKeys = {
   detail: (id: number | string) => [...courseKeys.all, 'detail', String(id)] as const,
 }
 
-const toCourseArray = (raw: unknown): Course[] => {
-  if (Array.isArray(raw)) return raw as Course[]
-  if (raw && typeof raw === 'object' && 'results' in raw) {
-    const results = (raw as CourseListResponse).results
-    return Array.isArray(results) ? results : []
-  }
-  return []
-}
-
 export function useCourses(params?: CourseQueryParams) {
   return useQuery<Course[], Error>({
     queryKey: courseKeys.list(params),
-    queryFn: async () => toCourseArray(await getCourseList(params)),
+    queryFn: async () => {
+      const res = await getCourseList(params)
+      return res.results
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCoursesPaginated(params?: CourseQueryParams) {
+  return useQuery<CourseListResponse, Error>({
+    queryKey: courseKeys.list(params),
+    queryFn: () => getCourseList(params),
     staleTime: 5 * 60 * 1000,
   })
 }

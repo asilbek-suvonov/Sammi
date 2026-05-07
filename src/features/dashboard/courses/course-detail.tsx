@@ -78,13 +78,13 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
 
       
 
-      {course.preview_video_url && (
+      {course.preview_video_url_full && (
         <div className='mt-4'>
           <Card>
             <CardHeader><CardTitle className='text-base'>Preview</CardTitle></CardHeader>
             <CardContent>
               <div className='aspect-video overflow-hidden rounded-md border'>
-                <video src={course.preview_video_url} controls className='h-full w-full object-cover' />
+                <video src={course.preview_video_url_full} controls className='h-full w-full object-cover' />
               </div>
             </CardContent>
           </Card>

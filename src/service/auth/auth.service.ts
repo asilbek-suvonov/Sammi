@@ -1,7 +1,7 @@
 import api from '@/api'
 import { API_ENDPOINTS } from '@/endpoints/api_endpoints'
 import type { GoogleAuthRequest, GoogleAuthResponse } from './auth.types'
-import { GithubAuthRequest, GithubAuthResponse } from './github/auth.types'
+import type { GithubAuthRequest, GithubAuthResponse } from './github/auth.types'
 
 export const googleAuth= (
   data: GoogleAuthRequest

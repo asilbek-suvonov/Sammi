@@ -15,8 +15,9 @@ import type {
   ProjectDetail,
   ProjectFilters,
   ProjectListItem,
+  ProjectPatchRequest,
   ProjectRequest,
-  Step,
+  ProjectStep,
   StepRequest,
 } from '@/service/projects/projects.type'
 
@@ -83,7 +84,7 @@ export function usePatchProject() {
   return useMutation<
     ProjectDetail,
     Error,
-    { id: number | string; data: Partial<ProjectRequest> }
+    { id: number | string; data: ProjectPatchRequest }
   >({
     mutationFn: ({ id, data }) => patchProject(id, data),
     onSuccess: (_, vars) => {
@@ -112,7 +113,7 @@ export function useDeleteProject() {
 }
 
 export function useProjectStep(id: number | string | undefined, enabled = true) {
-  return useQuery<Step, Error>({
+  return useQuery<ProjectStep, Error>({
     queryKey: projectKeys.step(id ?? ''),
     queryFn: () => getStepDetail(id as number | string),
     enabled: !!id && enabled,
@@ -122,7 +123,7 @@ export function useProjectStep(id: number | string | undefined, enabled = true) 
 
 export function useCreateProjectStep() {
   const qc = useQueryClient()
-  return useMutation<Step, Error, StepRequest>({
+  return useMutation<ProjectStep, Error, StepRequest>({
     mutationFn: createStep,
     onSuccess: () => {
       toast.success('Step created successfully')

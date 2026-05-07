@@ -41,7 +41,7 @@ export function ProjectDetailPage({ id }: Props) {
                   {project.difficulty_display || project.difficulty}
                 </Badge>
                 {project.technologies.map((t) => (
-                  <Badge key={t.id} variant='secondary'>{t.name}</Badge>
+                  <Badge key={t.id} variant='secondary'>{t.label}</Badge>
                 ))}
               </div>
               <h1 className='text-3xl font-bold tracking-tight md:text-4xl'>{project.title}</h1>
@@ -117,7 +117,7 @@ export function ProjectDetailPage({ id }: Props) {
                     key={t.id}
                     className='flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-sm font-medium'
                   >
-                    <FolderGit2 className='size-4 text-muted-foreground' /> {t.name}
+                    <FolderGit2 className='size-4 text-muted-foreground' /> {t.label}
                   </div>
                 ))}
               </div>

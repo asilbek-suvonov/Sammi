@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Difficulty, ProjectDetail, ProjectListItem } from '@/service/projects/projects.type'
+import type { Difficulty, ProjectListItem } from '@/service/projects/projects.type'
 
 export const projectSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -22,7 +22,7 @@ export const projectDefaultValues: ProjectFormValues = {
   github_url: '',
   demo_url: '',
   technologies: [],
-  is_published: false,
+  is_published: true,
 }
 
 const normalizeDifficulty = (value: string | undefined): Difficulty => {
@@ -32,9 +32,7 @@ const normalizeDifficulty = (value: string | undefined): Difficulty => {
   return 'beginner'
 }
 
-export function projectToFormValues(
-  project: ProjectListItem | ProjectDetail
-): ProjectFormValues {
+export function projectToFormValues(project: ProjectListItem): ProjectFormValues {
   return {
     title: project.title,
     description: project.description,
@@ -43,6 +41,6 @@ export function projectToFormValues(
     github_url: project.github_url ?? '',
     demo_url: project.demo_url ?? '',
     technologies: project.technologies?.map((t) => t.id) ?? [],
-    is_published: 'is_published' in project ? Boolean(project.is_published) : false,
+    is_published: project.is_published ?? true,
   }
 }

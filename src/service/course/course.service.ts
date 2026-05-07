@@ -2,11 +2,16 @@ import api from '@/api'
 import { API_ENDPOINTS } from '@/endpoints/api_endpoints'
 import type {
   Course,
+  CourseDetail,
   CourseListResponse,
   CourseQueryParams,
   CourseRequest,
 } from './course.types'
 
+/**
+ * Course API ONLY accepts multipart/form-data (never JSON).
+ * All write methods always build FormData regardless of file presence.
+ */
 const buildFormData = (payload: Partial<CourseRequest>): FormData => {
   const fd = new FormData()
   for (const [key, value] of Object.entries(payload)) {
@@ -24,46 +29,30 @@ const buildFormData = (payload: Partial<CourseRequest>): FormData => {
   return fd
 }
 
-const hasFile = (payload: Partial<CourseRequest>): boolean =>
-  Object.values(payload).some((v) => v instanceof File)
+const multipart = { headers: { 'Content-Type': 'multipart/form-data' } }
 
 export class CourseService {
   static list(params?: CourseQueryParams): Promise<CourseListResponse> {
     return api.get<CourseListResponse>(API_ENDPOINTS.COURSE.LIST, { params })
   }
 
-  static detail(id: number | string): Promise<Course> {
+  static detail(id: number | string): Promise<CourseDetail> {
     const url = API_ENDPOINTS.COURSE.DETAIL.replace(':id', String(id))
-    return api.get<Course>(url)
+    return api.get<CourseDetail>(url)
   }
 
-  static create(data: CourseRequest): Promise<Course> {
-    if (hasFile(data)) {
-      return api.post<Course>(API_ENDPOINTS.COURSE.CREATE, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-    }
-    return api.post<Course>(API_ENDPOINTS.COURSE.CREATE, data)
+  static create(data: CourseRequest): Promise<CourseDetail> {
+    return api.post<CourseDetail>(API_ENDPOINTS.COURSE.CREATE, buildFormData(data), multipart)
   }
 
-  static update(id: number | string, data: CourseRequest): Promise<Course> {
+  static update(id: number | string, data: CourseRequest): Promise<CourseDetail> {
     const url = API_ENDPOINTS.COURSE.UPDATE.replace(':id', String(id))
-    if (hasFile(data)) {
-      return api.put<Course>(url, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-    }
-    return api.put<Course>(url, data)
+    return api.put<CourseDetail>(url, buildFormData(data), multipart)
   }
 
-  static patch(id: number | string, data: Partial<CourseRequest>): Promise<Course> {
+  static patch(id: number | string, data: Partial<CourseRequest>): Promise<CourseDetail> {
     const url = API_ENDPOINTS.COURSE.PATCH.replace(':id', String(id))
-    if (hasFile(data)) {
-      return api.patch<Course>(url, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-    }
-    return api.patch<Course>(url, data)
+    return api.patch<CourseDetail>(url, buildFormData(data), multipart)
   }
 
   static delete(id: number | string): Promise<void> {

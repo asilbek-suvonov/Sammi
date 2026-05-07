@@ -41,7 +41,7 @@ export const API_ENDPOINTS = {
 
   TECHNOLOGY: {
     LIST: "/technology/list",
-    CREATE: "/technology",
+    CREATE: "/technology/",
     UPDATE: "/technology/:id/",
     PATCH: "/technology/:id/",
     DELETE: "/technology/delete/:id/",
@@ -49,7 +49,7 @@ export const API_ENDPOINTS = {
   },
 
   CATEGORY: {
-    CREATE: "/category",
+    CREATE: "/category/",
     UPDATE: "/category/:id/",
     PATCH: "/category/:id/",
     DELETE: "/category/delete/:id/",

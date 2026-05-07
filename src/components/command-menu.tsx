@@ -106,7 +106,7 @@ export function CommandMenu() {
             {projects.map((project) => (
               <CommandItem
                 key={project.id}
-                value={`project-${project.title}-${project.difficulty}-${project.technologies.map((t) => t.name).join(' ')}`}
+                value={`project-${project.title}-${project.difficulty}-${project.technologies.map((t) => t.label).join(' ')}`}
                 onSelect={() =>
                   runCommand(() =>
                     navigate({ to: '/project/$id', params: { id: String(project.id) } })

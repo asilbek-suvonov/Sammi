@@ -1,99 +1,99 @@
-/**
- * SHARED / COMMON TYPES
- */
-export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
+import type { Technology } from '@/service/technology/technology.types'
 
-export interface Technology {
-  id: number;
-  name: string;
+// ─── Enums (API DifficultyEnum) ───────────────────────────────────────────────
+
+export type Difficulty = 'beginner' | 'intermediate' | 'advanced'
+
+// ─── Sub-types ────────────────────────────────────────────────────────────────
+
+export interface ProjectFeature {
+  id: number
+  text: string
+  order: number
 }
 
-export interface Feature {
-  id: number;
-  text: string;
-  order: number;
-}
-
-export interface Step {
-  id: number;
-  project: number;
-  title: string;
-  video_url: string;
-  duration: number; // sekundlarda
-  order: number;
+/** GET /projects/steps/:id */
+export interface ProjectStep {
+  id: number
+  project: number
+  title: string
+  description?: string
+  video_url: string | null
+  duration: number        // sekundlarda
+  order: number
 }
 
 export interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
+  count: number
+  next: string | null
+  previous: string | null
+  results: T[]
 }
 
-/**
- * PROJECT INTERFACES
- */
+// ─── GET Response Types ───────────────────────────────────────────────────────
 
-// Loyihaning qisqacha ko'rinishi (List view uchun)
+/** GET /projects — list item */
 export interface ProjectListItem {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  image_url: string;
-  difficulty: Difficulty;
-  difficulty_display: string;
-  github_url: string;
-  demo_url: string;
-  technologies: Technology[];
-  created_at: string; // ISO Date string
-  total_steps: number;
-  total_duration_str: string;
+  id: number
+  title: string
+  slug: string
+  description: string
+  image_url: string | null
+  difficulty: Difficulty
+  difficulty_display: string
+  github_url: string
+  demo_url: string
+  /** API da Technology serializer qaytaradi */
+  technologies: Technology[]
+  created_at: string      // ISO date string
+  total_steps: number
+  total_duration_str: string
+  /** Admin create/update endpoints return this; public GET may omit it */
+  is_published?: boolean
 }
 
-// Loyihaning to'liq ko'rinishi (Detail view uchun)
+/** GET /projects/:id — full detail */
 export interface ProjectDetail extends ProjectListItem {
-  features: Feature[];
-  steps: Step[];
-  is_published: boolean;
+  features: ProjectFeature[]
+  steps: ProjectStep[]
 }
 
-/**
- * REQUEST BODIES (POST / PATCH / PUT)
- */
+// ─── POST / PUT / PATCH Request Types ────────────────────────────────────────
 
-// Loyiha yaratish va tahrirlash uchun (Multipart/form-data bo'lishi mumkin)
+/** POST /projects/admin/create */
 export interface ProjectRequest {
-  title: string;
-  description: string;
-  image?: File | string; // binary upload yoki URL
-  difficulty: Difficulty;
-  github_url?: string;
-  demo_url?: string;
-  technologies: number[]; // ID lar massivi
-  is_published?: boolean;
+  title: string
+  description: string
+  /** File upload. null = olib tashlash */
+  image?: File | null
+  difficulty: Difficulty
+  github_url?: string
+  demo_url?: string
+  /** Technology ID lari massivi */
+  technologies?: number[]
+  is_published?: boolean
 }
 
-// Step (qadam) yaratish uchun
+/** PATCH /projects/admin/:id/update — barcha maydonlar optional */
+export type ProjectPatchRequest = Partial<ProjectRequest>
+
+/** POST /projects/steps/create */
 export interface StepRequest {
-  title: string;
-  description: string;
-  image?: File | string;
-  difficulty?: string;
-  github_url?: string;
-  demo_url?: string;
-  technologies: number[];
-  is_published?: boolean;
+  project: number
+  title: string
+  description?: string
+  video?: File | null
+  duration?: number
+  order?: number
 }
 
-/**
- * QUERY PARAMETERS (API Filters)
- */
+// ─── Query Params ─────────────────────────────────────────────────────────────
+
 export interface ProjectFilters {
-  difficulty?: Difficulty;
-  ordering?: 'created_at' | '-created_at' | 'title' | '-title';
-  page?: number;
-  page_size?: number;
-  search?: string;
-  technologies?: number | number[];
+  difficulty?: Difficulty
+  ordering?: 'created_at' | '-created_at' | 'title' | '-title'
+  page?: number
+  page_size?: number
+  search?: string
+  technologies?: number | number[]
 }

@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { type Module, ModuleCard } from '@/components/shared/module-card'
 import { AddModuleDialog } from '@/components/shared/add-module-dialog'
-import { AddVideoSheet, VideoFormData } from './add-video-sheet';
+import { AddVideoSheet, type VideoFormData } from './add-video-sheet'
 
 export function ModulesSection() {
   const [modules, setModules] = useState<Module[]>([])

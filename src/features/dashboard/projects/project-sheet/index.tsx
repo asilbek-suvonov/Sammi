@@ -6,7 +6,6 @@ import {
   useUpdateProject,
 } from '@/api-hooks/projects/use-projects'
 import type {
-  ProjectDetail,
   ProjectListItem,
   ProjectRequest,
 } from '@/service/projects/projects.type'
@@ -34,7 +33,7 @@ import {
 type ProjectSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  project?: ProjectListItem | ProjectDetail | null
+  project?: ProjectListItem | null
 }
 
 export function ProjectSheet({

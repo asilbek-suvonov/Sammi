@@ -5,12 +5,17 @@ import type {
   ProjectDetail,
   ProjectFilters,
   ProjectListItem,
+  ProjectPatchRequest,
   ProjectRequest,
-  Step,
+  ProjectStep,
   StepRequest,
 } from './projects.type'
 
-const buildFormData = (payload: Partial<ProjectRequest> | Partial<StepRequest>): FormData => {
+// ─── FormData builder ─────────────────────────────────────────────────────────
+
+type AnyRequest = Partial<ProjectRequest> | Partial<StepRequest>
+
+const buildFormData = (payload: AnyRequest): FormData => {
   const fd = new FormData()
   for (const [key, value] of Object.entries(payload)) {
     if (value === undefined || value === null) continue
@@ -21,14 +26,16 @@ const buildFormData = (payload: Partial<ProjectRequest> | Partial<StepRequest>):
     } else if (typeof value === 'boolean') {
       fd.append(key, value ? 'true' : 'false')
     } else {
-      fd.append(key, value as string)
+      fd.append(key, String(value))
     }
   }
   return fd
 }
 
-const hasFile = (payload: Partial<ProjectRequest> | Partial<StepRequest>): boolean =>
+const hasFile = (payload: AnyRequest): boolean =>
   Object.values(payload).some((v) => v instanceof File)
+
+// ─── Service ──────────────────────────────────────────────────────────────────
 
 export class ProjectsService {
   static list(params?: ProjectFilters): Promise<PaginatedResponse<ProjectListItem>> {
@@ -61,7 +68,7 @@ export class ProjectsService {
     return api.put<ProjectDetail>(url, data)
   }
 
-  static patch(id: number | string, data: Partial<ProjectRequest>): Promise<ProjectDetail> {
+  static patch(id: number | string, data: ProjectPatchRequest): Promise<ProjectDetail> {
     const url = API_ENDPOINTS.PROJECTS.PATCH.replace(':id', String(id))
     if (hasFile(data)) {
       return api.patch<ProjectDetail>(url, buildFormData(data), {
@@ -76,18 +83,20 @@ export class ProjectsService {
     return api.delete(url)
   }
 
-  static stepDetail(id: number | string): Promise<Step> {
+  static stepDetail(id: number | string): Promise<ProjectStep> {
     const url = API_ENDPOINTS.PROJECTS.STEP_DETAIL.replace(':id', String(id))
-    return api.get<Step>(url)
+    return api.get<ProjectStep>(url)
   }
 
-  static createStep(data: StepRequest): Promise<Step> {
+  static createStep(data: StepRequest): Promise<ProjectStep> {
     if (hasFile(data)) {
-      return api.post<Step>(API_ENDPOINTS.PROJECTS.STEP_CREATE, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      return api.post<ProjectStep>(
+        API_ENDPOINTS.PROJECTS.STEP_CREATE,
+        buildFormData(data),
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      )
     }
-    return api.post<Step>(API_ENDPOINTS.PROJECTS.STEP_CREATE, data)
+    return api.post<ProjectStep>(API_ENDPOINTS.PROJECTS.STEP_CREATE, data)
   }
 }
 
@@ -95,7 +104,6 @@ export const {
   list: getProjectsList,
   detail: getProjectDetail,
   create: createProject,
-  
   update: updateProject,
   patch: patchProject,
   delete: deleteProject,

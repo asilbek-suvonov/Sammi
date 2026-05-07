@@ -47,7 +47,7 @@ export function MultiSelect({
   )
 
   const filtered = allOptions.filter((o) =>
-    o.label.toLowerCase().includes(search.toLowerCase())
+    (o.label ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
   const isCustom =
@@ -75,25 +75,28 @@ export function MultiSelect({
           )}
         >
           {value.length > 0 ? (
-            value.map((item) => (
-              <Badge
-                key={item}
-                variant='secondary'
-                className='h-6 gap-0.5 pr-1 text-xs font-normal'
-              >
-                {item}
-                <button
-                  type='button'
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    toggle(item)
-                  }}
-                  className='ml-0.5 rounded-sm hover:text-destructive focus:outline-none'
+            value.map((item) => {
+              const label = allOptions.find((o) => o.value === item)?.label ?? item
+              return (
+                <Badge
+                  key={item}
+                  variant='secondary'
+                  className='h-6 gap-0.5 pr-1 text-xs font-normal'
                 >
-                  <X className='size-3' />
-                </button>
-              </Badge>
-            ))
+                  {label}
+                  <button
+                    type='button'
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggle(item)
+                    }}
+                    className='ml-0.5 rounded-sm hover:text-destructive focus:outline-none'
+                  >
+                    <X className='size-3' />
+                  </button>
+                </Badge>
+              )
+            })
           ) : (
             <span className='text-muted-foreground'>{placeholder}</span>
           )}

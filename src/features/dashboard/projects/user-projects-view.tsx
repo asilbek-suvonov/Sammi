@@ -90,7 +90,7 @@ const UserProjectsView = () => {
                       key={t.id}
                       className='rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground'
                     >
-                      {t.name}
+                      {t.label}
                     </span>
                   ))}
                 </div>

@@ -2,6 +2,7 @@ import { useTechnologies } from '@/api-hooks/technology/use-technologies'
 import { FileUpload } from '@/components/ui/file-upload'
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useMemo } from 'react'
 import { type Control } from 'react-hook-form'
@@ -30,7 +32,7 @@ export function ProjectFormFields({ control, isEdit }: Props) {
   const { data: technologies = [] } = useTechnologies()
 
   const techOptions = useMemo(
-    () => technologies.map((t) => ({ label: t.name, value: String(t.id) })),
+    () => technologies.map((t) => ({ label: t.label, value: String(t.id) })),
     [technologies]
   )
 
@@ -158,6 +160,22 @@ export function ProjectFormFields({ control, isEdit }: Props) {
           </FormItem>
         )}
       />
+
+      <div className='rounded-lg border p-3'>
+        <FormField
+          control={control}
+          name='is_published'
+          render={({ field }) => (
+            <FormItem className='flex flex-col gap-1'>
+              <FormLabel className='text-xs'>Published</FormLabel>
+              <FormControl>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+              <FormDescription className='text-[10px]'>Visible to users</FormDescription>
+            </FormItem>
+          )}
+        />
+      </div>
     </>
   )
 }

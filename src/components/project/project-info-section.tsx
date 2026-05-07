@@ -1,16 +1,17 @@
-import type { Feature, Technology } from '@/service/projects/projects.type'
+import type { ProjectFeature } from '@/service/projects/projects.type'
+import type { Technology } from '@/service/technology/technology.types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface ProjectInfoSectionProps {
   technologies: Technology[]
-  features: Feature[]
+  features: ProjectFeature[]
 }
 
 export function ProjectInfoSection({ technologies, features }: ProjectInfoSectionProps) {
   return (
     <div className='grid gap-4 md:grid-cols-2'>
-      <Card>z``
+      <Card>
         <CardHeader>
           <CardTitle className='text-base'>Technologies</CardTitle>
         </CardHeader>
@@ -18,7 +19,7 @@ export function ProjectInfoSection({ technologies, features }: ProjectInfoSectio
           {technologies.length ? (
             <div className='flex flex-wrap gap-2'>
               {technologies.map((t) => (
-                <Badge key={t.id} variant='outline'>{t.name}</Badge>
+                <Badge key={t.id} variant='outline'>{t.label}</Badge>
               ))}
             </div>
           ) : (

@@ -1,61 +1,71 @@
-// 1. Kurs darajalari uchun enum
-export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
+// ─── Enums ────────────────────────────────────────────────────────────────────
 
-// 2. Kursning asosiy modeli (GET so'rovlari va Response uchun)
-export interface ICourse {
-  id: number;
-  title: string;
-  description: string;
-  image_url: string;
-  preview_video_url_full: string;
-  category_name: string;
-  technologies_list: string[];
-  level: CourseLevel;
-  price: string; // API-dan decimal string ko'rinishida keladi
-  is_published: boolean;
-}
-export interface ICourseDelete {
-  id: number;
- 
-}
+export type CourseLevel = 'beginner' | 'intermediate' | 'advanced'
 
-// 3. Kurs yaratish uchun (POST /course/) - Skrinshotdagi Request Body asosida
-export interface ICourseCreate {
-  title: string;          // required
-  description: string;    // required
-  image: File | Blob;     // string($binary)
-  preview_video?: File | Blob; // string($binary)
-  category: number;       // required (integer)
-  technologies?: number[]; // [1, 2, 3] ko'rinishida
-  level?: CourseLevel;
-  price?: number;
-  is_published?: boolean;
+// ─── GET Response Types ───────────────────────────────────────────────────────
+
+/** GET /course/list — paginated list item */
+export interface Course {
+  id: number
+  title: string
+  description: string
+  image_url: string | null
+  preview_video_url_full: string | null
+  category_name: string
+  technologies_list: string[]
+  level: CourseLevel
+  price: string           // decimal string: "99.00"
+  /** These may be absent in GET responses — present only in admin/write context */
+  is_free?: boolean
+  is_new?: boolean
+  is_published?: boolean
 }
 
-// 4. Kursni yangilash uchun (PATCH /course/{id}/) - Barcha maydonlar optional
-export interface ICoursePatch {
-  title?: string;
-  description?: string;
-  image?: string; // Skrinshotda Patch uchun string($uri) ko'rsatilgan
-  preview_video?: string;
-  category?: number;
-  technologies?: number[];
-  level?: CourseLevel;
-  price?: string; // string($decimal)
-  is_published?: boolean;
+/** GET /course/detail/:id — adds aggregate counts */
+export interface CourseDetail extends Course {
+  rating: number
+  reviews_count: number
+  lessons_count: number
+  modules_count: number
 }
 
-// 5. Kurslar ro'yxati (Pagination Response)
-export interface ICourseListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: ICourse[];
+// ─── POST / PUT / PATCH Request Types ────────────────────────────────────────
+
+/** POST /course/ — requires multipart/form-data (category & technologies are FKs) */
+export interface CourseRequest {
+  title: string
+  description: string
+  /** File upload: binary */
+  image?: File | null
+  preview_video?: File | null
+  /** FK integer — Category.id */
+  category?: number | null
+  technologies?: number[]
+  level?: CourseLevel
+  /** decimal string: "99.00" */
+  price?: string
+  is_free?: boolean
+  is_new?: boolean
+  is_published?: boolean
 }
 
-// 6. Qidiruv va filtr parametrlari (Query Parameters)
-export interface ICourseQueryParams {
-  ordering?: string;
-  page?: number;
-  search?: string;
+// ─── Paginated List Response ──────────────────────────────────────────────────
+
+export interface CourseListResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: Course[]
 }
+
+// ─── Query Params ─────────────────────────────────────────────────────────────
+
+export interface CourseQueryParams {
+  page?: number
+  search?: string
+  ordering?: string
+  level?: CourseLevel
+  category?: number
+  is_free?: boolean
+}
+  
