@@ -27,6 +27,20 @@ function getCSRFToken(): string | undefined {
     ?.split('=')[1]
 }
 
+function extractErrorMessage(data: Record<string, unknown>): string {
+  if (typeof data.message === 'string') return data.message
+  if (typeof data.detail === 'string') return data.detail
+  if (Array.isArray(data.non_field_errors) && data.non_field_errors.length > 0) {
+    return String(data.non_field_errors[0])
+  }
+  for (const value of Object.values(data)) {
+    if (Array.isArray(value) && value.length > 0) {
+      return String(value[0])
+    }
+  }
+  return JSON.stringify(data)
+}
+
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL,
@@ -75,6 +89,12 @@ apiClient.interceptors.response.use(
       const status = error.response?.status
 
       switch (status) {
+        case 400: {
+          const errorData = error.response?.data as Record<string, unknown>
+          const errorMsg = extractErrorMessage(errorData)
+          toast.error(errorMsg || "Noto'g'ri so'rov. Ma'lumotlarni tekshiring.")
+          break
+        }
         case 401:
           useAuthStore.getState().auth.reset()
           toast.error('Sessiya tugadi. Iltimos, qayta kiring.')
@@ -91,10 +111,12 @@ apiClient.interceptors.response.use(
           }
       }
 
+      const dataMessage = (error.response?.data as Record<string, string>)?.message
+      const errorMessage = error.message
+      const fallbackMessage = 'Unknown error occurred'
+
       const apiError: ApiError = {
-        message:
-          (error.response?.data as Record<string, string>)?.message ??
-          error.message,
+        message: dataMessage || errorMessage || fallbackMessage,
         status: status ?? 0,
         data: error.response?.data,
       }
@@ -102,7 +124,12 @@ apiClient.interceptors.response.use(
       return Promise.reject(apiError)
     }
 
-    return Promise.reject(error)
+    const fallbackError: ApiError = {
+      message: error instanceof Error ? error.message : 'Network error occurred',
+      status: 0,
+      data: null,
+    }
+    return Promise.reject(fallbackError)
   }
 )
 

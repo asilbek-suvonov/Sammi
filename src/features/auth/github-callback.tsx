@@ -13,18 +13,12 @@ export function GithubCallbackPage() {
         window.location.origin
       )
       window.close()
-      return
-    }
-
-    if (code) {
-      sessionStorage.setItem('sammi_github_code', code)
-      window.location.replace('/')
     }
   }, [])
 
   return (
     <div className='flex min-h-screen items-center justify-center text-sm text-muted-foreground'>
-      Completing GitHub sign-in…
+      GitHub kirish yakunlanmoqda…
     </div>
   )
 }

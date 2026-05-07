@@ -1,9 +1,9 @@
-import { API_ENDPOINTS } from '@/endpoints/api_endpoints';
-import type { VerifyOtpPayload, VerifyOtpResponse } from './userOTP.type';
-import api from '@/api';
+import { API_ENDPOINTS } from '@/endpoints/api_endpoints'
+import type { EmailPayload, SendOtpResponse, VerifyOtpPayload, VerifyOtpResponse } from './userOTP.type'
+import api from '@/api'
 
-export const verifyOtp = async (data: VerifyOtpPayload): Promise<VerifyOtpResponse> => {
-  // .data ni qaytarish muhim
-  const response = await api.post<VerifyOtpResponse>(API_ENDPOINTS.ACCOUNTS.VERIFY_OTP, data);
-  return response.data; 
-};
+export const sendOtp = (data: EmailPayload): Promise<SendOtpResponse> =>
+  api.post<SendOtpResponse>(API_ENDPOINTS.ACCOUNTS.SEND_OTP, data)
+
+export const verifyOtp = (data: VerifyOtpPayload): Promise<VerifyOtpResponse> =>
+  api.post<VerifyOtpResponse>(API_ENDPOINTS.ACCOUNTS.VERIFY_OTP, data)

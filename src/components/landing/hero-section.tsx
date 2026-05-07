@@ -19,7 +19,6 @@ export default function HeroMinimal() {
             Boshlash
             <ArrowRight className='ml-2 size-4 transition group-hover:translate-x-1' />
           </Button>
-          <Button variant='link'>Ko'proq →</Button>
         </div>
 
       </div>

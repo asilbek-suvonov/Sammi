@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { useGithubSignIn } from '@/hooks/auth/use-github-signin'
 import { useGoogleSignIn } from '@/hooks/auth/use-google-signin'
+import { useSendOtp } from '@/api-hooks/auth/userOTP/use-OTP'
 import { useNavigate } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
@@ -61,15 +62,29 @@ export function SignInDialog({
   const github = useGithubSignIn(closeAndForward)
   const signingIn = google.signingIn || github.signingIn
 
+  const { mutate: sendOtp, isPending: isSendingOtp } = useSendOtp({
+    onSuccess: () => {
+      sessionStorage.setItem('sammi_pending_email', email)
+      setIsOpen(false)
+      navigate({ to: '/otp' })
+    },
+    // Error handling done in hook with getErrorMessage
+  })
+
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation() // Event bubbling ni to'xtatish
+    
+    if (isSendingOtp) return // Agar jo'natilayotgan bo'lsa, qayta jo'natmaslik
+    
     if (!email || !email.includes('@')) {
       toast.error('Please enter a valid email')
       return
     }
-    sessionStorage.setItem('sammi_pending_email', email)
-    setIsOpen(false)
-    navigate({ to: '/otp' })
+    
+    // eslint-disable-next-line no-console
+    console.log('🔍 Sending OTP to:', email)
+    sendOtp({ email })
   }
 
   return (
@@ -117,7 +132,7 @@ export function SignInDialog({
               variant="secondary"
               className="w-full"
               onClick={() => setEmailStep(true)}
-              disabled={signingIn}
+              disabled={signingIn || isSendingOtp}
             >
               Continue with Email
             </Button>
@@ -141,8 +156,8 @@ export function SignInDialog({
               >
                 Back
               </Button>
-              <Button type="submit" className="flex-1">
-                Continue
+              <Button type="submit" className="flex-1" disabled={isSendingOtp}>
+                {isSendingOtp ? 'Sending...' : 'Continue'}
               </Button>
             </div>
           </form>

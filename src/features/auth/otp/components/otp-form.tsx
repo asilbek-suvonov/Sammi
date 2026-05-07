@@ -6,7 +6,6 @@ import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useAuthStore, type AuthUser } from '@/stores/auth-store'
-import { handleServerError } from '@/lib/handle-server-error'
 import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
@@ -38,34 +37,41 @@ const formSchema = z.object({
     .max(6, 'Please enter the 6-digit code.'),
 })
 
-const toAuthUser = (data: VerifyOtpResponse): AuthUser => ({
-  id: data.id,
-  email: data.email,
-  fullName: data.full_name,
-  avatarUrl: data.avatar_url,
-  country: data.country,
-  languageCode: data.language_code,
-  isNewUser: data.is_new_user,
-  role: 'user',
-})
+const parseFullName = (fullName?: string): { firstName: string; lastName: string } => {
+  if (!fullName) return { firstName: '', lastName: '' }
+  const parts = fullName.trim().split(' ')
+  return {
+    firstName: parts[0] || '',
+    lastName: parts.slice(1).join(' ') || '',
+  }
+}
+
+const toAuthUser = (data: VerifyOtpResponse): AuthUser => {
+  const { firstName, lastName } = parseFullName(data.full_name)
+
+  return {
+    id: data.id ?? 0,
+    email: data.email,
+    firstName,
+    lastName,
+    fullName: data.full_name,
+    avatarUrl: data.avatar_url,
+    country: data.country,
+    languageCode: data.language_code,
+    isNewUser: data.is_new_user,
+    role: 'user',
+  }
+}
 
 type OtpFormProps = React.HTMLAttributes<HTMLFormElement>
 
-export function OtpForm({
-  className,
-  ...props
-}: OtpFormProps) {
+export function OtpForm({ className, ...props }: OtpFormProps) {
   const navigate = useNavigate()
-
-  const login = useAuthStore(
-    (state) => state.auth.login
-  )
+  const login = useAuthStore((state) => state.auth.login)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      otp: '',
-    },
+    defaultValues: { otp: '' },
   })
 
   const verifyOtpMutation = useVerifyOtp({
@@ -75,46 +81,24 @@ export function OtpForm({
         refreshToken: data.refresh ?? '',
         user: toAuthUser(data),
       })
-
-      sessionStorage.removeItem(
-        'sammi_pending_email'
-      )
-
-      toast.success('Successfully verified!')
-
-      navigate({
-        to: '/',
-      })
-    },
-
-    onError: (error) => {
-      handleServerError(error)
+      sessionStorage.removeItem('sammi_pending_email')
+      toast.success('Muvaffaqiyatli tasdiqlandi!')
+      navigate({ to: '/' })
     },
   })
 
   const otp = form.watch('otp')
 
-  async function onSubmit(
-    values: z.infer<typeof formSchema>
-  ) {
-    const email = sessionStorage.getItem(
-      'sammi_pending_email'
-    )
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const email = sessionStorage.getItem('sammi_pending_email')
 
     if (!email) {
-      toast.error('Email not found')
-
-      navigate({
-        to: '/login',
-      })
-
+      toast.error('Email topilmadi')
+      navigate({ to: '/' })
       return
     }
 
-    verifyOtpMutation.mutate({
-      email,
-      otp: values.otp,
-    })
+    verifyOtpMutation.mutate({ email, otp: values.otp })
   }
 
   return (
@@ -129,9 +113,7 @@ export function OtpForm({
           name='otp'
           render={({ field }) => (
             <FormItem>
-              <FormLabel className='sr-only'>
-                One-Time Password
-              </FormLabel>
+              <FormLabel className='sr-only'>One-Time Password</FormLabel>
 
               <FormControl>
                 <InputOTP
@@ -170,18 +152,12 @@ export function OtpForm({
         <Button
           type='submit'
           className='mt-2'
-          disabled={
-            otp.length < 6 ||
-            verifyOtpMutation.isPending
-          }
+          disabled={otp.length < 6 || verifyOtpMutation.isPending}
         >
           {verifyOtpMutation.isPending && (
             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
           )}
-
-          {verifyOtpMutation.isPending
-            ? 'Verifying...'
-            : 'Verify'}
+          {verifyOtpMutation.isPending ? 'Tekshirilmoqda...' : 'Tasdiqlash'}
         </Button>
       </form>
     </Form>

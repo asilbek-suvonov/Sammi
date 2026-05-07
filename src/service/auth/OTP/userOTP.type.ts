@@ -2,6 +2,11 @@ export interface EmailPayload {
   email: string
 }
 
+export interface SendOtpResponse {
+  message: string
+  email: string
+}
+
 export interface VerifyOtpPayload {
   email: string
   otp: string

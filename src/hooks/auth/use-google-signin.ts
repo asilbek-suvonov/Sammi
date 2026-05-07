@@ -70,24 +70,34 @@ export function useGoogleSignIn(onDone?: () => void) {
             refreshToken = data.refresh ?? ''
             user = mergeBackendUser(user, data)
           }
-        } catch {
-          // Backend exchange failed — fall back to client-side identity.
+        } catch (backendErr) {
+          const errStatus = (backendErr as { status?: number }).status
+          // 4xx: backend explicitly rejected the token — abort login
+          // (interceptor already showed the error toast)
+          if (errStatus && errStatus >= 400 && errStatus < 500) {
+            return
+          }
+          // Network error or 5xx: fall back to client-side identity
         }
 
         login({ accessToken, refreshToken, user })
-        toast.success(`Welcome, ${user.firstName || user.email}!`)
+        toast.success(`Xush kelibsiz, ${user.firstName || user.email}!`)
         onDone?.()
         navigate({ to: '/dashboard' })
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Sign-in failed')
+        const errStatus = (err as { status?: number }).status
+        // Don't double-toast if interceptor already handled it
+        if (!errStatus || errStatus === 0) {
+          toast.error(err instanceof Error ? err.message : 'Kirish muvaffaqiyatsiz')
+        }
       } finally {
         setSigningIn(false)
       }
     },
-    onError: () => toast.error('Google sign-in canceled'),
+    onError: () => toast.error('Google orqali kirish bekor qilindi'),
     onNonOAuthError: () =>
       toast.error(
-        'Google sign-in could not start. Add http://localhost:5173 to your OAuth client’s Authorized JavaScript origins.'
+        'Google kirish boshlanmadi. http://localhost:5173 ni OAuth client Authorized JavaScript origins ga qo\'shing.'
       ),
   })
 

@@ -20,10 +20,17 @@ export function ProfileDropdown() {
   const user = useAuthUser()
   const profile = useProfile()
 
-  const avatarUrl = profile.avatarUrl || ''
-  const displayName =
-    profile.nickname || user?.firstName || user?.email?.split('@')[0] || 'User'
-  const initials = (displayName?.[0] ?? 'U').toUpperCase()
+  const avatarUrl = profile?.avatarUrl || user?.avatarUrl || ''
+  
+  // Safely build display name with fallbacks
+  const firstName = user?.firstName || ''
+  const lastName = user?.lastName || ''
+  const fullName = user?.fullName || ''
+  const email = user?.email || ''
+  const nickname = profile?.nickname || ''
+  
+  const displayName = nickname || fullName || `${firstName} ${lastName}`.trim() || email.split('@')[0] || 'User'
+  const initials = (displayName[0] || 'U').toUpperCase()
 
   return (
     <>

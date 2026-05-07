@@ -36,45 +36,51 @@ export function useGithubSignIn(onDone?: () => void) {
   const popupRef = useRef<Window | null>(null)
   const [signingIn, setSigningIn] = useState(false)
 
-  const mutation = useGithubAuth({
+  const { mutate: githubMutate, isPending } = useGithubAuth({
     onSuccess: (data) => {
       const user = responseToUser(data)
       const accessToken = data.access ?? ''
       const refreshToken = data.refresh ?? ''
       login({ accessToken, refreshToken, user })
-      toast.success(`Welcome, ${user.fullName || user.email}!`)
+      toast.success(`Xush kelibsiz, ${user.fullName || user.email}!`)
       onDone?.()
       navigate({ to: '/dashboard' })
       setSigningIn(false)
     },
     onError: (err) => {
-      toast.error(err.message || 'GitHub sign-in failed')
+      // 400 toast already shown by interceptor
+      const errStatus = (err as { status?: number }).status
+      if (!errStatus || errStatus === 0) {
+        toast.error('GitHub orqali kirish muvaffaqiyatsiz')
+      }
       setSigningIn(false)
     },
   })
 
   useEffect(() => {
+    const redirectUri = `${window.location.origin}/auth/github/callback`
+
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return
       const payload = event.data as { source?: string; code?: string; state?: string }
       if (payload?.source !== 'sammi-github-oauth' || !payload.code) return
       const expected = sessionStorage.getItem('sammi_github_oauth_state')
       if (expected && payload.state && payload.state !== expected) {
-        toast.error('GitHub sign-in: state mismatch')
+        toast.error('GitHub kirish: state mos kelmadi')
         return
       }
       sessionStorage.removeItem('sammi_github_oauth_state')
       popupRef.current?.close()
-      mutation.mutate({ code: payload.code })
+      githubMutate({ code: payload.code, redirect_uri: redirectUri })
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
-  }, [mutation])
+  }, [githubMutate])
 
   const start = () => {
     const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID as string | undefined
     if (!clientId) {
-      toast.error('GitHub sign-in is not configured (VITE_GITHUB_CLIENT_ID missing).')
+      toast.error('GitHub kirish sozlanmagan (VITE_GITHUB_CLIENT_ID yo\'q).')
       return
     }
     setSigningIn(true)
@@ -82,10 +88,10 @@ export function useGithubSignIn(onDone?: () => void) {
     const url = buildAuthorizeUrl(clientId, redirectUri)
     popupRef.current = window.open(url, 'github-oauth', 'width=600,height=720')
     if (!popupRef.current) {
-      toast.error('Popup blocked. Please allow popups and try again.')
+      toast.error('Popup bloklandi. Iltimos, popupga ruxsat bering.')
       setSigningIn(false)
     }
   }
 
-  return { start, signingIn: signingIn || mutation.isPending }
+  return { start, signingIn: signingIn || isPending }
 }

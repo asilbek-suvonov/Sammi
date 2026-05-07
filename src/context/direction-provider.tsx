@@ -6,7 +6,7 @@ export type Direction = 'ltr' | 'rtl'
 
 const DEFAULT_DIRECTION = 'ltr'
 const DIRECTION_COOKIE_NAME = 'dir'
-const DIRECTION_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
+const DIRECTION_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 yea
 
 type DirectionContextType = {
   defaultDir: Direction
@@ -51,7 +51,6 @@ export function DirectionProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useDirection() {
   const context = useContext(DirectionContext)
   if (!context) {
