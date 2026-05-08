@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 export const useGetLessons = () => {
   return useQuery({
     queryKey: ['lessons'],
-    queryFn: LessonService.getList
+    queryFn: LessonService.getList,
   })
 }
 
@@ -18,8 +18,9 @@ export const useCreateLesson = () => {
     mutationFn: LessonService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modules'] })
-      toast.success("Dars muvaffaqiyatli qo'shildi")
-    }
+      queryClient.invalidateQueries({ queryKey: ['module-details'] }) // Buni qo'shing
+      toast.success("Dars qo'shildi")
+    },
   })
 }
 
@@ -27,23 +28,33 @@ export const useCreateLesson = () => {
 export const useUpdateLesson = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, data }: { id: number, data: LessonCreateRequest }) => 
+    mutationFn: ({ id, data }: { id: number; data: LessonCreateRequest }) =>
       LessonService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modules'] })
-      toast.success("Dars yangilandi")
-    }
+      toast.success('Dars yangilandi')
+    },
   })
 }
 
 // 4. Delete Lesson Hook
 export const useDeleteLesson = () => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => LessonService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] })
-      toast.error("Dars o'chirildi")
-    }
+      queryClient.invalidateQueries({ queryKey: ['module-details'] });
+      queryClient.invalidateQueries({ queryKey: ['modules'] });
+      toast.success("Dars o'chirildi");
+    },
+    onError: () => toast.error("Darsni o'chirishda xatolik yuz berdi")
+  });
+};
+
+export const useGetModuleDetails = (moduleId: number | null) => {
+  return useQuery({
+    queryKey: ['module-details', moduleId],
+    queryFn: () => LessonService.getModuleDetail(moduleId!),
+    enabled: !!moduleId,
   })
 }
