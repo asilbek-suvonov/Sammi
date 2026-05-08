@@ -1,3 +1,5 @@
+import type { Lesson } from '@/service/lessons/lessons.types'
+
 // ─── GET Response Types ───────────────────────────────────────────────────────
 
 /** GET /modules/list — paginated list item */
@@ -11,21 +13,21 @@ export interface ModuleListItem {
   total_duration: number
 }
 
-/** GET /modules/detail/{id}/ — detail info */
+/** GET /modules/detail/:id/ — includes full lesson list */
 export interface ModuleDetail {
   id: number
   course: number
   course_title: string
   title: string
   order: number
-  lessons: string[] // Lessonlar ro'yxati (string yoki obyektligiga qarab o'zgartirish mumkin)
+  lessons?: Lesson[]
 }
 
-// ─── POST / PUT Request Types ───────────────────────────────────────────────
+// ─── POST / PUT / PATCH Request Types ────────────────────────────────────────
 
-/** POST /modules/ va PUT /modules/{id}/ */
+/** POST /modules/ and PUT/PATCH /modules/:id/ */
 export interface ModuleRequest {
-  course: number // Course ID
+  course: number
   title: string
   order?: number
 }

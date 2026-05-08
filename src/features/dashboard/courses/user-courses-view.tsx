@@ -58,7 +58,7 @@ const UserCoursesView = () => {
               <Link to='/course/$id' params={{ id: String(course.id) }}>
                 <div className='relative h-45 overflow-hidden rounded-md'>
                   <img
-                    src={course.image_url}
+                    src={course.image_url ?? undefined}
                     alt={course.title}
                     className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
                   />

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Main } from '@/components/layout/main'
 import { DashboardBreadcrumb } from '@/components/layout/dashboard-breadcrumb'
-import { ModulesSection } from '@/components/shared/modules-section'
 import { ProjectInfoSection } from '@/components/project/project-info-section'
 import { ProjectMetrics } from '@/components/project/project-metrics'
 
@@ -109,7 +108,6 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
         <ProjectInfoSection technologies={project.technologies} features={project.features} />
       </div>
 
-      <ModulesSection />
     </Main>
   )
 }

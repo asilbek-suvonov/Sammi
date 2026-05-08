@@ -26,6 +26,11 @@ export class ModuleService {
     return api.put<ModuleDetail>(url, data)
   }
 
+  static patch(id: number | string, data: Partial<ModuleRequest>): Promise<ModuleDetail> {
+    const url = API_ENDPOINTS.MODULES.PATCH.replace(':id', String(id))
+    return api.patch<ModuleDetail>(url, data)
+  }
+
   static delete(id: number | string): Promise<void> {
     const url = API_ENDPOINTS.MODULES.DELETE.replace(':id', String(id))
     return api.delete(url)
@@ -37,6 +42,7 @@ export const {
   detail: getModuleDetail,
   create: createModule,
   update: updateModule,
+  patch: patchModule,
   delete: deleteModule,
 } = ModuleService
 

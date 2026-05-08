@@ -1,5 +1,5 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import { ImageIcon } from 'lucide-react'
+import { CheckCircle2, ImageIcon, XCircle } from 'lucide-react'
 
 import type { Course } from '@/service/course/course.types'
 
@@ -16,27 +16,19 @@ type CoursesColumnsProps = {
   onDelete: (course: Course) => void
 }
 
-const levelVariantMap: Record<
-  string,
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
+const levelVariantMap: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   beginner: 'secondary',
   intermediate: 'default',
   advanced: 'destructive',
 }
 
-export function getCoursesColumns({
-  onEdit,
-  onDelete,
-}: CoursesColumnsProps): ColumnDef<Course>[] {
+export function getCoursesColumns({ onEdit, onDelete }: CoursesColumnsProps): ColumnDef<Course>[] {
   return [
     selectColumn<Course>(),
 
     {
       accessorKey: 'image_url',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Image' />
-      ),
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Image' />,
       cell: ({ row }) =>
         row.original.image_url ? (
           <ImagePreview
@@ -49,37 +41,26 @@ export function getCoursesColumns({
             <ImageIcon className='size-4 text-muted-foreground' />
           </div>
         ),
-      size: 90, // column width kichrayadi
+      size: 90,
     },
 
     {
       accessorKey: 'title',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Title' />
-      ),
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Title' />,
       cell: ({ row }) => (
         <div className='ml-2 max-w-[320px]'>
-          <span className='block truncate font-medium'>
-            {row.getValue('title')}
-          </span>
+          <span className='block truncate font-medium'>{row.getValue('title')}</span>
         </div>
       ),
     },
 
-    // LEVEL COLUMN
     {
       accessorKey: 'level',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Level' />
-      ),
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Level' />,
       cell: ({ row }) => {
         const level = row.getValue('level') as string
-
         return (
-          <Badge
-            variant={levelVariantMap[level] ?? 'outline'}
-            className='capitalize'
-          >
+          <Badge variant={levelVariantMap[level] ?? 'outline'} className='capitalize'>
             {level}
           </Badge>
         )
@@ -87,25 +68,9 @@ export function getCoursesColumns({
       filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
     },
 
-    // CATEGORY COLUMN
-    {
-      accessorKey: 'category_name',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Category' />
-      ),
-      cell: ({ row }) => (
-        <span className='text-sm text-muted-foreground'>
-          {(row.getValue('category_name') as string) || '—'}
-        </span>
-      ),
-    },
-
-    // PRICE COLUMN
     {
       accessorKey: 'price',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Price' />
-      ),
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Price' />,
       cell: ({ row }) =>
         row.original.is_free ? (
           <Badge variant='secondary'>Free</Badge>
@@ -114,30 +79,22 @@ export function getCoursesColumns({
         ),
     },
 
-    // NEW COLUMN
     {
-      accessorKey: 'is_new',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='New' />
-      ),
+      accessorKey: 'is_published',
+      header: ({ column }) => <DataTableColumnHeader column={column} title='Published' />,
       cell: ({ row }) =>
-        row.getValue('is_new') ? (
-          <Badge>New</Badge>
+        row.getValue('is_published') ? (
+          <CheckCircle2 className='size-4 text-emerald-500' />
         ) : (
-          <span className='text-muted-foreground'>—</span>
+          <XCircle className='size-4 text-muted-foreground' />
         ),
     },
 
-    // ACTIONS COLUMN
     {
       id: 'actions',
       enableHiding: false,
       cell: ({ row }) => (
-        <EntityActionsCell
-          entity={row.original}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        <EntityActionsCell entity={row.original} onEdit={onEdit} onDelete={onDelete} />
       ),
     },
   ]

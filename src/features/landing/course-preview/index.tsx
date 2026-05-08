@@ -33,7 +33,7 @@ export function CoursePreviewPage({ courseId }: Props) {
 
   if (!isEnrolled(String(course.id))) enrollCourse(String(course.id))
 
-  const videoSrc = course.preview_video_url
+  const videoSrc = course.preview_video_url_full
 
   return (
     <div className='flex h-screen flex-col overflow-hidden bg-background text-foreground'>

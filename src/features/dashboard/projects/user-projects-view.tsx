@@ -59,7 +59,7 @@ const UserProjectsView = () => {
               <Link to='/project/$id' params={{ id: String(project.id) }}>
                 <div className='relative h-45 overflow-hidden rounded-md'>
                   <img
-                    src={project.image_url}
+                    src={project.image_url ?? undefined}
                     alt={project.title}
                     className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
                   />

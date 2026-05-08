@@ -58,7 +58,7 @@ export function ProjectDetailPage({ id }: Props) {
 
             <div className='overflow-hidden rounded-xl border'>
               <img
-                src={project.image_url}
+                src={project.image_url ?? undefined}
                 alt={project.title}
                 className='h-64 w-full object-cover md:h-80'
               />

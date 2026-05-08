@@ -74,21 +74,36 @@ export function ProjectFormFields({ control, isEdit }: Props) {
       <FormField
         control={control}
         name='image'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Image</FormLabel>
-            <FormControl>
-              <FileUpload
-                value={field.value}
-                onChange={field.onChange}
-                accept='image/*'
-                placeholder='Upload project image'
-                hideExistingValue={isEdit}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        render={({ field }) => {
+          const isUrl = !!field.value && !field.value.startsWith('data:')
+          return (
+            <FormItem>
+              <FormLabel>Image</FormLabel>
+              {isEdit && isUrl && (
+                <div className='relative h-28 overflow-hidden rounded-md border bg-muted'>
+                  <img
+                    src={field.value}
+                    alt='Current image'
+                    className='h-full w-full object-cover'
+                    onError={(e) => { ;(e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                  <div className='absolute bottom-0 left-0 right-0 bg-black/40 px-2 py-0.5'>
+                    <p className='text-[10px] text-white'>Mavjud rasm</p>
+                  </div>
+                </div>
+              )}
+              <FormControl>
+                <FileUpload
+                  value={isEdit && isUrl ? '' : field.value}
+                  onChange={field.onChange}
+                  accept='image/*'
+                  placeholder={isEdit ? 'Yangi rasm yuklash (ixtiyoriy)' : 'Upload project image'}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )
+        }}
       />
 
       <FormField

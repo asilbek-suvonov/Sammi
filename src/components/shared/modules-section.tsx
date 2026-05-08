@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useModules, useCreateModule } from '@/api-hooks/module' 
+=======
+import { useModules } from '@/api-hooks/module'
+>>>>>>> 1e991538ff73c0b97433d4692521278a71aa46a5
 import { AddModuleDialog } from './add-module-dialog'
 import { Button } from '@/components/ui/button'
 import { Plus, Loader2, LayoutGrid } from 'lucide-react'
@@ -12,6 +16,7 @@ export function ModulesSection({ courseId }: ModulesSectionProps) {
   const { data: allModules = [], isLoading } = useModules()
   const createModule = useCreateModule()
 
+<<<<<<< HEAD
   // Kursga tegishli modullarni filter va sort qilish
   const courseModules = allModules
     .filter((m) => m.course === courseId)
@@ -32,6 +37,11 @@ export function ModulesSection({ courseId }: ModulesSectionProps) {
       }
     })
   }
+=======
+  const courseModules = allModules
+    .filter((m) => m.course === courseId)
+    .sort((a, b) => a.order - b.order)
+>>>>>>> 1e991538ff73c0b97433d4692521278a71aa46a5
 
   return (
     <div className='mt-8 max-w-7xl mx-auto px-4'>

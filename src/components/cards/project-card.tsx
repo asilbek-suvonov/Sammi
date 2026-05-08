@@ -13,7 +13,7 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
       <Card className='cursor-pointer overflow-hidden border dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>
         <div className='relative overflow-hidden rounded-lg'>
           <img
-            src={project.image_url}
+            src={project.image_url ?? undefined}
             alt={project.title}
             className='h-44 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110'
           />

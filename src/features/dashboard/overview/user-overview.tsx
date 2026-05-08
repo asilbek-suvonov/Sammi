@@ -64,7 +64,7 @@ const UserOverview = () => {
                 <div className='overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md p-4'>
                   <div className='relative h-45 overflow-hidden rounded-md'>
                     <img
-                      src={course.image_url}
+                      src={course.image_url ?? undefined}
                       alt={course.title}
                       className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
                     />
