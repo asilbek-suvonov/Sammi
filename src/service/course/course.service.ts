@@ -1,7 +1,6 @@
 import api from '@/api'
 import { API_ENDPOINTS } from '@/endpoints/api_endpoints'
 import type {
-  Course,
   CourseDetail,
   CourseListResponse,
   CourseQueryParams,

@@ -7,6 +7,18 @@ import type {
   LessonRequest,
 } from './lessons.types'
 
+function buildLessonFormData(data: LessonRequest): FormData {
+  const form = new FormData()
+  form.append('module', String(data.module))
+  form.append('title', data.title)
+  if (data.video) form.append('video', data.video)
+  if (data.video_url) form.append('video_url', data.video_url)
+  if (data.duration != null) form.append('duration', String(data.duration))
+  if (data.order != null) form.append('order', String(data.order))
+  if (data.is_preview != null) form.append('is_preview', String(data.is_preview))
+  return form
+}
+
 export class LessonService {
   static list(params?: LessonQueryParams): Promise<LessonListResponse> {
     return api.get<LessonListResponse>(API_ENDPOINTS.LESSON.LIST, { params })
@@ -18,12 +30,14 @@ export class LessonService {
   }
 
   static create(data: LessonRequest): Promise<Lesson> {
-    return api.post<Lesson>(API_ENDPOINTS.LESSON.CREATE, data)
+    const body = data.video ? buildLessonFormData(data) : data
+    return api.post<Lesson>(API_ENDPOINTS.LESSON.CREATE, body)
   }
 
   static update(id: number | string, data: LessonRequest): Promise<Lesson> {
     const url = API_ENDPOINTS.LESSON.UPDATE.replace(':id', String(id))
-    return api.put<Lesson>(url, data)
+    const body = data.video ? buildLessonFormData(data) : data
+    return api.put<Lesson>(url, body)
   }
 
   static patch(id: number | string, data: Partial<LessonRequest>): Promise<Lesson> {

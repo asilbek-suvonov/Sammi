@@ -43,6 +43,9 @@ export function courseToFormValues(course: {
   category_name: string
   level: CourseLevel
   price: string
+  is_free?: boolean
+  is_new?: boolean
+  is_published?: boolean
 }): CourseFormValues {
   return {
     title: course.title,
@@ -52,8 +55,8 @@ export function courseToFormValues(course: {
     technologies: [],
     level: normalizeLevel(course.level),
     price: course.price ?? '',
-    is_free: false,
-    is_new: false,
-    is_published: false,
+    is_free: course.is_free ?? false,
+    is_new: course.is_new ?? false,
+    is_published: course.is_published ?? true,
   }
 }

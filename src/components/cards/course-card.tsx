@@ -12,7 +12,7 @@ export function CourseCard({ course }: { course: Course }) {
         
         <div className='relative overflow-hidden rounded-lg'>
           <img
-            src={course.image_url} // API dagi nom: image_url
+            src={course.image_url ?? undefined}
             alt={course.title}
             className='h-45 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110'
           />

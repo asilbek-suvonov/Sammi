@@ -1,4 +1,4 @@
-import { useModules } from '@/api-hooks/module' // Bu yerda barcha modullarni olish hooki
+import { useModules } from '@/api-hooks/module'
 import { AddModuleDialog } from './add-module-dialog'
 
 interface ModulesSectionProps {
@@ -8,10 +8,9 @@ interface ModulesSectionProps {
 export function ModulesSection({ courseId }: ModulesSectionProps) {
   const { data: allModules = [], isLoading } = useModules()
 
-  // Faqat shu kursga tegishli modullarni filter qilamiz
   const courseModules = allModules
     .filter((m) => m.course === courseId)
-    .sort((a, b) => a.order - b.order) // Tartib bo'yicha saralash
+    .sort((a, b) => a.order - b.order)
 
   return (
     <div className='mt-6 max-w-7xl mx-auto'>

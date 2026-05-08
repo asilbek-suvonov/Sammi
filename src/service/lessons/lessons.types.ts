@@ -28,8 +28,9 @@ export interface LessonListResponse {
 export interface LessonRequest {
   module: number
   title: string
-  video_url: string
-  duration: number
+  video_url?: string
+  video?: File
+  duration?: number
   order?: number
   is_preview?: boolean
 }

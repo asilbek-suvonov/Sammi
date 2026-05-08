@@ -81,7 +81,7 @@ export function CourseDetailPage({ id }: Props) {
               )}
             </div>
             <div className='overflow-hidden rounded-xl border'>
-              <img src={course.image_url} alt={course.title} className='h-64 w-full object-cover md:h-80' />
+              <img src={course.image_url ?? undefined} alt={course.title} className='h-64 w-full object-cover md:h-80' />
             </div>
            
           </div>
