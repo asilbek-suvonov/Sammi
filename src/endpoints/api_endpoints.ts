@@ -80,6 +80,20 @@ export const API_ENDPOINTS = {
     PATCH: "/lesson-progress/:id/",
     LIST: "/lesson-progress/list",
   },
+  MODULES: {
+    LIST: "/modules/list",
+    DETAIL: "/modules/detail/:id/",
+    DELETE: "/modules/delete/:id/",
+    UPDATE: "/modules/:id/",
+    CREATE: "/modules/",
+  },
+  LESSON: {
+    CREATE: "/lessons/",
+    UPDATE: "/lessons/:id/",
+    DELETE: "/lessons/delete/:id/",
+    DETAIL: "/lessons/detail/:id/",
+    LIST: "/lessons/list",
+  }
 } as const;
 
 export default API_ENDPOINTS;

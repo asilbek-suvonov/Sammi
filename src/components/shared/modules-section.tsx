@@ -1,72 +1,34 @@
-import { useState } from 'react'
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { type Module, ModuleCard } from '@/components/shared/module-card'
-import { AddModuleDialog } from '@/components/shared/add-module-dialog'
-import { AddVideoSheet, type VideoFormData } from './add-video-sheet'
+import { useModules } from '@/api-hooks/module' // Bu yerda barcha modullarni olish hooki
+import { AddModuleDialog } from './add-module-dialog'
 
-export function ModulesSection() {
-  const [modules, setModules] = useState<Module[]>([])
-  const [moduleDialogOpen, setModuleDialogOpen] = useState(false)
-  const [videoSheetOpen, setVideoSheetOpen] = useState(false)
-  const [activeModuleId, setActiveModuleId] = useState<number | null>(null)
+interface ModulesSectionProps {
+  courseId: number
+}
 
-  const handleAddModule = (title: string) => {
-    setModules((prev) => [...prev, { id: Date.now(), title, videos: [] }])
-  }
+export function ModulesSection({ courseId }: ModulesSectionProps) {
+  const { data: allModules = [], isLoading } = useModules()
 
-  const openAddVideo = (moduleId: number) => {
-    setActiveModuleId(moduleId)
-    setVideoSheetOpen(true)
-  }
-
-  const handleAddVideo = (video: VideoFormData) => {
-    setModules((prev) =>
-      prev.map((m) =>
-        m.id === activeModuleId
-          ? { ...m, videos: [...m.videos, { id: Date.now(), ...video }] }
-          : m,
-      ),
-    )
-  }
+  // Faqat shu kursga tegishli modullarni filter qilamiz
+  const courseModules = allModules
+    .filter((m) => m.course === courseId)
+    .sort((a, b) => a.order - b.order) // Tartib bo'yicha saralash
 
   return (
-    <div className='mt-6'>
-      <div className='mb-3 flex items-center justify-between'>
-        <h2 className='text-lg font-semibold'>Modullar</h2>
-        <Button size='sm' onClick={() => setModuleDialogOpen(true)}>
-          <Plus className='mr-2 size-4' />
-          Modul qo'shish
-        </Button>
+    <div className='mt-6 max-w-7xl mx-auto'>
+      <div className='mb-6 flex items-center justify-between border-b pb-4'>
+        <div>
+          <h2 className='text-2xl font-bold tracking-tight'>Kurs Modullari</h2>
+          <p className='text-sm text-muted-foreground'>
+            Ushbu kurs uchun jami {courseModules.length} ta modul yaratilgan
+          </p>
+        </div>
       </div>
 
-      {modules.length > 0 ? (
-        <div className='space-y-3'>
-          {modules.map((m, i) => (
-            <ModuleCard
-              key={m.id}
-              order={i + 1}
-              module={m}
-              onAddVideo={() => openAddVideo(m.id)}
-            />
-          ))}
-        </div>
+      {isLoading ? (
+        <div className="py-10 text-center text-muted-foreground">Modullar yuklanmoqda...</div>
       ) : (
-        <p className='rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground'>
-          Hali modul qo'shilmagan. Boshlash uchun "Modul qo'shish" tugmasini bosing.
-        </p>
+        <AddModuleDialog courseId={courseId} modules={courseModules} />
       )}
-
-      <AddModuleDialog
-        open={moduleDialogOpen}
-        onOpenChange={setModuleDialogOpen}
-        onAdd={handleAddModule}
-      />
-      <AddVideoSheet
-        open={videoSheetOpen}
-        onOpenChange={setVideoSheetOpen}
-        onAdd={handleAddVideo}
-      />
     </div>
   )
 }

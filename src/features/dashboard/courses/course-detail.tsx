@@ -29,13 +29,9 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
       <Main>
         <div className='flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center'>
           <h1 className='text-2xl font-semibold'>Course not found</h1>
-          <p className='text-sm text-muted-foreground'>
-            The course you are looking for does not exist or has been removed.
-          </p>
           <Button asChild>
             <Link to='/dashboard/courses'>
-              <ArrowLeft className='mr-2 size-4' />
-              Back to courses
+              <ArrowLeft className='mr-2 size-4' /> Back to courses
             </Link>
           </Button>
         </div>
@@ -67,7 +63,6 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
             <Badge variant='outline' className='capitalize'>{course.level}</Badge>
             {course.category_name && <Badge variant='secondary'>{course.category_name}</Badge>}
             {course.is_free && <Badge>Free</Badge>}
-            {course.is_new && <Badge>New</Badge>}
           </div>
           <h1 className='truncate text-2xl font-bold tracking-tight'>{course.title}</h1>
           <p className='line-clamp-3 max-w-2xl text-sm text-muted-foreground'>{course.description}</p>
@@ -76,22 +71,8 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
 
       <Separator className='my-6' />
 
-      
-
-      {course.preview_video_url_full && (
-        <div className='mt-4'>
-          <Card>
-            <CardHeader><CardTitle className='text-base'>Preview</CardTitle></CardHeader>
-            <CardContent>
-              <div className='aspect-video overflow-hidden rounded-md border'>
-                <video src={course.preview_video_url_full} controls className='h-full w-full object-cover' />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      <ModulesSection />
+      {/* ModulesSection ga kurs ID-sini number formatida beramiz */}
+      <ModulesSection courseId={Number(id)} />
     </Main>
   )
 }
