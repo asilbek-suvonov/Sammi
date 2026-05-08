@@ -85,11 +85,13 @@ export const API_ENDPOINTS = {
     DETAIL: "/modules/detail/:id/",
     DELETE: "/modules/delete/:id/",
     UPDATE: "/modules/:id/",
+    PATCH: "/modules/:id/",
     CREATE: "/modules/",
   },
   LESSON: {
     CREATE: "/lessons/",
     UPDATE: "/lessons/:id/",
+    PATCH: "/lessons/:id/",
     DELETE: "/lessons/delete/:id/",
     DETAIL: "/lessons/detail/:id/",
     LIST: "/lessons/list",

@@ -17,11 +17,11 @@ import {
 import { useCreateModule, useUpdateModule, useDeleteModule } from '@/api-hooks/module'
 import { useCreateLesson, useUpdateLesson, useDeleteLesson } from '../../api-hooks/lessons/use-lessons'
 import { LessonForm } from '../LessonForm'
-import { Module } from '../../service/lessons/lessons.types'
+import type { ModuleDetail } from '@/service/module/module.types'
 
 interface Props {
   courseId: number
-  modules: Module[]
+  modules: ModuleDetail[]
 }
 
 export function AddModuleDialog({ courseId, modules }: Props) {

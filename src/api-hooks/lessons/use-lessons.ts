@@ -1,49 +1,59 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { LessonService } from '../../service/lessons/lessons.service'
-import { LessonCreateRequest } from '../../service/lessons/lessons.types'
 import { toast } from 'sonner'
+import {
+  createLesson,
+  deleteLesson,
+  getLessonList,
+  updateLesson,
+} from '@/service/lessons/lessons.service'
+import type { LessonQueryParams, LessonRequest } from '@/service/lessons/lessons.types'
 
-// 1. Get Lessons Hook
-export const useGetLessons = () => {
+export const lessonKeys = {
+  all: ['lessons'] as const,
+  list: (params?: LessonQueryParams) => [...lessonKeys.all, 'list', params] as const,
+  detail: (id: number | string) => [...lessonKeys.all, 'detail', String(id)] as const,
+}
+
+export function useGetLessons(params?: LessonQueryParams) {
   return useQuery({
-    queryKey: ['lessons'],
-    queryFn: LessonService.getList
+    queryKey: lessonKeys.list(params),
+    queryFn: () => getLessonList(params),
   })
 }
 
-// 2. Create Lesson Hook
-export const useCreateLesson = () => {
-  const queryClient = useQueryClient()
+export function useCreateLesson() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: LessonService.create,
+    mutationFn: createLesson,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] })
+      qc.invalidateQueries({ queryKey: lessonKeys.all })
+      qc.invalidateQueries({ queryKey: ['modules'] })
       toast.success("Dars muvaffaqiyatli qo'shildi")
-    }
+    },
   })
 }
 
-// 3. Update Lesson Hook
-export const useUpdateLesson = () => {
-  const queryClient = useQueryClient()
+export function useUpdateLesson() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, data }: { id: number, data: LessonCreateRequest }) => 
-      LessonService.update(id, data),
+    mutationFn: ({ id, data }: { id: number | string; data: LessonRequest }) =>
+      updateLesson(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] })
-      toast.success("Dars yangilandi")
-    }
+      qc.invalidateQueries({ queryKey: lessonKeys.all })
+      qc.invalidateQueries({ queryKey: ['modules'] })
+      toast.success('Dars yangilandi')
+    },
   })
 }
 
-// 4. Delete Lesson Hook
-export const useDeleteLesson = () => {
-  const queryClient = useQueryClient()
+export function useDeleteLesson() {
+  const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => LessonService.delete(id),
+    mutationFn: (id: number | string) => deleteLesson(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['modules'] })
+      qc.invalidateQueries({ queryKey: lessonKeys.all })
+      qc.invalidateQueries({ queryKey: ['modules'] })
       toast.error("Dars o'chirildi")
-    }
+    },
   })
 }
