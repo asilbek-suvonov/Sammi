@@ -1,6 +1,6 @@
 
 export interface GoogleAuthRequest {
-  access_token: string
+  token: string
 }
 
 export interface GoogleAuthResponse {

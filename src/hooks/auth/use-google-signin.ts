@@ -64,7 +64,7 @@ export function useGoogleSignIn(onDone?: () => void) {
         let refreshToken = ''
 
         try {
-          const data = await googleAuth({ access_token: tokenResponse.access_token })
+          const data = await googleAuth({ token: tokenResponse.access_token })
           if (data?.access) {
             accessToken = data.access
             refreshToken = data.refresh ?? ''

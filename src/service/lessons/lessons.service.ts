@@ -7,6 +7,8 @@ import type {
   LessonRequest,
 } from './lessons.types'
 
+const multipart = { headers: { 'Content-Type': 'multipart/form-data' } }
+
 function buildLessonFormData(data: LessonRequest): FormData {
   const form = new FormData()
   form.append('module', String(data.module))
@@ -30,14 +32,12 @@ export class LessonService {
   }
 
   static create(data: LessonRequest): Promise<Lesson> {
-    const body = data.video ? buildLessonFormData(data) : data
-    return api.post<Lesson>(API_ENDPOINTS.LESSON.CREATE, body)
+    return api.post<Lesson>(API_ENDPOINTS.LESSON.CREATE, buildLessonFormData(data), multipart)
   }
 
   static update(id: number | string, data: LessonRequest): Promise<Lesson> {
     const url = API_ENDPOINTS.LESSON.UPDATE.replace(':id', String(id))
-    const body = data.video ? buildLessonFormData(data) : data
-    return api.put<Lesson>(url, body)
+    return api.put<Lesson>(url, buildLessonFormData(data), multipart)
   }
 
   static patch(id: number | string, data: Partial<LessonRequest>): Promise<Lesson> {

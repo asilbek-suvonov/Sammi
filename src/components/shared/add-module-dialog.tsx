@@ -1,107 +1,52 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronDown, GripVertical, Loader2, Trash2 } from 'lucide-react'
 
+import { useDeleteModule, useUpdateModule } from '@/api-hooks/module'
 import {
-  ChevronDown,
-  GripVertical,
-  Pencil,
-  Plus,
-  Trash2,
-  Video,
-} from 'lucide-react'
-
-import {
-  useDeleteModule,
-  useUpdateModule,
-} from '@/api-hooks/module'
-
-import { useDeleteLesson } from '@/api-hooks/lessons/use-lessons'
-
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-
 import { cn } from '@/lib/utils'
-
-import { LessonDialog } from './lesson-dialog'
-
-import type { ModuleDetail } from '@/service/module/module.types'
 import type { Lesson } from '@/service/lessons/lessons.types'
+import type { ModuleListItem } from '@/service/module/module.types'
+import { LessonDialog } from './lesson-dialog'
+import { ModuleLessonsPanel } from './module-lessons-panel'
 
 interface Props {
   courseId: number
-  modules: ModuleDetail[]
+  modules: ModuleListItem[]
+  initialEditingId?: number | null
+  onResetEditingId?: () => void
 }
 
-export function AddModuleDialog({
-  courseId,
-  modules,
-}: Props) {
-  const [openModuleId, setOpenModuleId] =
-    useState<number | null>(null)
-
-  const [editingModuleId, setEditingModuleId] =
-    useState<number | null>(null)
-
-  const [lessonDialogModuleId, setLessonDialogModuleId] =
-    useState<number | null>(null)
-
-  const [editingLesson, setEditingLesson] =
-    useState<Lesson | undefined>()
+export function AddModuleDialog({ courseId, modules, initialEditingId, onResetEditingId }: Props) {
+  const [openModuleId, setOpenModuleId] = useState<number | null>(null)
+  const [editingModuleId, setEditingModuleId] = useState<number | null>(null)
+  const [lessonDialogModuleId, setLessonDialogModuleId] = useState<number | null>(null)
+  const [editingLesson, setEditingLesson] = useState<Lesson | undefined>()
 
   const updateModule = useUpdateModule()
-
   const deleteModule = useDeleteModule()
 
-  const deleteLesson = useDeleteLesson()
+  const sortedModules = useMemo(() => [...modules].sort((a, b) => a.order - b.order), [modules])
 
-  const sortedModules = useMemo(() => {
-    return [...modules].sort(
-      (a, b) => a.order - b.order
-    )
-  }, [modules])
-
-  const onUpdateModuleTitle = (
-    id: number,
-    title: string
-  ) => {
-    const currentModule = modules.find(
-      (m) => m.id === id
-    )
-
-    if (
-      !title.trim() ||
-      title === currentModule?.title
-    ) {
-      setEditingModuleId(null)
-      return
+  useEffect(() => {
+    if (initialEditingId != null) {
+      setEditingModuleId(initialEditingId)
+      onResetEditingId?.()
     }
+  }, [initialEditingId, onResetEditingId])
 
+  const onUpdateModuleTitle = (id: number, newTitle: string) => {
+    const current = modules.find((m) => m.id === id)
+    if (!newTitle.trim() || newTitle === current?.title) { setEditingModuleId(null); return }
     updateModule.mutate(
-      {
-        id,
-        data: {
-          course: courseId,
-          title: title.trim(),
-          order: currentModule?.order ?? 1,
-        },
-      },
-      {
-        onSuccess: () => {
-          setEditingModuleId(null)
-        },
-      }
+      { id, data: { course: courseId, title: newTitle.trim(), order: current?.order ?? 0 } },
+      { onSuccess: () => setEditingModuleId(null) }
     )
   }
 
@@ -118,89 +63,46 @@ export function AddModuleDialog({
   return (
     <div className='space-y-4'>
       <AnimatePresence mode='popLayout'>
-        {sortedModules.map((module, index) => {
-          const isOpen =
-            openModuleId === module.id
-
-          const isEditing =
-            editingModuleId === module.id
-
+        {sortedModules.map((mod, index) => {
+          const isOpen = openModuleId === mod.id
+          const isEditing = editingModuleId === mod.id
           return (
             <motion.div
-              key={module.id}
+              key={mod.id}
               layout
-              initial={{
-                opacity: 0,
-                y: 10,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              exit={{
-                opacity: 0,
-                y: -10,
-              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               className={cn(
-                'overflow-hidden rounded-xl border bg-card transition-all',
-                isOpen &&
-                  'border-primary shadow-md'
+                'overflow-hidden rounded-xl border transition-all duration-200',
+                isOpen ? 'border-primary shadow-md ring-1 ring-primary/10' : 'bg-card'
               )}
             >
-              <div className='flex items-center justify-between bg-muted/10 p-4'>
+              <div className='flex items-center justify-between bg-muted/5 p-4 select-none'>
                 <div
                   className='flex flex-1 cursor-pointer items-center gap-3'
-                  onClick={() =>
-                    !isEditing &&
-                    setOpenModuleId(
-                      isOpen
-                        ? null
-                        : module.id
-                    )
-                  }
+                  onClick={() => !isEditing && setOpenModuleId(isOpen ? null : mod.id)}
                 >
-                  <GripVertical className='size-4 text-muted-foreground/40' />
-
-                  <span className='flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary'>
+                  <GripVertical className='size-4 text-muted-foreground/30' />
+                  <span className='flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary'>
                     {index + 1}
                   </span>
-
                   <div className='flex-1'>
                     {isEditing ? (
                       <Input
+                        defaultValue={mod.title}
                         autoFocus
-                        defaultValue={
-                          module.title
-                        }
                         className='h-8 max-w-sm'
-                        onBlur={(e) =>
-                          onUpdateModuleTitle(
-                            module.id,
-                            e.target.value
-                          )
-                        }
-                        onKeyDown={(e) => {
-                          if (
-                            e.key === 'Enter'
-                          ) {
-                            onUpdateModuleTitle(
-                              module.id,
-                              e.currentTarget
-                                .value
-                            )
-                          }
-                        }}
+                        onBlur={(e) => onUpdateModuleTitle(mod.id, e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && onUpdateModuleTitle(mod.id, e.currentTarget.value)}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     ) : (
                       <h3
                         className='text-sm font-semibold transition-colors hover:text-primary'
-                        onDoubleClick={() =>
-                          setEditingModuleId(
-                            module.id
-                          )
-                        }
+                        onDoubleClick={(e) => { e.stopPropagation(); setEditingModuleId(mod.id) }}
                       >
-                        {module.title}
+                        {mod.title}
                       </h3>
                     )}
                   </div>
@@ -212,64 +114,39 @@ export function AddModuleDialog({
                       <Button
                         size='icon'
                         variant='ghost'
-                        className='size-8 hover:text-destructive'
+                        className='size-8 text-muted-foreground hover:text-destructive'
+                        disabled={deleteModule.isPending}
                       >
-                        <Trash2 className='size-4' />
+                        {deleteModule.isPending
+                          ? <Loader2 className='size-4 animate-spin' />
+                          : <Trash2 className='size-4' />}
                       </Button>
                     </AlertDialogTrigger>
-
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Modulni o‘chirish?
-                        </AlertDialogTitle>
-
+                        <AlertDialogTitle>Modulni o'chirish?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Ushbu modul va
-                          uning barcha
-                          darslari
-                          o‘chiriladi.
+                          Ushbu modul va uning ichidagi barcha darslar butunlay o'chib ketadi.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-
                       <AlertDialogFooter>
-                        <AlertDialogCancel>
-                          Bekor qilish
-                        </AlertDialogCancel>
-
+                        <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
                         <AlertDialogAction
-                          className='bg-destructive'
-                          onClick={() =>
-                            deleteModule.mutate(
-                              module.id
-                            )
-                          }
+                          className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                          onClick={() => deleteModule.mutate(mod.id)}
                         >
-                          O‘chirish
+                          O'chirish
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-
                   <Button
                     size='icon'
                     variant='ghost'
                     className='size-8'
-                    onClick={() =>
-                      setOpenModuleId(
-                        isOpen
-                          ? null
-                          : module.id
-                      )
-                    }
+                    onClick={() => setOpenModuleId(isOpen ? null : mod.id)}
                   >
-                    <ChevronDown
-                      className={cn(
-                        'size-4 transition-transform',
-                        isOpen &&
-                          'rotate-180'
-                      )}
-                    />
+                    <ChevronDown className={cn('size-4 transition-transform duration-300', isOpen && 'rotate-180')} />
                   </Button>
                 </div>
               </div>
@@ -277,79 +154,17 @@ export function AddModuleDialog({
               <AnimatePresence>
                 {isOpen && (
                   <motion.div
-                    initial={{
-                      height: 0,
-                    }}
-                    animate={{
-                      height: 'auto',
-                    }}
-                    exit={{
-                      height: 0,
-                    }}
-                    className='overflow-hidden border-t bg-muted/5'
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className='overflow-hidden border-t bg-muted/10'
                   >
-                    <div className='space-y-2 p-4'>
-                      {module.lessons?.map(
-                        (lesson) => (
-                          <div
-                            key={lesson.id}
-                            className='group flex items-center justify-between rounded-lg border bg-background px-3 py-2'
-                          >
-                            <div className='flex items-center gap-2'>
-                              <Video className='size-4 text-muted-foreground' />
-
-                              <p className='max-w-[260px] truncate text-sm font-medium'>
-                                {
-                                  lesson.title
-                                }
-                              </p>
-                            </div>
-
-                            <div className='flex gap-1 opacity-0 transition-opacity group-hover:opacity-100'>
-                              <Button
-                                size='icon'
-                                variant='ghost'
-                                className='size-7'
-                                onClick={() =>
-                                  openEditLesson(
-                                    lesson
-                                  )
-                                }
-                              >
-                                <Pencil className='size-3.5' />
-                              </Button>
-
-                              <Button
-                                size='icon'
-                                variant='ghost'
-                                className='size-7 text-destructive'
-                                onClick={() =>
-                                  deleteLesson.mutate(
-                                    lesson.id
-                                  )
-                                }
-                              >
-                                <Trash2 className='size-3.5' />
-                              </Button>
-                            </div>
-                          </div>
-                        )
-                      )}
-
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        className='mt-2 w-full border-dashed'
-                        onClick={() =>
-                          openAddLesson(
-                            module.id
-                          )
-                        }
-                      >
-                        <Plus className='mr-2 size-4' />
-                        Dars qo‘shish
-                      </Button>
-                    </div>
+                    <ModuleLessonsPanel
+                      moduleId={mod.id}
+                      onAddLesson={() => openAddLesson(mod.id)}
+                      onEditLesson={openEditLesson}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -358,22 +173,18 @@ export function AddModuleDialog({
         })}
       </AnimatePresence>
 
-      <LessonDialog
-        open={
-          lessonDialogModuleId !== null
-        }
-        onOpenChange={(open) => {
-          if (!open) {
-            setLessonDialogModuleId(
-              null
-            )
+      {modules.length === 0 && (
+        <div className='flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center'>
+          <p className='text-sm text-muted-foreground'>Hozircha modullar yo'q</p>
+        </div>
+      )}
 
-            setEditingLesson(undefined)
-          }
+      <LessonDialog
+        open={lessonDialogModuleId !== null}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) { setLessonDialogModuleId(null); setEditingLesson(undefined) }
         }}
-        moduleId={
-          lessonDialogModuleId ?? 0
-        }
+        moduleId={lessonDialogModuleId ?? 0}
         lesson={editingLesson}
       />
     </div>

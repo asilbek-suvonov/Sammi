@@ -43,3 +43,23 @@ export interface LessonQueryParams {
   search?: string
   ordering?: string
 }
+
+// ─── Module Detail Response Type ─────────────────────────────────────────────
+
+/** GET /modules/detail/:id/ response */
+export interface ModuleDetail {
+  id: number
+  course: number
+  title: string
+  order: number
+  lessons: Lesson[] // Modul ichidagi barcha darslar
+  created_at?: string
+  updated_at?: string
+}
+
+/** Modul yaratish yoki yangilash uchun request (agar kerak bo'lsa) */
+export interface ModuleRequest {
+  course: number
+  title: string
+  order: number
+}
