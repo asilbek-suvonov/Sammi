@@ -1,46 +1,30 @@
-import { Loader2, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2, Plus } from 'lucide-react'
+import { useState } from 'react'
 
-import { useCreateModule, useModules } from '@/api-hooks/module';
-import { Button } from '@/components/ui/button';
-import { AddModuleDialog } from './add-module-dialog';
+import { useCreateModule, useModules } from '@/api-hooks/module'
+import { Button } from '@/components/ui/button'
+import { AddModuleDialog } from './add-module-dialog'
 
 interface Props {
-  courseId: number;
+  courseId: number
 }
 
 export function ModulesSection({ courseId }: Props) {
-  const { data: allModules = [], isLoading } = useModules();
-  const createModule = useCreateModule();
-  
-  // Modul qo'shilgandan keyin uni tahrirlash rejimida ochish uchun state
-  const [initialEditingId, setInitialEditingId] = useState<number | null>(null);
+  const { data: allModules = [], isLoading } = useModules()
+  const createModule = useCreateModule()
+  const [editingModuleId, setEditingModuleId] = useState<number | null>(null)
 
-  // Faqat ushbu kursga tegishli modullarni ajratib olish va tartiblash
   const courseModules = allModules
     .filter((m) => m.course === courseId)
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => a.order - b.order)
 
   const onAddModule = () => {
-    // Keyingi tartib raqamini aniqlash
-    const nextOrder = courseModules.length > 0 
-      ? Math.max(...courseModules.map(m => m.order)) + 1 
-      : 1;
-
+    const nextOrder = courseModules.length > 0 ? Math.max(...courseModules.map((m) => m.order)) + 1 : 1
     createModule.mutate(
-      { 
-        course: courseId, 
-        title: `Yangi modul ${courseModules.length + 1}`, 
-        order: nextOrder 
-      },
-      { 
-        onSuccess: (newMod) => {
-          // Yangi modul yaratilgach, uni tahrirlash uchun ID ni saqlaymiz
-          setInitialEditingId(newMod.id);
-        } 
-      }
-    );
-  };
+      { course: courseId, title: `Yangi modul ${courseModules.length + 1}`, order: nextOrder },
+      { onSuccess: (newMod) => setEditingModuleId(newMod.id) }
+    )
+  }
 
   return (
     <div className='mx-auto mt-6 max-w-7xl px-4'>
@@ -51,18 +35,10 @@ export function ModulesSection({ courseId }: Props) {
             Ushbu kurs uchun jami {courseModules.length} ta modul yaratilgan
           </p>
         </div>
-
-        <Button 
-          onClick={onAddModule} 
-          disabled={createModule.isPending} 
-          size='sm' 
-          className='shadow-sm'
-        >
-          {createModule.isPending ? (
-            <Loader2 className='mr-2 size-4 animate-spin' />
-          ) : (
-            <Plus className='mr-2 size-4' />
-          )}
+        <Button onClick={onAddModule} disabled={createModule.isPending} size='sm' className='shadow-sm'>
+          {createModule.isPending
+            ? <Loader2 className='mr-2 size-4 animate-spin' />
+            : <Plus className='mr-2 size-4' />}
           Modul qo'shish
         </Button>
       </div>
@@ -73,13 +49,13 @@ export function ModulesSection({ courseId }: Props) {
           Modullar yuklanmoqda...
         </div>
       ) : (
-        <AddModuleDialog 
-          courseId={courseId} 
-          modules={courseModules} 
-          initialEditingId={initialEditingId}
-          onResetEditingId={() => setInitialEditingId(null)}
+        <AddModuleDialog
+          courseId={courseId}
+          modules={courseModules}
+          editingModuleId={editingModuleId}
+          onEditingModuleIdChange={setEditingModuleId}
         />
       )}
     </div>
-  );
+  )
 }

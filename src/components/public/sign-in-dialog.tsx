@@ -1,5 +1,5 @@
+import { GoogleLogin } from '@react-oauth/google'
 import { IconGithub } from '@/assets/brand-icons'
-import { IconGoogle } from '@/assets/brand-icons/icon-google'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -99,15 +99,16 @@ export function SignInDialog({
 
         {!emailStep ? (
           <div className="space-y-3 pt-2">
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={() => google.start()}
-              disabled={signingIn}
-            >
-              <IconGoogle className="size-4" />
-              {google.signingIn ? 'Signing in...' : 'Continue with Google'}
-            </Button>
+            <div className={signingIn ? 'pointer-events-none opacity-50' : ''}>
+              <GoogleLogin
+                onSuccess={google.handleCredential}
+                onError={() => toast.error('Google orqali kirish bekor qilindi')}
+                theme="outline"
+                size="large"
+                text="continue_with"
+                width="336"
+              />
+            </div>
 
             <Button
               variant="outline"
