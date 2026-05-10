@@ -8,6 +8,14 @@ import axios, {
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
 
+// Allow callers to suppress the global error toast for expected API errors
+// (e.g. 403 = "already enrolled", 400 = "progress already exists")
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    silent?: boolean
+  }
+}
+
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
 const timeout = Number(import.meta.env.VITE_API_TIMEOUT ?? 30_000)
@@ -88,11 +96,15 @@ apiClient.interceptors.response.use(
     if (isAxiosError(error)) {
       const status = error.response?.status
 
+      const silent = error.config?.silent ?? false
+
       switch (status) {
         case 400: {
-          const errorData = error.response?.data as Record<string, unknown>
-          const errorMsg = extractErrorMessage(errorData)
-          toast.error(errorMsg || "Noto'g'ri so'rov. Ma'lumotlarni tekshiring.")
+          if (!silent) {
+            const errorData = error.response?.data as Record<string, unknown>
+            const errorMsg = extractErrorMessage(errorData)
+            toast.error(errorMsg || "Noto'g'ri so'rov. Ma'lumotlarni tekshiring.")
+          }
           break
         }
         case 401:
@@ -100,13 +112,17 @@ apiClient.interceptors.response.use(
           toast.error('Sessiya tugadi. Iltimos, qayta kiring.')
           break
         case 403:
-          toast.error("Bu amalni bajarish uchun ruxsat yo'q.")
+          if (!silent) {
+            toast.error("Bu amalni bajarish uchun ruxsat yo'q.")
+          }
           break
         case 500:
-          toast.error("Server xatosi. Keyinroq urinib ko'ring.")
+          if (!silent) {
+            toast.error("Server xatosi. Keyinroq urinib ko'ring.")
+          }
           break
         default:
-          if (!error.response) {
+          if (!error.response && !silent) {
             toast.error("Internet bilan bog'lanishda muammo yuz berdi.")
           }
       }

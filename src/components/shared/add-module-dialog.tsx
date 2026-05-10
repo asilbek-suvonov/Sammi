@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, GripVertical, Loader2, Trash2 } from 'lucide-react'
 
@@ -19,13 +19,12 @@ import { ModuleLessonsPanel } from './module-lessons-panel'
 interface Props {
   courseId: number
   modules: ModuleListItem[]
-  initialEditingId?: number | null
-  onResetEditingId?: () => void
+  editingModuleId: number | null
+  onEditingModuleIdChange: (id: number | null) => void
 }
 
-export function AddModuleDialog({ courseId, modules, initialEditingId, onResetEditingId }: Props) {
+export function AddModuleDialog({ courseId, modules, editingModuleId, onEditingModuleIdChange }: Props) {
   const [openModuleId, setOpenModuleId] = useState<number | null>(null)
-  const [editingModuleId, setEditingModuleId] = useState<number | null>(null)
   const [lessonDialogModuleId, setLessonDialogModuleId] = useState<number | null>(null)
   const [editingLesson, setEditingLesson] = useState<Lesson | undefined>()
 
@@ -34,19 +33,12 @@ export function AddModuleDialog({ courseId, modules, initialEditingId, onResetEd
 
   const sortedModules = useMemo(() => [...modules].sort((a, b) => a.order - b.order), [modules])
 
-  useEffect(() => {
-    if (initialEditingId != null) {
-      setEditingModuleId(initialEditingId)
-      onResetEditingId?.()
-    }
-  }, [initialEditingId, onResetEditingId])
-
   const onUpdateModuleTitle = (id: number, newTitle: string) => {
     const current = modules.find((m) => m.id === id)
-    if (!newTitle.trim() || newTitle === current?.title) { setEditingModuleId(null); return }
+    if (!newTitle.trim() || newTitle === current?.title) { onEditingModuleIdChange(null); return }
     updateModule.mutate(
       { id, data: { course: courseId, title: newTitle.trim(), order: current?.order ?? 0 } },
-      { onSuccess: () => setEditingModuleId(null) }
+      { onSuccess: () => onEditingModuleIdChange(null) }
     )
   }
 
@@ -100,7 +92,7 @@ export function AddModuleDialog({ courseId, modules, initialEditingId, onResetEd
                     ) : (
                       <h3
                         className='text-sm font-semibold transition-colors hover:text-primary'
-                        onDoubleClick={(e) => { e.stopPropagation(); setEditingModuleId(mod.id) }}
+                        onDoubleClick={(e) => { e.stopPropagation(); onEditingModuleIdChange(mod.id) }}
                       >
                         {mod.title}
                       </h3>
