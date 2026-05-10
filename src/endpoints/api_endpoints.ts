@@ -67,7 +67,7 @@ export const API_ENDPOINTS = {
   },
 
   ENROLLMENT: {
-    CREATE: "/enrollment",
+    CREATE: "/enrollment/",
     DETAIL: "/enrollment/:id/",
     DELETE: "/enrollment/delete/:id/",
     LIST: "/enrollment/list",

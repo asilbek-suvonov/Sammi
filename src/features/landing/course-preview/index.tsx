@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { BookOpen, GraduationCap } from 'lucide-react'
 import { useCourse } from '@/api-hooks/course/use-courses'
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { CurriculumSheet } from '@/components/preview/curriculum-sheet'
 import { LessonPlayer } from '@/components/preview/lesson-player'
 import { useCourseCurriculum } from '@/hooks/course/use-course-curriculum'
-import { useUserActions } from '@/stores/selectors'
+import { useLessonTracking } from '@/hooks/course/use-lesson-tracking'
 import type { Lesson } from '@/service/lessons/lessons.types'
 
 interface Props {
@@ -15,20 +15,31 @@ interface Props {
 
 export function CoursePreviewPage({ courseId }: Props) {
   const { data: course, isLoading } = useCourse(courseId)
-  const { enrollCourse, isEnrolled } = useUserActions()
 
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [hasOpened, setHasOpened] = useState(false)
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
-  const [completedIds, setCompletedIds] = useState<Set<number>>(new Set())
+  const firstSet = useRef(false)
 
-  const curriculumEnabled = sheetOpen || hasOpened
+  // Always load curriculum — not lazily — so first lesson can auto-play
   const { modules, flatLessons, isLoading: curriculumLoading } =
-    useCourseCurriculum(courseId, curriculumEnabled)
+    useCourseCurriculum(courseId, !!courseId && courseId !== '0')
+
+  // Auto-select the very first lesson once curriculum finishes loading
+  useEffect(() => {
+    if (firstSet.current || curriculumLoading || flatLessons.length === 0) return
+    firstSet.current = true
+    setCurrentLesson(flatLessons[0])
+  }, [curriculumLoading, flatLessons])
+
+  const { completedIds, markDone } = useLessonTracking({ courseId, flatLessons })
 
   const currentIdx = currentLesson
     ? flatLessons.findIndex((l) => l.id === currentLesson.id)
     : -1
+
+  const canNavigate = !curriculumLoading && currentIdx !== -1
+  const hasPrev = canNavigate && currentIdx > 0
+  const hasNext = canNavigate && currentIdx < flatLessons.length - 1
 
   if (isLoading) {
     return (
@@ -49,43 +60,38 @@ export function CoursePreviewPage({ courseId }: Props) {
     )
   }
 
-  if (!isEnrolled(String(course.id))) enrollCourse(String(course.id))
-
-  const handleOpenSheet = () => {
-    if (!hasOpened) setHasOpened(true)
-    setSheetOpen(true)
-  }
-
   const handleMarkDone = () => {
     if (!currentLesson) return
-    setCompletedIds((prev) => new Set([...prev, currentLesson.id]))
-    const next = flatLessons[currentIdx + 1]
-    if (next) setCurrentLesson(next)
+    markDone(currentLesson.id)
+    if (hasNext) setCurrentLesson(flatLessons[currentIdx + 1])
   }
 
   return (
     <div className='flex h-screen flex-col overflow-hidden bg-background text-foreground'>
-      <header className='shrink-0 border-b bg-background/95 backdrop-blur'>
+      <header className='shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
         <div className='mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6'>
-          <Link to='/' className='flex items-center gap-2'>
-            <span className='hidden text-sm font-semibold tracking-tight sm:block'>
-              Sammi
-            </span>
+          <Link
+            to='/'
+            className='text-sm font-bold tracking-tight text-foreground transition-opacity hover:opacity-70'
+          >
+            Sammi
           </Link>
-          <div className='flex flex-1 items-center justify-center px-4'>
-            <div className='flex items-center gap-2 text-sm'>
+
+          <div className='flex min-w-0 flex-1 items-center justify-center px-6'>
+            <div className='flex min-w-0 items-center gap-2 text-sm'>
               <GraduationCap className='size-4 shrink-0 text-muted-foreground' />
-              <span className='line-clamp-1 font-medium'>{course.title}</span>
+              <span className='truncate font-medium'>{course.title}</span>
             </div>
           </div>
+
           <Button
-            variant='outline'
+            variant='ghost'
             size='sm'
-            onClick={handleOpenSheet}
-            className='gap-1.5'
+            onClick={() => setSheetOpen(true)}
+            className='shrink-0 gap-1.5'
           >
             <BookOpen className='size-4' />
-            <span className='hidden sm:inline'>Kurs qismlari</span>
+            <span className='hidden text-xs sm:inline'>Kurs qismlari</span>
           </Button>
         </div>
       </header>
@@ -95,16 +101,11 @@ export function CoursePreviewPage({ courseId }: Props) {
           <LessonPlayer
             lesson={currentLesson}
             previewUrl={course.preview_video_url_full}
-            hasPrev={currentIdx > 0}
-            hasNext={currentIdx !== -1 && currentIdx < flatLessons.length - 1}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
             isCompleted={currentLesson ? completedIds.has(currentLesson.id) : false}
-            onPrev={() => {
-              if (currentIdx > 0) setCurrentLesson(flatLessons[currentIdx - 1])
-            }}
-            onNext={() => {
-              if (currentIdx < flatLessons.length - 1)
-                setCurrentLesson(flatLessons[currentIdx + 1])
-            }}
+            onPrev={() => setCurrentLesson(flatLessons[currentIdx - 1])}
+            onNext={() => setCurrentLesson(flatLessons[currentIdx + 1])}
             onMarkDone={handleMarkDone}
           />
         </div>

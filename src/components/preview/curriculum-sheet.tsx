@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CheckCircle2, ChevronDown } from 'lucide-react'
+import { CheckCircle2, ChevronDown, Loader2, VideoOff } from 'lucide-react'
 import {
   Collapsible,
   CollapsibleContent,
@@ -38,7 +38,7 @@ function ModuleItem({
           {mod.order}. {mod.title}
         </span>
         <div className='flex shrink-0 items-center gap-2'>
-          {mod.lessons.length > 0 && (
+          {!mod.isLoading && mod.lessons.length > 0 && (
             <span className='text-xs text-muted-foreground'>
               {doneCount}/{mod.lessons.length}
             </span>
@@ -51,11 +51,18 @@ function ModuleItem({
           />
         </div>
       </CollapsibleTrigger>
+
       <CollapsibleContent>
-        {mod.lessons.length === 0 ? (
-          <p className='px-4 py-2.5 text-xs text-muted-foreground'>
+        {mod.isLoading ? (
+          <div className='flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground'>
+            <Loader2 className='size-3 animate-spin' />
             Yuklanmoqda...
-          </p>
+          </div>
+        ) : mod.lessons.length === 0 ? (
+          <div className='flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground'>
+            <VideoOff className='size-3' />
+            Bu moduleda hali video yo&apos;q
+          </div>
         ) : (
           <ul>
             {mod.lessons.map((lesson, idx) => {
@@ -131,7 +138,8 @@ export function CurriculumSheet({
         </SheetHeader>
 
         {isLoading ? (
-          <div className='flex flex-1 items-center justify-center text-sm text-muted-foreground'>
+          <div className='flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground'>
+            <Loader2 className='size-4 animate-spin' />
             Yuklanmoqda...
           </div>
         ) : modules.length === 0 ? (
@@ -165,7 +173,7 @@ export function CurriculumSheet({
               />
             </div>
             <p className='mt-1.5 text-xs text-muted-foreground'>
-              {completedIds.size} / {totalCount} dars ko'rildi
+              {completedIds.size} / {totalCount} dars ko&apos;rildi
             </p>
           </div>
         )}
