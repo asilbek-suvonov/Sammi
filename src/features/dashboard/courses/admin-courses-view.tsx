@@ -1,24 +1,36 @@
 import { lazy, Suspense, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
+
 import {
   useCourses,
   useDeleteCourse,
 } from '@/api-hooks/course/use-courses'
+
 import type { Course } from '@/service/course/course.types'
+
 import { useEntityCrud } from '@/hooks/use-entity-crud'
 import { useEntityTable } from '@/hooks/use-entity-table'
+
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { EntityTablePage } from '@/components/data-table'
 import { Main } from '@/components/layout/main'
+
 import { getCoursesColumns } from './columns'
 
 const CourseSheet = lazy(() =>
-  import('./course-sheet').then((m) => ({ default: m.CourseSheet }))
+  import('./course-sheet').then((m) => ({
+    default: m.CourseSheet,
+  }))
 )
 
 export default function AdminCoursesView() {
+  const { t } = useTranslation()
+
   const navigate = useNavigate()
+
   const { data: courses = [], isLoading } = useCourses()
+
   const deleteMutation = useDeleteCourse()
 
   const {
@@ -34,14 +46,23 @@ export default function AdminCoursesView() {
   } = useEntityCrud<Course>()
 
   const columns = useMemo(
-    () => getCoursesColumns({ onEdit: openEdit, onDelete: askDelete }),
+    () =>
+      getCoursesColumns({
+        onEdit: openEdit,
+        onDelete: askDelete,
+      }),
     [openEdit, askDelete]
   )
 
-  const { table } = useEntityTable({ data: courses, columns })
+  const { table } = useEntityTable({
+    data: courses,
+    columns,
+  })
 
   const handleConfirmDelete = () => {
-    confirmDelete((course) => deleteMutation.mutate(course.id))
+    confirmDelete((course) =>
+      deleteMutation.mutate(course.id)
+    )
   }
 
   const handleBulkDelete = (ids: (string | number)[]) => {
@@ -52,21 +73,36 @@ export default function AdminCoursesView() {
     <>
       <Main fixed>
         <EntityTablePage<Course>
-          title='Courses'
-          description='Manage your courses — add, edit, or remove.'
-          addLabel='Add Course'
-          searchPlaceholder='Search courses...'
-          emptyMessage={isLoading ? 'Loading...' : 'No courses found.'}
-          entityName='course'
+          title={t('courses')}
+          description={t(
+            'manageCoursesDescription'
+          )}
+          addLabel={t('addCourse')}
+          searchPlaceholder={t('searchCourses')}
+          emptyMessage={
+            isLoading
+              ? t('loading')
+              : t('noCoursesFound')
+          }
+          entityName={t('course')}
           table={table}
           filters={[
             {
               columnId: 'level',
-              title: 'Level',
+              title: t('level'),
               options: [
-                { label: 'Beginner', value: 'beginner' },
-                { label: 'Intermediate', value: 'intermediate' },
-                { label: 'Advanced', value: 'advanced' },
+                {
+                  label: t('beginner'),
+                  value: 'beginner',
+                },
+                {
+                  label: t('intermediate'),
+                  value: 'intermediate',
+                },
+                {
+                  label: t('advanced'),
+                  value: 'advanced',
+                },
               ],
             },
           ]}
@@ -75,7 +111,9 @@ export default function AdminCoursesView() {
           onRowClick={(course) =>
             navigate({
               to: '/dashboard/courses/$id',
-              params: { id: String(course.id) },
+              params: {
+                id: String(course.id),
+              },
             })
           }
         />
@@ -91,16 +129,20 @@ export default function AdminCoursesView() {
 
       <ConfirmDialog
         open={!!deletePending}
-        onOpenChange={(open) => !open && cancelDelete()}
-        title='Delete Course'
+        onOpenChange={(open) =>
+          !open && cancelDelete()
+        }
+        title={t('deleteCourse')}
         desc={
           <span>
-            Are you sure you want to delete{' '}
-            <strong>{deletePending?.title}</strong>? This action cannot be
-            undone.
+            {t('deleteCourseConfirm')}{' '}
+            <strong>
+              {deletePending?.title}
+            </strong>
+            ? {t('deleteActionWarning')}
           </span>
         }
-        confirmText='Delete'
+        confirmText={t('delete')}
         destructive
         handleConfirm={handleConfirmDelete}
       />
