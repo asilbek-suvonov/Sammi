@@ -26,7 +26,7 @@ export const API_ENDPOINTS = {
   },
   CONTACT: {
     CREATE: '/contact/',
-    LIST: '/contact/list',
+    LIST: '/contact/list/',
   },
   PROFILE: {
     CREATE: '/settings/change-password/',
@@ -45,6 +45,11 @@ export const API_ENDPOINTS = {
 REFRESH:{
   TOKEN: '/refresh/',
 },
+
+
+
+
+
   SOURCE_CODES: {
     LIST: '/source-codes/',
     CREATE: '/source-codes/',

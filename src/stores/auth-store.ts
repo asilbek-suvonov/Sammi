@@ -15,6 +15,7 @@ export interface AuthUser {
   country?: string
   languageCode?: string
   isNewUser?: boolean
+  avatar_url?: string
   isStaff?: boolean
   role: 'admin' | 'user'
   exp?: number

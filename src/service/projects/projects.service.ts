@@ -57,7 +57,7 @@ export class ProjectsService {
       return api.post<ProjectDetail>(
         API_ENDPOINTS.PROJECTS.CREATE,
         buildFormData(data),
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        { headers: { 'Content-Type': undefined } }
       )
     }
     return api.post<ProjectDetail>(API_ENDPOINTS.PROJECTS.CREATE, data)
@@ -67,7 +67,7 @@ export class ProjectsService {
     const url = API_ENDPOINTS.PROJECTS.UPDATE.replace(':id', String(id))
     if (hasFile(data)) {
       return api.put<ProjectDetail>(url, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': undefined },
       })
     }
     return api.put<ProjectDetail>(url, data)
@@ -77,7 +77,7 @@ export class ProjectsService {
     const url = API_ENDPOINTS.PROJECTS.PATCH.replace(':id', String(id))
     if (hasFile(data)) {
       return api.patch<ProjectDetail>(url, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': undefined },
       })
     }
     return api.patch<ProjectDetail>(url, data)
@@ -98,7 +98,7 @@ export class ProjectsService {
       return api.post<ProjectStep>(
         API_ENDPOINTS.PROJECTS.STEP_CREATE,
         buildFormData(data),
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        { headers: { 'Content-Type': undefined } }
       )
     }
     return api.post<ProjectStep>(API_ENDPOINTS.PROJECTS.STEP_CREATE, data)
@@ -108,7 +108,7 @@ export class ProjectsService {
     const url = API_ENDPOINTS.PROJECTS.STEP_UPDATE.replace(':id', String(id))
     if (hasFile(data)) {
       return api.put<ProjectStep>(url, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': undefined },
       })
     }
     return api.put<ProjectStep>(url, data)
@@ -118,7 +118,7 @@ export class ProjectsService {
     const url = API_ENDPOINTS.PROJECTS.STEP_PATCH.replace(':id', String(id))
     if (hasFile(data)) {
       return api.patch<ProjectStep>(url, buildFormData(data), {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': undefined },
       })
     }
     return api.patch<ProjectStep>(url, data)

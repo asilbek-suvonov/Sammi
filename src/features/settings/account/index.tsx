@@ -1,38 +1,42 @@
-import { useState } from 'react'
-import { useUserSettings } from '@/hooks/use-user-settings'
+import { Loader2 } from 'lucide-react'
+import { useProfile } from '@/api-hooks/profile/use-profile'
 import { Separator } from '@/components/ui/separator'
 import { AvatarSection } from './avatar-section'
 import { PasswordForm } from './password-form'
-import { ProfileForm, type ProfileFormState } from './profile-form'
+import { ProfileForm } from './profile-form'
 
 export function SettingsAccount() {
-  const { data } = useUserSettings()
+  const { data, isLoading, isError, refetch } = useProfile()
 
-  const [profileForm, setProfileForm] = useState<ProfileFormState>({
-    nickname: data.nickname,
-    username: data.username,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    bio: data.bio,
-  })
+  if (isLoading) {
+    return (
+      <div className='flex h-64 items-center justify-center'>
+        <Loader2 className='size-5 animate-spin text-muted-foreground' />
+      </div>
+    )
+  }
+
+  if (isError || !data) {
+    return (
+      <div className='flex h-64 flex-col items-center justify-center gap-3 text-sm'>
+        <p className='text-muted-foreground'>Failed to load profile.</p>
+        <button
+          type='button'
+          onClick={() => refetch()}
+          className='text-primary hover:underline'
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className='w-full max-w-2xl space-y-8 overflow-y-auto'>
-      <AvatarSection
-        previewNickname={profileForm.nickname}
-        previewFirstName={profileForm.firstName}
-        previewUsername={profileForm.username}
-      />
-
+      <AvatarSection profile={data} />
       <Separator />
-
-      <ProfileForm
-        profileForm={profileForm}
-        setProfileForm={setProfileForm}
-      />
-
+      <ProfileForm profile={data} />
       <Separator />
-
       <PasswordForm />
     </div>
   )

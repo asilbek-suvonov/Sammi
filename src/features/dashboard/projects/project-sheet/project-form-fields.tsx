@@ -1,4 +1,7 @@
+import { useMemo } from 'react'
+import { useFormContext, type Control } from 'react-hook-form'
 import { useTechnologies } from '@/api-hooks/technology/use-technologies'
+import { TechQuickAdd } from '@/components/shared/tech-quick-add'
 import { FileUpload } from '@/components/ui/file-upload'
 import {
   FormControl,
@@ -19,8 +22,6 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { useMemo } from 'react'
-import { type Control } from 'react-hook-form'
 import { type ProjectFormValues } from './project-schema'
 
 type Props = {
@@ -29,6 +30,7 @@ type Props = {
 }
 
 export function ProjectFormFields({ control, isEdit }: Props) {
+  const { setValue, getValues } = useFormContext<ProjectFormValues>()
   const { data: technologies = [] } = useTechnologies()
 
   const techOptions = useMemo(
@@ -85,7 +87,9 @@ export function ProjectFormFields({ control, isEdit }: Props) {
                     src={field.value}
                     alt='Current image'
                     className='h-full w-full object-cover'
-                    onError={(e) => { ;(e.target as HTMLImageElement).style.display = 'none' }}
+                    onError={(e) => {
+                      ;(e.target as HTMLImageElement).style.display = 'none'
+                    }}
                   />
                   <div className='absolute bottom-0 left-0 right-0 bg-black/40 px-2 py-0.5'>
                     <p className='text-[10px] text-white'>Mavjud rasm</p>
@@ -97,7 +101,9 @@ export function ProjectFormFields({ control, isEdit }: Props) {
                   value={isEdit && isUrl ? '' : field.value}
                   onChange={field.onChange}
                   accept='image/*'
-                  placeholder={isEdit ? 'Yangi rasm yuklash (ixtiyoriy)' : 'Upload project image'}
+                  placeholder={
+                    isEdit ? 'Yangi rasm yuklash (ixtiyoriy)' : 'Upload project image'
+                  }
                 />
               </FormControl>
               <FormMessage />
@@ -134,7 +140,15 @@ export function ProjectFormFields({ control, isEdit }: Props) {
         name='technologies'
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Technologies</FormLabel>
+            <div className='flex items-center justify-between'>
+              <FormLabel>Technologies</FormLabel>
+              <TechQuickAdd
+                onCreated={(tech) => {
+                  const current = getValues('technologies')
+                  setValue('technologies', [...current, tech.id])
+                }}
+              />
+            </div>
             <FormControl>
               <MultiSelect
                 value={field.value.map(String)}
@@ -176,21 +190,23 @@ export function ProjectFormFields({ control, isEdit }: Props) {
         )}
       />
 
-      <div className='rounded-lg border p-3'>
-        <FormField
-          control={control}
-          name='is_published'
-          render={({ field }) => (
-            <FormItem className='flex flex-col gap-1'>
-              <FormLabel className='text-xs'>Published</FormLabel>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-              <FormDescription className='text-[10px]'>Visible to users</FormDescription>
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={control}
+        name='is_published'
+        render={({ field }) => (
+          <FormItem className='flex items-center justify-between rounded-lg border p-3'>
+            <div className='space-y-0.5'>
+              <FormLabel className='text-sm'>Published</FormLabel>
+              <FormDescription className='text-xs'>
+                Visible to users on the public site.
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch checked={field.value} onCheckedChange={field.onChange} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
     </>
   )
 }

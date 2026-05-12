@@ -13,12 +13,14 @@ import { toast } from 'sonner'
 declare module 'axios' {
   interface AxiosRequestConfig {
     silent?: boolean
+    _retry?: boolean
   }
 }
 
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
 const timeout = Number(import.meta.env.VITE_API_TIMEOUT ?? 30_000)
+const API_REFRESH_PATH = '/refresh/'
 
 
 export interface ApiError {
@@ -90,13 +92,52 @@ apiClient.interceptors.request.use(
 )
 
 
+let refreshPromise: Promise<string | null> | null = null
+
+async function tryRefresh(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise
+  const { refreshToken, setAccessToken } = useAuthStore.getState().auth
+  if (!refreshToken) return null
+  refreshPromise = axios
+    .post<{ access: string; refresh?: string }>(
+      `${baseURL}${API_REFRESH_PATH}`,
+      { refresh: refreshToken },
+      { withCredentials: true, timeout }
+    )
+    .then((res) => {
+      const newAccess = res.data?.access
+      if (!newAccess) return null
+      setAccessToken(newAccess)
+      return newAccess
+    })
+    .catch(() => null)
+    .finally(() => {
+      refreshPromise = null
+    })
+  return refreshPromise
+}
+
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error: unknown) => {
+  async (error: unknown) => {
     if (isAxiosError(error)) {
       const status = error.response?.status
 
       const silent = error.config?.silent ?? false
+
+      if (status === 401 && error.config && !error.config._retry) {
+        const isRefreshCall = error.config.url?.includes(API_REFRESH_PATH)
+        if (!isRefreshCall) {
+          const newAccess = await tryRefresh()
+          if (newAccess) {
+            error.config._retry = true
+            error.config.headers = error.config.headers ?? {}
+            ;(error.config.headers as Record<string, string>).Authorization =
+              `Bearer ${newAccess}`
+            return apiClient.request(error.config)
+          }
+        }
+      }
 
       switch (status) {
         case 400: {

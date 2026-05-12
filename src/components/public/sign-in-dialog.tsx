@@ -1,4 +1,8 @@
+import { useState, type ReactNode } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { GoogleLogin } from '@react-oauth/google'
+
 import { IconGithub } from '@/assets/brand-icons'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,14 +15,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+
 import { useGithubSignIn } from '@/hooks/auth/use-github-signin'
 import { useGoogleSignIn } from '@/hooks/auth/use-google-signin'
 import { useSendOtp } from '@/api-hooks/auth/userOTP/use-OTP'
-import { useNavigate } from '@tanstack/react-router'
-import { useState, type ReactNode } from 'react'
-import { toast } from 'sonner'
 
-// --- Interfaces ---
 interface SignInDialogProps {
   trigger?: ReactNode
   onSuccess?: () => void
@@ -42,9 +43,11 @@ export function SignInDialog({
   const [email, setEmail] = useState('')
 
   const isOpen = controlledOpen ?? internalOpen
+
   const setIsOpen = (value: boolean) => {
     if (onOpenChange) onOpenChange(value)
     else setInternalOpen(value)
+
     if (!value) {
       setTimeout(() => {
         setEmailStep(false)
@@ -68,20 +71,19 @@ export function SignInDialog({
       setIsOpen(false)
       navigate({ to: '/otp' })
     },
-    // Error handling done in hook with getErrorMessage
   })
 
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
-    e.stopPropagation() // Event bubbling ni to'xtatish
-    
-    if (isSendingOtp) return // Agar jo'natilayotgan bo'lsa, qayta jo'natmaslik
-    
+    e.stopPropagation()
+
+    if (isSendingOtp) return
+
     if (!email || !email.includes('@')) {
       toast.error('Please enter a valid email')
       return
     }
-    
+
     sendOtp({ email })
   }
 
@@ -99,17 +101,23 @@ export function SignInDialog({
 
         {!emailStep ? (
           <div className="space-y-3 pt-2">
-            <div className={signingIn ? 'pointer-events-none opacity-50' : ''}>
+            {/* Google Login Section */}
+            <div className={`flex w-full justify-center overflow-hidden rounded-md ${signingIn ? 'pointer-events-none opacity-50' : ''}`}>
               <GoogleLogin
-                onSuccess={google.handleCredential}
+                onSuccess={(res) => {
+                  if (res.credential) {
+                    google.handleSuccess(res.credential)
+                  }
+                }}
                 onError={() => toast.error('Google orqali kirish bekor qilindi')}
                 theme="outline"
-                size="large"
+                width="340"
                 text="continue_with"
-                width="336"
+                size="large"
               />
             </div>
 
+            {/* GitHub Login Section */}
             <Button
               variant="outline"
               className="w-full gap-2"
@@ -122,11 +130,12 @@ export function SignInDialog({
 
             <div className="relative w-full py-1">
               <Separator />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
                 or
               </span>
             </div>
 
+            {/* Email Login Section */}
             <Button
               variant="secondary"
               className="w-full"

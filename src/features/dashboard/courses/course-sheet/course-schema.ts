@@ -9,8 +9,6 @@ export const courseSchema = z.object({
   technologies: z.array(z.string()),
   level: z.enum(['beginner', 'intermediate', 'advanced']),
   price: z.string().min(1, 'Price is required'),
-  is_free: z.boolean(),
-  is_new: z.boolean(),
   is_published: z.boolean(),
 })
 
@@ -24,9 +22,7 @@ export const courseDefaultValues: CourseFormValues = {
   technologies: [],
   level: 'beginner',
   price: '',
-  is_free: false,
-  is_new: false,
-  is_published: true,   // ← admin creates published courses by default
+  is_published: true,
 }
 
 const normalizeLevel = (value: string | undefined): CourseLevel => {
@@ -43,20 +39,16 @@ export function courseToFormValues(course: {
   category_name: string
   level: CourseLevel
   price: string
-  is_free?: boolean
-  is_new?: boolean
   is_published?: boolean
 }): CourseFormValues {
   return {
     title: course.title,
     description: course.description,
     image: course.image_url ?? '',
-    category: '',       // category_name is a string — can't reverse-lookup ID without extra fetch
+    category: '',
     technologies: [],
     level: normalizeLevel(course.level),
     price: course.price ?? '',
-    is_free: course.is_free ?? false,
-    is_new: course.is_new ?? false,
     is_published: course.is_published ?? true,
   }
 }

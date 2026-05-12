@@ -59,6 +59,31 @@ export function ProjectStepDialog({
   step,
   nextOrder = 1,
 }: Props) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className='sm:max-w-md'>
+        {open && (
+          <StepFormBody
+            key={step?.id ?? 'new'}
+            projectId={projectId}
+            step={step}
+            nextOrder={nextOrder}
+            onClose={() => onOpenChange(false)}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+interface BodyProps {
+  projectId: number
+  step?: ProjectStep
+  nextOrder: number
+  onClose: () => void
+}
+
+function StepFormBody({ projectId, step, nextOrder, onClose }: BodyProps) {
   const isEdit = !!step
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -86,128 +111,140 @@ export function ProjectStepDialog({
     e.preventDefault()
     if (!title.trim()) return
 
-    const payload = {
-      project: projectId,
-      title: title.trim(),
-      description: description.trim() || undefined,
-      video: videoFile ?? undefined,
-      duration: duration > 0 ? duration : undefined,
-      order: isEdit ? step?.order : nextOrder,
-    }
-
-    const close = () => onOpenChange(false)
+    const trimmedDesc = description.trim()
 
     if (isEdit && step) {
-      updateStep.mutate({ id: step.id, data: payload }, { onSuccess: close })
-    } else {
-      createStep.mutate(payload, { onSuccess: close })
+      updateStep.mutate(
+        {
+          id: step.id,
+          data: {
+            project: projectId,
+            title: title.trim(),
+            description: trimmedDesc || undefined,
+            video: videoFile ?? undefined,
+            duration: duration > 0 ? duration : undefined,
+            order: step.order,
+          },
+        },
+        { onSuccess: onClose }
+      )
+      return
     }
+
+    const createPayload: Parameters<typeof createStep.mutate>[0] = {
+      project: projectId,
+      title: title.trim(),
+    }
+    if (trimmedDesc) createPayload.description = trimmedDesc
+    if (videoFile) createPayload.video = videoFile
+    if (duration > 0) createPayload.duration = duration
+    if (nextOrder > 0) createPayload.order = nextOrder
+
+    createStep.mutate(createPayload, { onSuccess: onClose })
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit step' : 'Add step'}</DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>{isEdit ? 'Edit step' : 'Add step'}</DialogTitle>
+      </DialogHeader>
 
-        <form onSubmit={onSubmit} className='space-y-4 pt-2'>
-          <div className='space-y-2'>
-            <Label htmlFor='step-title'>Title</Label>
-            <Input
-              id='step-title'
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              autoFocus
-            />
-          </div>
+      <form onSubmit={onSubmit} className='space-y-4 pt-2'>
+        <div className='space-y-2'>
+          <Label htmlFor='step-title'>Title</Label>
+          <Input
+            id='step-title'
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            autoFocus
+          />
+        </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='step-desc'>Description</Label>
-            <Textarea
-              id='step-desc'
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder='Optional'
-            />
-          </div>
+        <div className='space-y-2'>
+          <Label htmlFor='step-desc'>Description</Label>
+          <Textarea
+            id='step-desc'
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder='Optional'
+          />
+        </div>
 
-          <div className='space-y-2'>
-            <Label>
-              Video{' '}
-              {isEdit && (
-                <span className='text-xs font-normal text-muted-foreground'>
-                  (upload to replace)
-                </span>
-              )}
-            </Label>
-            <div
-              role='button'
-              tabIndex={0}
-              onClick={() => fileRef.current?.click()}
-              onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
+        <div className='space-y-2'>
+          <Label>
+            Video{' '}
+            {isEdit && (
+              <span className='text-xs font-normal text-muted-foreground'>
+                (upload to replace)
+              </span>
+            )}
+          </Label>
+          <div
+            role='button'
+            tabIndex={0}
+            onClick={() => fileRef.current?.click()}
+            onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
+            className={cn(
+              'flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-5 transition-colors',
+              fileName
+                ? 'border-primary/40 bg-primary/5'
+                : 'border-input hover:border-primary/60 hover:bg-muted/30'
+            )}
+          >
+            {fileName ? (
+              <Video className='size-5 text-primary' />
+            ) : (
+              <Upload className='size-5 text-muted-foreground' />
+            )}
+            <p
+              title={fileName}
               className={cn(
-                'flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-5 transition-colors',
-                fileName
-                  ? 'border-primary/40 bg-primary/5'
-                  : 'border-input hover:border-primary/60 hover:bg-muted/30',
+                'text-center text-xs',
+                fileName ? 'font-medium text-primary' : 'text-muted-foreground'
               )}
             >
-              {fileName ? (
-                <Video className='size-5 text-primary' />
-              ) : (
-                <Upload className='size-5 text-muted-foreground' />
-              )}
-              <p
-                title={fileName}
-                className={cn(
-                  'text-center text-xs',
-                  fileName ? 'font-medium text-primary' : 'text-muted-foreground',
-                )}
-              >
-                {fileName
-                  ? formatFileName(fileName)
-                  : 'Click to select a video file'}
-              </p>
-            </div>
-            <input
-              ref={fileRef}
-              type='file'
-              accept='video/*'
-              className='hidden'
-              onChange={onFileChange}
-            />
+              {fileName
+                ? formatFileName(fileName)
+                : 'Click to select a video file'}
+            </p>
           </div>
+          <input
+            ref={fileRef}
+            type='file'
+            accept='video/*'
+            className='hidden'
+            onChange={onFileChange}
+          />
+        </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='step-duration'>Duration (seconds)</Label>
-            <Input
-              id='step-duration'
-              type='number'
-              min={0}
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value) || 0)}
-            />
-          </div>
+        <div className='space-y-2'>
+          <Label htmlFor='step-duration'>Duration (seconds)</Label>
+          <Input
+            id='step-duration'
+            type='number'
+            min={0}
+            value={duration}
+            onChange={(e) => setDuration(Number(e.target.value) || 0)}
+          />
+        </div>
 
-          <DialogFooter className='gap-2 sm:gap-0'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => onOpenChange(false)}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-            <Button type='submit' disabled={isPending || !title.trim()}>
-              {isPending && <Loader2 className='mr-2 size-4 animate-spin' />}
-              Save
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <DialogFooter className='gap-2 sm:gap-0'>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={onClose}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+          <Button type='submit' disabled={isPending || !title.trim()}>
+            {isPending && <Loader2 className='mr-2 size-4 animate-spin' />}
+            Save
+          </Button>
+        </DialogFooter>
+      </form>
+    </>
   )
 }

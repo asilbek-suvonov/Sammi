@@ -59,8 +59,6 @@ export function CourseSheet({ open, onOpenChange, course }: CourseSheetProps) {
       price: values.price,
       category: values.category ? Number(values.category) : undefined,
       technologies: values.technologies.map(Number),
-      is_free: values.is_free,
-      is_new: values.is_new,
       is_published: values.is_published,
       image: image instanceof File ? image : undefined,
     }

@@ -1,44 +1,45 @@
 import { useRef, useState } from 'react'
 import { Camera, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useUserSettings } from '@/hooks/use-user-settings'
+import { usePatchProfile } from '@/api-hooks/profile/use-profile'
+import type { Profile } from '@/service/profile/profile.types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 
-type Props = {
-  previewNickname: string
-  previewFirstName: string
-  previewUsername: string
-}
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
-export function AvatarSection({
-  previewNickname,
-  previewFirstName,
-  previewUsername,
-}: Props) {
-  const { data, save, uploadAvatar, removeAvatar } = useUserSettings()
+export function AvatarSection({ profile }: { profile: Profile }) {
   const fileRef = useRef<HTMLInputElement>(null)
-  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const patch = usePatchProfile()
 
-  const avatarUrl = data.avatarUrl
-  const initials = (previewFirstName?.[0] ?? data.email?.[0] ?? 'U').toUpperCase()
+  const displayName = profile.nickname || profile.first_name || profile.email
+  const usernameLine = profile.username || profile.email.split('@')[0]
+  const initials = (
+    profile.first_name?.[0] ??
+    profile.nickname?.[0] ??
+    profile.email?.[0] ??
+    'U'
+  ).toUpperCase()
 
-  const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (fileRef.current) fileRef.current.value = ''
     if (!file) return
-    setAvatarUploading(true)
-    const url = await uploadAvatar(file)
-    setAvatarUploading(false)
-    if (!url) return
-    if (save({ avatarUrl: url })) {
-      toast.success('Profile picture updated')
+    if (file.size > MAX_AVATAR_SIZE) {
+      toast.error('Image is too large (max 5 MB).')
+      return
+    }
+    setUploading(true)
+    try {
+      await patch.mutateAsync({ avatar: file })
+    } finally {
+      setUploading(false)
     }
   }
 
-  const handleRemoveAvatar = () => {
-    removeAvatar()
-    toast.success('Profile picture removed')
+  const handleRemove = async () => {
+    await patch.mutateAsync({ avatar: null })
   }
 
   return (
@@ -52,7 +53,7 @@ export function AvatarSection({
       <div className='flex items-center gap-6'>
         <div className='relative'>
           <Avatar className='size-20 border-2 border-border'>
-            <AvatarImage src={avatarUrl} />
+            <AvatarImage src={profile.avatar_url ?? undefined} />
             <AvatarFallback className='text-2xl font-semibold'>
               {initials}
             </AvatarFallback>
@@ -60,10 +61,11 @@ export function AvatarSection({
           <button
             type='button'
             onClick={() => fileRef.current?.click()}
-            disabled={avatarUploading}
-            className='absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-60'
+            disabled={uploading}
+            className='absolute -bottom-1 -end-1 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-60'
+            aria-label='Change avatar'
           >
-            {avatarUploading ? (
+            {uploading ? (
               <Loader2 className='size-3.5 animate-spin' />
             ) : (
               <Camera className='size-3.5' />
@@ -73,24 +75,21 @@ export function AvatarSection({
             ref={fileRef}
             type='file'
             accept='image/*'
-            onChange={handleAvatarFile}
+            onChange={handleFile}
             className='hidden'
           />
         </div>
         <div className='space-y-1'>
-          <p className='text-sm font-medium'>
-            {previewNickname || previewFirstName || data.email}
-          </p>
-          <p className='text-xs text-muted-foreground'>
-            @{previewUsername || data.email.split('@')[0]}
-          </p>
-          {avatarUrl && (
+          <p className='text-sm font-medium'>{displayName}</p>
+          <p className='text-xs text-muted-foreground'>@{usernameLine}</p>
+          {profile.avatar_url && (
             <Button
               type='button'
               variant='ghost'
               size='sm'
               className='h-7 text-xs text-destructive hover:text-destructive'
-              onClick={handleRemoveAvatar}
+              onClick={handleRemove}
+              disabled={patch.isPending}
             >
               Remove photo
             </Button>

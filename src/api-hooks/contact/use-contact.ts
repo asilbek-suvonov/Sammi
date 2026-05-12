@@ -14,7 +14,7 @@ export const contactKeys = {
 export function useContacts(params?: IContactQueryParams) {
   return useQuery({
     queryKey: contactKeys.list(params),
-    queryFn: () => ContactService.get(params),
+    queryFn: () => ContactService.get({ ordering: '-created_at', ...params }),
     placeholderData: (prev) => prev,
     staleTime: 60_000,
   })
