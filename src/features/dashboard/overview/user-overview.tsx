@@ -1,31 +1,31 @@
+import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { BookOpen } from 'lucide-react'
-import { useEnrollments } from '@/api-hooks/enrollment/use-enrollment'
 import { useCourses } from '@/api-hooks/course/use-courses'
+import { useLessonProgressList } from '@/api-hooks/lesson-progress/use-progress'
+import type { Course } from '@/service/course/course.types'
 import { Main } from '@/components/layout/main'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuthUser, useProfile } from '@/stores/selectors'
-import type { Enrollment } from '@/service/enrollment/enrollment.type'
-import type { Course } from '@/service/course/course.types'
 
-interface EnrolledCardProps {
-  enrollment: Enrollment
+interface CourseProgress {
   course: Course
+  completed: number
+  started: number
 }
 
-function EnrolledCard({ enrollment, course }: EnrolledCardProps) {
-  const courseId =
-    typeof enrollment.course === 'object' ? enrollment.course.id : enrollment.course
-  const progress = Math.round(enrollment.progress_percentage ?? 0)
+function ProgressCard({ course, completed, started }: CourseProgress) {
+  const total = Math.max(started, completed)
+  const percent = total > 0 ? Math.round((completed / total) * 100) : 0
 
   return (
     <Link
       to='/course/preview'
-      search={{ courseId: String(courseId) }}
-      className='group block overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md p-3'
+      search={{ courseId: String(course.id) }}
+      className='group block overflow-hidden rounded-xl border bg-card p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md'
     >
-      <div className='relative aspect-video overflow-hidden bg-muted rounded-lg'>
+      <div className='relative aspect-video overflow-hidden rounded-lg bg-muted'>
         {course.image_url ? (
           <img
             src={course.image_url}
@@ -39,18 +39,20 @@ function EnrolledCard({ enrollment, course }: EnrolledCardProps) {
         )}
       </div>
 
-      <div className='pt-3 space-y-2'>
-        <p className='line-clamp-2 text-sm font-medium leading-tight'>{course.title}</p>
+      <div className='space-y-2 pt-3'>
+        <p className='line-clamp-2 text-sm font-medium leading-tight'>
+          {course.title}
+        </p>
 
         <div className='space-y-1'>
           <div className='flex items-center justify-between text-xs text-muted-foreground'>
-            <span>Progress</span>
-            <span className='font-medium text-foreground'>{progress}%</span>
+            <span>{completed} / {total} lessons</span>
+            <span className='font-medium text-foreground'>{percent}%</span>
           </div>
           <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
             <div
               className='h-full rounded-full bg-primary transition-all duration-500'
-              style={{ width: `${progress}%` }}
+              style={{ width: `${percent}%` }}
             />
           </div>
         </div>
@@ -63,22 +65,37 @@ const UserOverview = () => {
   const user = useAuthUser()
   const profile = useProfile()
 
-  const { data: enrollmentData, isLoading: enrollmentsLoading } = useEnrollments()
+  const { data: progressData, isLoading: progressLoading } =
+    useLessonProgressList()
   const { data: courses = [], isLoading: coursesLoading } = useCourses()
 
-  const isLoading = enrollmentsLoading || coursesLoading
-  const enrollments = enrollmentData?.results ?? []
+  const isLoading = progressLoading || coursesLoading
 
-  const enrolled = enrollments
-    .map((e) => {
-      const courseId = typeof e.course === 'object' ? e.course.id : e.course
-      const course = courses.find((c) => c.id === courseId)
-      return course ? { enrollment: e, course } : null
-    })
-    .filter((item): item is { enrollment: Enrollment; course: Course } => item !== null)
+  const courseProgress = useMemo<CourseProgress[]>(() => {
+    const records = progressData?.results ?? []
+    const stats = new Map<string, { started: number; completed: number }>()
+
+    for (const p of records) {
+      if (!p.course_title) continue
+      const cur = stats.get(p.course_title) ?? { started: 0, completed: 0 }
+      cur.started += 1
+      if (p.is_completed) cur.completed += 1
+      stats.set(p.course_title, cur)
+    }
+
+    return Array.from(stats.entries())
+      .map(([title, counts]) => {
+        const course = courses.find((c) => c.title === title)
+        return course ? { course, ...counts } : null
+      })
+      .filter((x): x is CourseProgress => !!x)
+  }, [progressData, courses])
 
   const displayName =
-    profile.nickname || user?.firstName || user?.email?.split('@')[0] || 'Learner'
+    profile.nickname ||
+    user?.firstName ||
+    user?.email?.split('@')[0] ||
+    'Learner'
 
   return (
     <Main>
@@ -98,19 +115,21 @@ const UserOverview = () => {
       {isLoading ? (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className='overflow-hidden rounded-xl border bg-card'>
-              <Skeleton className='aspect-video w-full' />
-              <div className='p-3 space-y-2'>
+            <div key={i} className='overflow-hidden rounded-xl border bg-card p-3'>
+              <Skeleton className='aspect-video w-full rounded-lg' />
+              <div className='space-y-2 pt-3'>
                 <Skeleton className='h-4 w-3/4' />
                 <Skeleton className='h-1.5 w-full' />
               </div>
             </div>
           ))}
         </div>
-      ) : enrolled.length === 0 ? (
+      ) : courseProgress.length === 0 ? (
         <div className='flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center'>
           <BookOpen className='mb-3 size-10 text-muted-foreground/50' />
-          <p className='text-sm font-medium'>Hali hech qanday kursga yozilmadingiz</p>
+          <p className='text-sm font-medium'>
+            Hali hech qanday kursni boshlamadingiz
+          </p>
           <p className='mt-1 text-xs text-muted-foreground'>
             <Link
               to='/dashboard/courses'
@@ -123,12 +142,8 @@ const UserOverview = () => {
         </div>
       ) : (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-          {enrolled.map(({ enrollment, course }) => (
-            <EnrolledCard
-              key={enrollment.id}
-              enrollment={enrollment}
-              course={course}
-            />
+          {courseProgress.map((cp) => (
+            <ProgressCard key={cp.course.id} {...cp} />
           ))}
         </div>
       )}

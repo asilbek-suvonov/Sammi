@@ -98,6 +98,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
         return { auth: { ...state.auth, accessToken } }
       }),
 
+      
+
     setRefreshToken: (refreshToken) =>
       set((state) => {
         writeString(REFRESH_TOKEN_KEY, refreshToken)

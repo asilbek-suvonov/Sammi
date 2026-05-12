@@ -125,27 +125,28 @@ export function CourseFormFields({ control, isEdit }: Props) {
         }}
       />
 
-      <div className='flex flex-row gap-4'>
+      <div className='grid grid-cols-2 gap-4'>
         <FormField
           control={control}
           name='category'
           render={({ field }) => (
-            <FormItem className='flex-1'>
-              <div className='flex items-center justify-between'>
-                <FormLabel>Category</FormLabel>
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <div className='flex items-center gap-2'>
+                <FormControl>
+                  <Combobox
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={categoryOptions}
+                    placeholder='Select category'
+                    searchPlaceholder='Search category...'
+                    className='flex-1'
+                  />
+                </FormControl>
                 <CategoryQuickAdd
                   onCreated={(cat) => setValue('category', String(cat.id))}
                 />
               </div>
-              <FormControl>
-                <Combobox
-                  value={field.value}
-                  onChange={field.onChange}
-                  options={categoryOptions}
-                  placeholder='Select category'
-                  searchPlaceholder='Search category...'
-                />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -155,11 +156,11 @@ export function CourseFormFields({ control, isEdit }: Props) {
           control={control}
           name='level'
           render={({ field }) => (
-            <FormItem className='flex-1'>
+            <FormItem>
               <FormLabel>Level</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className='w-full'>
                     <SelectValue placeholder='Select level' />
                   </SelectTrigger>
                 </FormControl>
@@ -180,8 +181,17 @@ export function CourseFormFields({ control, isEdit }: Props) {
         name='technologies'
         render={({ field }) => (
           <FormItem>
-            <div className='flex items-center justify-between'>
-              <FormLabel>Technologies</FormLabel>
+            <FormLabel>Technologies</FormLabel>
+            <div className='flex items-center gap-2'>
+              <FormControl>
+                <MultiSelect
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={techOptions}
+                  placeholder='Select technologies...'
+                  className='flex-1'
+                />
+              </FormControl>
               <TechQuickAdd
                 onCreated={(tech) => {
                   const current = getValues('technologies')
@@ -189,14 +199,6 @@ export function CourseFormFields({ control, isEdit }: Props) {
                 }}
               />
             </div>
-            <FormControl>
-              <MultiSelect
-                value={field.value}
-                onChange={field.onChange}
-                options={techOptions}
-                placeholder='Select technologies...'
-              />
-            </FormControl>
             <FormMessage />
           </FormItem>
         )}

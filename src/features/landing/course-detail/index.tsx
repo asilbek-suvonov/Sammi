@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useCourse } from '@/api-hooks/course/use-courses'
-import { useEnrollments } from '@/api-hooks/enrollment/use-enrollment'
+import { useLessonProgressList } from '@/api-hooks/lesson-progress/use-progress'
 import { CourseSideCard } from '@/components/course/course-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
@@ -18,16 +18,15 @@ export function CourseDetailPage({ id }: Props) {
   const accessToken = useAccessToken()
   const isAuthed = !!accessToken
   const { data: course, isLoading } = useCourse(id)
-  const { data: enrollmentData } = useEnrollments(undefined, { enabled: isAuthed })
+  const { data: progressData } = useLessonProgressList(undefined, {
+    enabled: isAuthed,
+  })
   const [loginOpen, setLoginOpen] = useState(false)
 
   const enrolled = useMemo(() => {
-    if (!isAuthed || !course || !enrollmentData?.results) return false
-    return enrollmentData.results.some((e) => {
-      const cid = typeof e.course === 'object' ? e.course.id : e.course
-      return cid === course.id
-    })
-  }, [isAuthed, course, enrollmentData])
+    if (!isAuthed || !course || !progressData?.results) return false
+    return progressData.results.some((p) => p.course_title === course.title)
+  }, [isAuthed, course, progressData])
 
   if (isLoading) {
     return (

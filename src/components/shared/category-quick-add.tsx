@@ -31,6 +31,7 @@ export function CategoryQuickAdd({ onCreated }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     const trimmed = name.trim()
     if (!trimmed) return
     const created = await createMutation.mutateAsync({ name: trimmed })
@@ -41,9 +42,14 @@ export function CategoryQuickAdd({ onCreated }: Props) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button type='button' variant='outline' size='sm' className='gap-1'>
-          <Plus className='size-3.5' />
-          New
+        <Button
+          type='button'
+          variant='outline'
+          size='icon'
+          className='size-9 shrink-0'
+          aria-label='Add new category'
+        >
+          <Plus className='size-4' />
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-md'>

@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useFormContext, type Control } from 'react-hook-form'
 import { useTechnologies } from '@/api-hooks/technology/use-technologies'
+import type { TechnologyCategory } from '@/service/technology/technology.types'
 import { TechQuickAdd } from '@/components/shared/tech-quick-add'
 import { FileUpload } from '@/components/ui/file-upload'
 import {
@@ -29,14 +30,40 @@ type Props = {
   isEdit: boolean
 }
 
-export function ProjectFormFields({ control, isEdit }: Props) {
-  const { setValue, getValues } = useFormContext<ProjectFormValues>()
-  const { data: technologies = [] } = useTechnologies()
+const TECH_CATEGORIES: { value: TechnologyCategory | 'all'; label: string }[] = [
+  { value: 'all', label: 'All categories' },
+  { value: 'frontend', label: 'Frontend' },
+  { value: 'backend', label: 'Backend' },
+  { value: 'database', label: 'Database' },
+  { value: 'devops', label: 'DevOps' },
+  { value: 'mobile', label: 'Mobile' },
+  { value: 'other', label: 'Other' },
+]
 
-  const techOptions = useMemo(
-    () => technologies.map((t) => ({ label: t.label, value: String(t.id) })),
-    [technologies]
+export function ProjectFormFields({ control, isEdit }: Props) {
+  const { setValue, getValues, watch } = useFormContext<ProjectFormValues>()
+  const { data: technologies = [] } = useTechnologies()
+  const [techCategory, setTechCategory] = useState<TechnologyCategory | 'all'>(
+    'all'
   )
+
+  const selectedTechIds = watch('technologies') ?? []
+
+  const techOptions = useMemo(() => {
+    const filtered =
+      techCategory === 'all'
+        ? technologies
+        : technologies.filter((t) => t.category === techCategory)
+    const selectedSet = new Set(selectedTechIds.map(String))
+    const filteredIds = new Set(filtered.map((t) => String(t.id)))
+    const extras = technologies.filter(
+      (t) => selectedSet.has(String(t.id)) && !filteredIds.has(String(t.id))
+    )
+    return [...filtered, ...extras].map((t) => ({
+      label: t.label,
+      value: String(t.id),
+    }))
+  }, [technologies, techCategory, selectedTechIds])
 
   return (
     <>
@@ -112,51 +139,82 @@ export function ProjectFormFields({ control, isEdit }: Props) {
         }}
       />
 
-      <FormField
-        control={control}
-        name='difficulty'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Difficulty</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder='Select difficulty' />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value='beginner'>Beginner</SelectItem>
-                <SelectItem value='intermediate'>Intermediate</SelectItem>
-                <SelectItem value='advanced'>Advanced</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className='grid grid-cols-2 gap-4'>
+        <FormField
+          control={control}
+          name='difficulty'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Difficulty</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='Select difficulty' />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value='beginner'>Beginner</SelectItem>
+                  <SelectItem value='intermediate'>Intermediate</SelectItem>
+                  <SelectItem value='advanced'>Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormItem>
+          <FormLabel>Category</FormLabel>
+          <Select
+            value={techCategory}
+            onValueChange={(v) => setTechCategory(v as TechnologyCategory | 'all')}
+          >
+            <FormControl>
+              <SelectTrigger className='w-full'>
+                <SelectValue />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {TECH_CATEGORIES.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormItem>
+      </div>
 
       <FormField
         control={control}
         name='technologies'
         render={({ field }) => (
           <FormItem>
-            <div className='flex items-center justify-between'>
-              <FormLabel>Technologies</FormLabel>
+            <FormLabel>Technologies</FormLabel>
+            <div className='flex items-center gap-2'>
+              <FormControl>
+                <MultiSelect
+                  value={field.value.map(String)}
+                  onChange={(vals) => field.onChange(vals.map(Number))}
+                  options={techOptions}
+                  placeholder={
+                    techCategory === 'all'
+                      ? 'Select technologies...'
+                      : `Choose from ${techCategory}...`
+                  }
+                  className='flex-1'
+                />
+              </FormControl>
               <TechQuickAdd
+                defaultCategory={
+                  techCategory === 'all' ? undefined : techCategory
+                }
                 onCreated={(tech) => {
                   const current = getValues('technologies')
                   setValue('technologies', [...current, tech.id])
                 }}
               />
             </div>
-            <FormControl>
-              <MultiSelect
-                value={field.value.map(String)}
-                onChange={(vals) => field.onChange(vals.map(Number))}
-                options={techOptions}
-                placeholder='Select technologies...'
-              />
-            </FormControl>
             <FormMessage />
           </FormItem>
         )}

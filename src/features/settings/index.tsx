@@ -1,10 +1,15 @@
 import { Main } from '@/components/layout/main'
 import { Separator } from '@/components/ui/separator'
 import { Outlet } from '@tanstack/react-router'
-import { Palette, UserCog } from 'lucide-react'
+import { Palette, User, UserCog } from 'lucide-react'
 import { SidebarNav } from './components/sidebar-nav'
 
 const sidebarNavItems = [
+  {
+    title: 'Profile',
+    href: '/settings/profile',
+    icon: <User size={18} />,
+  },
   {
     title: 'Account',
     href: '/settings/account',

@@ -14,15 +14,10 @@ import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
-
-// Generated Routes
 import { routeTree } from './routeTree.gen'
-
-// Styles
 import './styles/index.css'
 import "./i18n/i18n"
 
-// .env faylidan Client ID ni olish
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 if (!GOOGLE_CLIENT_ID) {
@@ -78,7 +73,6 @@ const queryClient = new QueryClient({
   }),
 })
 
-// Create a new router instance
 const router = createRouter({
   routeTree,
   context: { queryClient },
@@ -86,19 +80,16 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 })
 
-// Register the router instance for type safety
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
   }
 }
-// Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      {/* Client ID o'zgaruvchisi bu yerga beriladi */}
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>

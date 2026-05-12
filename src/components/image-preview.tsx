@@ -1,12 +1,7 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
-import { ZoomIn } from 'lucide-react'
 import { useEffect, useState, type MouseEvent } from 'react'
+import { createPortal } from 'react-dom'
+import { X, ZoomIn } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 type ImagePreviewProps = {
   src: string
@@ -30,13 +25,28 @@ export function ImagePreview({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false)
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    document.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
   }, [open])
+
+  const stop = (e: MouseEvent) => {
+    e.stopPropagation()
+  }
 
   const handleThumbClick = (e: MouseEvent) => {
     e.stopPropagation()
     setOpen(true)
+  }
+
+  const handleClose = (e: MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setOpen(false)
   }
 
   if (!src) return null
@@ -46,11 +56,13 @@ export function ImagePreview({
       <button
         type='button'
         onClick={handleThumbClick}
+        onPointerDown={stop}
+        onMouseDown={stop}
         aria-label={`Preview ${alt}`}
         className={cn(
           'group relative inline-flex shrink-0 overflow-hidden ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           rounded && 'rounded-md',
-          className,
+          className
         )}
       >
         <img
@@ -63,32 +75,38 @@ export function ImagePreview({
         </span>
       </button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          showCloseButton={false}
-          className='max-w-3xl overflow-hidden border-0 bg-transparent p-0 shadow-none'
-          onPointerDownOutside={(e) => {
-            // Prevent Radix from closing on pointerdown so the overlay stays in DOM
-            // long enough for the subsequent click event to fire on the overlay
-            // (not on the underlying table row), avoiding unintended row navigation.
-            e.preventDefault()
-            setOpen(false)
-          }}
-        >
-          <DialogTitle className='sr-only'>{alt}</DialogTitle>
-          <DialogDescription className='sr-only'>
-            Image preview
-          </DialogDescription>
-          <div>
+      {open &&
+        createPortal(
+          <div
+            role='dialog'
+            aria-modal='true'
+            aria-label={alt}
+            className='fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm'
+            onClick={handleClose}
+            onPointerDown={stop}
+            onMouseDown={stop}
+          >
             <img
               src={src}
               alt={alt}
-              className='max-h-[80vh] w-auto rounded-lg object-contain shadow-2xl'
+              onClick={stop}
+              onPointerDown={stop}
+              onMouseDown={stop}
+              className='max-h-[85vh] max-w-[90vw] rounded-lg object-contain shadow-2xl'
             />
-           
-          </div>
-        </DialogContent>
-      </Dialog>
+            <button
+              type='button'
+              onClick={handleClose}
+              onPointerDown={stop}
+              onMouseDown={stop}
+              aria-label='Close preview'
+              className='absolute end-4 top-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20'
+            >
+              <X className='size-5' />
+            </button>
+          </div>,
+          document.body
+        )}
     </>
   )
 }

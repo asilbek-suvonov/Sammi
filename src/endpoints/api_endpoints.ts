@@ -42,13 +42,9 @@ export const API_ENDPOINTS = {
     DELETE: '/review/delete/:id',
     DETAIL: '/review/detail/:id',
   },
-REFRESH:{
-  TOKEN: '/refresh/',
-},
-
-
-
-
+  REFRESH: {
+    TOKEN: '/refresh/',
+  },
 
   SOURCE_CODES: {
     LIST: '/source-codes/',
@@ -84,13 +80,6 @@ REFRESH:{
     DELETE: '/course/delete/:id/',
     DETAIL: '/course/detail/:id/',
     LIST: '/course/list',
-  },
-
-  ENROLLMENT: {
-    CREATE: '/enrollment/',
-    DETAIL: '/enrollment/:id/',
-    DELETE: '/enrollment/delete/:id/',
-    LIST: '/enrollment/list',
   },
 
   LESSON_PROGRESS: {

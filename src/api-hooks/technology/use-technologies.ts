@@ -65,7 +65,6 @@ export function useCreateTechnology() {
   return useMutation<Technology, Error, TechnologyRequest>({
     mutationFn: createTechnology,
     onSuccess: () => {
-      toast.success('Technology created successfully')
       qc.invalidateQueries({ queryKey: technologyKeys.all })
     },
     onError: (error) => {

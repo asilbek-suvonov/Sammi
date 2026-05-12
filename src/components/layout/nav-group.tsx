@@ -174,12 +174,22 @@ function SidebarMenuCollapsedDropdown({
 }
 
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
-  return (
-    href === item.url || // /endpint?search=param
-    href.split('?')[0] === item.url || // endpoint
-    !!item?.items?.filter((i) => i.url === href).length || // if child nav is active
-    (mainNav &&
-      href.split('/')[1] !== '' &&
-      href.split('/')[1] === item?.url?.split('/')[1])
-  )
+  const hrefPath = href.split('?')[0]
+  if (hrefPath === item.url) return true
+  if (
+    item.url &&
+    item.url !== '/' &&
+    (hrefPath.startsWith(`${item.url}/`) || hrefPath.startsWith(`${item.url}?`))
+  ) {
+    return true
+  }
+  if (item?.items?.some((i) => i.url === hrefPath)) return true
+  if (
+    mainNav &&
+    href.split('/')[1] !== '' &&
+    href.split('/')[1] === item?.url?.split('/')[1]
+  ) {
+    return true
+  }
+  return false
 }

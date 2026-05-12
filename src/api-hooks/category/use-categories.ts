@@ -44,7 +44,6 @@ export function useCreateCategory() {
   return useMutation<Category, Error, CategoryRequest>({
     mutationFn: createCategory,
     onSuccess: () => {
-      toast.success('Category created successfully')
       qc.invalidateQueries({ queryKey: categoryKeys.all })
     },
     onError: (error) => {

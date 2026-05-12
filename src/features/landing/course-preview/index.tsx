@@ -31,7 +31,7 @@ export function CoursePreviewPage({ courseId }: Props) {
     setCurrentLesson(flatLessons[0])
   }, [curriculumLoading, flatLessons])
 
-  const { completedIds, markDone } = useLessonTracking({ courseId, flatLessons })
+  const { completedIds, markDone } = useLessonTracking({ flatLessons })
 
   const currentIdx = currentLesson
     ? flatLessons.findIndex((l) => l.id === currentLesson.id)
