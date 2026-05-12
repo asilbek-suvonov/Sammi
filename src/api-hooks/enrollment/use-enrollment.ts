@@ -13,10 +13,15 @@ export const enrollmentKeys = {
     [...enrollmentKeys.all, 'detail', String(id)] as const,
 }
 
-export function useEnrollments(params?: EnrollmentQueryParams) {
+export function useEnrollments(
+  params?: EnrollmentQueryParams,
+  options: { enabled?: boolean } = {},
+) {
+  const { enabled = true } = options
   return useQuery({
     queryKey: enrollmentKeys.list(params),
     queryFn: () => EnrollmentService.list(params),
+    enabled,
     staleTime: 5 * 60 * 1000,
   })
 }

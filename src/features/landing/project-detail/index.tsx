@@ -36,7 +36,7 @@ export function ProjectDetailPage({ id }: Props) {
         <div className='grid gap-10 lg:grid-cols-[1fr_340px]'>
           <div className='space-y-8'>
             <div className='space-y-4'>
-              <div className='flex flex-wrap gap-2'>
+              <div className='flex flex-wrap gap-1'>
                 <Badge variant='outline' className='capitalize'>
                   {project.difficulty_display || project.difficulty}
                 </Badge>
@@ -44,8 +44,8 @@ export function ProjectDetailPage({ id }: Props) {
                   <Badge key={t.id} variant='secondary'>{t.label}</Badge>
                 ))}
               </div>
-              <h1 className='text-3xl font-bold tracking-tight md:text-4xl'>{project.title}</h1>
-              <p className='text-base leading-relaxed text-muted-foreground'>{project.description}</p>
+              <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>{project.title}</h1>
+              <p className='text-xs leading-relaxed text-muted-foreground'>{project.description}</p>
               <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
                 <span className='flex items-center gap-1.5'>
                   <Layers3 className='size-4' /> {project.total_steps} steps

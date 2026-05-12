@@ -53,7 +53,7 @@ const UserCoursesView = () => {
           {courses.map((course) => (
             <div
               key={course.id}
-              className='group overflow-hidden rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md p-4'
+              className='group overflow-hidden rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md p-3'
             >
               <Link to='/course/$id' params={{ id: String(course.id) }}>
                 <div className='relative h-45 overflow-hidden rounded-md'>
@@ -72,7 +72,7 @@ const UserCoursesView = () => {
                   </div>
                 </div>
               </Link>
-              <div className='p-3'>
+              <div className='pt-3'>
                 <Link
                   to='/course/$id'
                   params={{ id: String(course.id) }}

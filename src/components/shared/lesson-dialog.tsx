@@ -12,7 +12,12 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { useCreateLesson, useUpdateLesson } from '@/api-hooks/lessons/use-lessons'
+
+import {
+  useCreateLesson,
+  useUpdateLesson,
+} from '@/api-hooks/lessons/use-lessons'
+
 import type { Lesson } from '@/service/lessons/lessons.types'
 
 interface LessonFormProps {
@@ -21,38 +26,75 @@ interface LessonFormProps {
   onClose: () => void
 }
 
+/**
+ * Fayl nomini o'rtasidan qisqartirib ko'rsatish uchun yordamchi funksiya
+ */
+const formatFileName = (name: string, maxLength = 30) => {
+  if (name.length <= maxLength) return name;
+  
+  const extension = name.split('.').pop(); // masalan: mp4
+  const nameWithoutExt = name.substring(0, name.lastIndexOf('.'));
+  
+  // Boshidan 12 ta va oxiridan 6 ta belgini olib birlashtiramiz
+  const start = nameWithoutExt.slice(0, 15);
+  const end = nameWithoutExt.slice(-5);
+  
+  return `${start}...${end}.${extension}`;
+};
+
 function LessonForm({ moduleId, lesson, onClose }: LessonFormProps) {
   const isEdit = !!lesson
+
   const fileRef = useRef<HTMLInputElement>(null)
+
   const [title, setTitle] = useState(lesson?.title ?? '')
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState('')
 
   const createLesson = useCreateLesson()
   const updateLesson = useUpdateLesson()
+
   const isPending = createLesson.isPending || updateLesson.isPending
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+
     if (!file) return
+
     setVideoFile(file)
     setFileName(file.name)
-    if (fileRef.current) fileRef.current.value = ''
+
+    if (fileRef.current) {
+      fileRef.current.value = ''
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!title.trim()) return
+
     const payload = {
       module: moduleId,
       title: title.trim(),
       video: videoFile ?? undefined,
       video_url: !videoFile ? (lesson?.video_url ?? '') : undefined,
     }
+
     if (isEdit) {
-      updateLesson.mutate({ id: lesson.id, data: payload }, { onSuccess: onClose })
+      updateLesson.mutate(
+        {
+          id: lesson.id,
+          data: payload,
+        },
+        {
+          onSuccess: onClose,
+        }
+      )
     } else {
-      createLesson.mutate(payload, { onSuccess: onClose })
+      createLesson.mutate(payload, {
+        onSuccess: onClose,
+      })
     }
   }
 
@@ -60,6 +102,7 @@ function LessonForm({ moduleId, lesson, onClose }: LessonFormProps) {
     <form id='lesson-form' onSubmit={handleSubmit} className='space-y-4 pt-2'>
       <div className='space-y-2'>
         <Label htmlFor='lesson-title'>Dars nomi</Label>
+
         <Input
           id='lesson-title'
           value={title}
@@ -75,31 +118,51 @@ function LessonForm({ moduleId, lesson, onClose }: LessonFormProps) {
           Video{' '}
           {isEdit && (
             <span className='text-xs font-normal text-muted-foreground'>
-              (o'zgartirish uchun yuklang)
+              (o&apos;zgartirish uchun yuklang)
             </span>
           )}
         </Label>
+
         <div
           role='button'
           tabIndex={0}
           onClick={() => fileRef.current?.click()}
-          onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              fileRef.current?.click()
+            }
+          }}
           className={cn(
-            'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-5 transition-colors',
+            'flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border-2 border-dashed px-4 py-6 transition-all duration-200',
             'border-input hover:border-primary/60 hover:bg-muted/30',
-            fileName && 'border-primary/40 bg-muted/20'
+            fileName && 'border-primary/40 bg-primary/5'
           )}
         >
           {fileName ? (
-            <Video className='size-5 text-primary' />
+            <Video className='size-6 shrink-0 text-primary animate-in zoom-in-50' />
           ) : (
-            <Upload className='size-5 text-muted-foreground' />
+            <Upload className='size-6 shrink-0 text-muted-foreground' />
           )}
-          <p className='text-center text-sm text-muted-foreground'>
-            {fileName || 'Video faylni tanlash uchun bosing'}
+
+          <div className='w-full overflow-hidden px-2'>
+            <p
+              title={fileName} // Sishqonchani ustiga olib borganda to'liq nomi chiqadi
+              className={cn(
+                'w-full text-center text-sm transition-colors',
+                fileName ? 'font-medium text-primary' : 'text-muted-foreground'
+              )}
+            >
+              {fileName 
+                ? formatFileName(fileName) 
+                : 'Video faylni tanlash uchun bosing'}
+            </p>
+          </div>
+
+          <p className='text-[10px] uppercase tracking-wider text-muted-foreground/50 font-semibold'>
+            MP4, MOV, AVI, MKV
           </p>
-          <p className='text-xs text-muted-foreground/60'>MP4, MOV, AVI, MKV</p>
         </div>
+
         <input
           ref={fileRef}
           type='file'
@@ -109,11 +172,22 @@ function LessonForm({ moduleId, lesson, onClose }: LessonFormProps) {
         />
       </div>
 
-      <DialogFooter>
-        <Button type='button' variant='outline' onClick={onClose} disabled={isPending}>
+      <DialogFooter className="gap-2 sm:gap-0">
+        <Button
+          type='button'
+          variant='outline'
+          onClick={onClose}
+          disabled={isPending}
+          className="flex-1 sm:flex-none"
+        >
           Bekor qilish
         </Button>
-        <Button type='submit' disabled={isPending || !title.trim()}>
+
+        <Button 
+          type='submit' 
+          disabled={isPending || !title.trim()}
+          className="flex-1 sm:flex-none"
+        >
           {isPending && <Loader2 className='mr-2 size-4 animate-spin' />}
           Saqlash
         </Button>
@@ -136,8 +210,11 @@ export function LessonDialog({ open, onOpenChange, moduleId, lesson }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>{lesson ? 'Darsni tahrirlash' : "Dars qo'shish"}</DialogTitle>
+          <DialogTitle>
+            {lesson ? 'Darsni tahrirlash' : "Dars qo'shish"}
+          </DialogTitle>
         </DialogHeader>
+
         <LessonForm
           key={formKey}
           moduleId={moduleId}

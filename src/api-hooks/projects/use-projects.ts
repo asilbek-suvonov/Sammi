@@ -4,11 +4,15 @@ import {
   createProject,
   createStep,
   deleteProject,
+  deleteStep,
   getProjectDetail,
   getProjectsList,
   getStepDetail,
   patchProject,
+  patchStep,
+  reorderSteps,
   updateProject,
+  updateStep,
 } from '@/service/projects/projects.service'
 import type {
   PaginatedResponse,
@@ -18,6 +22,8 @@ import type {
   ProjectPatchRequest,
   ProjectRequest,
   ProjectStep,
+  StepPatchRequest,
+  StepReorderRequest,
   StepRequest,
 } from '@/service/projects/projects.type'
 
@@ -132,6 +138,70 @@ export function useCreateProjectStep() {
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to create step')
+    },
+  })
+}
+
+export function useUpdateProjectStep() {
+  const qc = useQueryClient()
+  return useMutation<
+    ProjectStep,
+    Error,
+    { id: number | string; data: StepRequest }
+  >({
+    mutationFn: ({ id, data }) => updateStep(id, data),
+    onSuccess: (_, vars) => {
+      toast.success('Step updated successfully')
+      qc.invalidateQueries({ queryKey: projectKeys.all })
+      qc.invalidateQueries({ queryKey: projectKeys.step(vars.id) })
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update step')
+    },
+  })
+}
+
+export function usePatchProjectStep() {
+  const qc = useQueryClient()
+  return useMutation<
+    ProjectStep,
+    Error,
+    { id: number | string; data: StepPatchRequest }
+  >({
+    mutationFn: ({ id, data }) => patchStep(id, data),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: projectKeys.all })
+      qc.invalidateQueries({ queryKey: projectKeys.step(vars.id) })
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update step')
+    },
+  })
+}
+
+export function useDeleteProjectStep() {
+  const qc = useQueryClient()
+  return useMutation<void, Error, number | string>({
+    mutationFn: deleteStep,
+    onSuccess: () => {
+      toast.success('Step deleted')
+      qc.invalidateQueries({ queryKey: projectKeys.all })
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to delete step')
+    },
+  })
+}
+
+export function useReorderProjectSteps() {
+  const qc = useQueryClient()
+  return useMutation<ProjectStep[], Error, StepReorderRequest>({
+    mutationFn: reorderSteps,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: projectKeys.all })
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to reorder steps')
     },
   })
 }

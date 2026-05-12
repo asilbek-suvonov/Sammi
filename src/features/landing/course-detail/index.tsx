@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useCourse } from '@/api-hooks/course/use-courses'
+import { useEnrollments } from '@/api-hooks/enrollment/use-enrollment'
 import { CourseSideCard } from '@/components/course/course-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
@@ -8,16 +9,25 @@ import { PublicNavRight } from '@/components/public/public-nav-right'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
 import { Badge } from '@/components/ui/badge'
 import { levelVariant } from '@/lib/variants'
-import { useAuthUser, useUserActions } from '@/stores/selectors'
+import { useAccessToken } from '@/stores/selectors'
 
 interface Props { id: string }
 
 export function CourseDetailPage({ id }: Props) {
   const navigate = useNavigate()
-  const user = useAuthUser()
-  const { enrollCourse, isEnrolled } = useUserActions()
+  const accessToken = useAccessToken()
+  const isAuthed = !!accessToken
   const { data: course, isLoading } = useCourse(id)
+  const { data: enrollmentData } = useEnrollments(undefined, { enabled: isAuthed })
   const [loginOpen, setLoginOpen] = useState(false)
+
+  const enrolled = useMemo(() => {
+    if (!isAuthed || !course || !enrollmentData?.results) return false
+    return enrollmentData.results.some((e) => {
+      const cid = typeof e.course === 'object' ? e.course.id : e.course
+      return cid === course.id
+    })
+  }, [isAuthed, course, enrollmentData])
 
   if (isLoading) {
     return (
@@ -36,15 +46,13 @@ export function CourseDetailPage({ id }: Props) {
   }
 
   const courseId = String(course.id)
-  const enrolled = isEnrolled(courseId)
 
   const goToPreview = () => {
-    if (!enrolled) enrollCourse(courseId)
     navigate({ to: '/course/preview', search: { courseId } })
   }
 
   const handleWatch = () => {
-    if (!user) {
+    if (!isAuthed) {
       setLoginOpen(true)
       return
     }
@@ -70,22 +78,35 @@ export function CourseDetailPage({ id }: Props) {
                 {course.is_free && <Badge>Free</Badge>}
                 {course.is_new && <Badge>New</Badge>}
               </div>
-              <h1 className='text-3xl font-bold tracking-tight md:text-4xl mb-1'>{course.title}</h1>
-              <p className='text-md leading-relaxed text-muted-foreground'>{course.description}</p>
+              <h1 className='mb-1 text-3xl font-bold tracking-tight md:text-4xl'>
+                {course.title}
+              </h1>
+              <p className='text-xs leading-relaxed text-muted-foreground'>
+                {course.description}
+              </p>
               {course.technologies_list?.length > 0 && (
                 <div className='flex flex-wrap gap-2'>
                   {course.technologies_list.map((tech) => (
-                    <Badge key={tech} variant='secondary'>{tech}</Badge>
+                    <Badge key={tech} variant='secondary'>
+                      {tech}
+                    </Badge>
                   ))}
                 </div>
               )}
             </div>
             <div className='overflow-hidden rounded-xl border'>
-              <img src={course.image_url ?? undefined} alt={course.title} className='h-64 w-full object-cover md:h-80' />
+              <img
+                src={course.image_url ?? undefined}
+                alt={course.title}
+                className='h-64 w-full object-cover md:h-80'
+              />
             </div>
-           
           </div>
-          <CourseSideCard course={course} enrolled={enrolled} onWatch={handleWatch} />
+          <CourseSideCard
+            course={course}
+            enrolled={enrolled}
+            onWatch={handleWatch}
+          />
         </div>
       </main>
 

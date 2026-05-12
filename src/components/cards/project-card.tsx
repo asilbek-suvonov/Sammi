@@ -10,7 +10,7 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
       params={{ id: String(project.id) }}
       className='group block'
     >
-      <Card className='cursor-pointer overflow-hidden border dark:bg-neutral-900/30 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20'>
+      <Card className='cursor-pointer overflow-hidden border p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 dark:bg-neutral-900/30'>
         <div className='relative overflow-hidden rounded-lg'>
           <img
             src={project.image_url ?? undefined}
@@ -19,10 +19,10 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
           />
           <div className='absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/0' />
 
-          <div className='absolute right-2.5 top-2.5'>
+          <div className='absolute top-2.5 right-2.5'>
             <Badge
               variant='secondary'
-              className='border-transparent bg-background/80 text-foreground backdrop-blur-md text-[10px]'
+              className='border-transparent bg-background/80 text-[10px] text-foreground backdrop-blur-md'
             >
               {project.difficulty_display || project.difficulty}
             </Badge>
@@ -30,22 +30,24 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
         </div>
 
         <div className='px-1 pt-4 pb-2'>
-          <p className='text-[14px] font-medium leading-snug text-foreground'>
+          <p className='text-[14px] leading-snug font-medium text-foreground'>
             {project.title}
           </p>
         </div>
 
-        <CardContent className='px-1 pb-2 pt-0'>
+        <CardContent className='px-1 pt-0 pb-2'>
           <div className='flex flex-wrap gap-1.5'>
-            {project.technologies.map((tech) => (
-              <Badge
-                key={tech.id}
-                variant='secondary'
-                className='rounded-md px-2 py-0.5 text-[10px] bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border-none'
-              >
-                {tech.label}
-              </Badge>
-            ))}
+            {project.technologies.flatMap((tech) =>
+              tech.value.map((item, index) => (
+                <Badge
+                  key={`${tech.id}-${item}-${index}`}
+                  variant='secondary'
+                  className='rounded-md border-none bg-neutral-100 px-2 py-0.5 text-[10px] text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                >
+                  {item}
+                </Badge>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

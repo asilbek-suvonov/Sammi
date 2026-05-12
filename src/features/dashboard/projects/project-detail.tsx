@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Main } from '@/components/layout/main'
 import { DashboardBreadcrumb } from '@/components/layout/dashboard-breadcrumb'
-import { ProjectInfoSection } from '@/components/project/project-info-section'
-import { ProjectMetrics } from '@/components/project/project-metrics'
+import { ProjectStepsSection } from '@/components/project/project-steps-section'
 
 interface AdminProjectDetailProps {
   id: string
@@ -97,16 +96,7 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
       </div>
 
       <Separator className='my-6' />
-
-      <ProjectMetrics
-        totalSteps={project.total_steps}
-        totalDurationStr={project.total_duration_str}
-        createdAt={project.created_at}
-      />
-
-      <div className='mt-6'>
-        <ProjectInfoSection technologies={project.technologies} features={project.features} />
-      </div>
+      <ProjectStepsSection projectId={project.id} steps={project.steps ?? []} />
 
     </Main>
   )

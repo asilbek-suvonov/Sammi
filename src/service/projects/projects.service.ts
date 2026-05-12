@@ -8,12 +8,17 @@ import type {
   ProjectPatchRequest,
   ProjectRequest,
   ProjectStep,
+  StepPatchRequest,
+  StepReorderRequest,
   StepRequest,
 } from './projects.type'
 
 // ─── FormData builder ─────────────────────────────────────────────────────────
 
-type AnyRequest = Partial<ProjectRequest> | Partial<StepRequest>
+type AnyRequest =
+  | Partial<ProjectRequest>
+  | Partial<StepRequest>
+  | StepPatchRequest
 
 const buildFormData = (payload: AnyRequest): FormData => {
   const fd = new FormData()
@@ -98,6 +103,38 @@ export class ProjectsService {
     }
     return api.post<ProjectStep>(API_ENDPOINTS.PROJECTS.STEP_CREATE, data)
   }
+
+  static updateStep(id: number | string, data: StepRequest): Promise<ProjectStep> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_UPDATE.replace(':id', String(id))
+    if (hasFile(data)) {
+      return api.put<ProjectStep>(url, buildFormData(data), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+    return api.put<ProjectStep>(url, data)
+  }
+
+  static patchStep(id: number | string, data: StepPatchRequest): Promise<ProjectStep> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_PATCH.replace(':id', String(id))
+    if (hasFile(data)) {
+      return api.patch<ProjectStep>(url, buildFormData(data), {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+    return api.patch<ProjectStep>(url, data)
+  }
+
+  static deleteStep(id: number | string): Promise<void> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_DELETE.replace(':id', String(id))
+    return api.delete(url)
+  }
+
+  static reorderSteps(data: StepReorderRequest): Promise<ProjectStep[]> {
+    return api.post<ProjectStep[], StepReorderRequest>(
+      API_ENDPOINTS.PROJECTS.STEP_REORDER,
+      data,
+    )
+  }
 }
 
 export const {
@@ -109,6 +146,10 @@ export const {
   delete: deleteProject,
   stepDetail: getStepDetail,
   createStep,
+  updateStep,
+  patchStep,
+  deleteStep,
+  reorderSteps,
 } = ProjectsService
 
 export default ProjectsService

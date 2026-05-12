@@ -23,6 +23,20 @@ export interface ProjectStep {
   order: number
 }
 
+/** PATCH /projects/steps/:id — partial update */
+export type StepPatchRequest = Partial<Omit<StepRequest, 'project'>>
+
+/** POST /projects/steps/reorder — bulk reorder payload */
+export interface StepReorderItem {
+  id: number
+  order: number
+}
+
+export interface StepReorderRequest {
+  project: number
+  steps: StepReorderItem[]
+}
+
 export interface PaginatedResponse<T> {
   count: number
   next: string | null

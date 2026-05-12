@@ -23,9 +23,9 @@ function EnrolledCard({ enrollment, course }: EnrolledCardProps) {
     <Link
       to='/course/preview'
       search={{ courseId: String(courseId) }}
-      className='group block overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md'
+      className='group block overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md p-3'
     >
-      <div className='relative aspect-video overflow-hidden bg-muted'>
+      <div className='relative aspect-video overflow-hidden bg-muted rounded-lg'>
         {course.image_url ? (
           <img
             src={course.image_url}
@@ -39,7 +39,7 @@ function EnrolledCard({ enrollment, course }: EnrolledCardProps) {
         )}
       </div>
 
-      <div className='p-3 space-y-2'>
+      <div className='pt-3 space-y-2'>
         <p className='line-clamp-2 text-sm font-medium leading-tight'>{course.title}</p>
 
         <div className='space-y-1'>

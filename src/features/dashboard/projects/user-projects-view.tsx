@@ -54,7 +54,7 @@ const UserProjectsView = () => {
           {projects.map((project) => (
             <div
               key={project.id}
-              className='group overflow-hidden rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md p-4'
+              className='group overflow-hidden rounded-xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md p-3'
             >
               <Link to='/project/$id' params={{ id: String(project.id) }}>
                 <div className='relative h-45 overflow-hidden rounded-md'>
@@ -73,7 +73,7 @@ const UserProjectsView = () => {
                   </div>
                 </div>
               </Link>
-              <div className='p-3'>
+              <div className='pt-3'>
                 <Link
                   to='/project/$id'
                   params={{ id: String(project.id) }}

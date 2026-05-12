@@ -1,9 +1,9 @@
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Course } from '../../service/course/course.types' // Yangi interfeysdan foydalanamiz
-import { levelVariant } from '@/lib/variants'
-import { Link } from '@tanstack/react-router'
-import { Clock3, Layers3 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { levelVariant } from '@/lib/variants';
+import { Link } from '@tanstack/react-router';
+import { Layers3 } from 'lucide-react';
+import type { Course } from '../../service/course/course.types'; // Yangi interfeysdan foydalanamiz
 
 export function CourseCard({ course }: { course: Course }) {
   return (
@@ -35,10 +35,13 @@ export function CourseCard({ course }: { course: Course }) {
         <CardContent className='px-2 pb-2'>
           <div className='flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground'>
             <span className='flex items-center gap-1'>
-              <Layers3 className='size-3' /> {course.technologies_list[0]} {/* Backenddan kelayotgan texnologiya */}
+              <Layers3 className='size-3' /> {course.category_name}
             </span>
             <span className='flex items-center gap-1'>
-              <Clock3 className='size-3' /> {course.is_free ? 'Free' : course.price}
+              <Layers3 className='size-3' /> {course.level}
+            </span>
+            <span className='flex items-center gap-1'>
+              {/* <Layers3 className='size-3' /> {course.technologies_list.values[1]} */}
             </span>
             <span className='flex items-center gap-1'>
               {course.is_new && <Badge className="bg-green-500 h-4 text-[9px]">NEW</Badge>}

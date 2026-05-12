@@ -17,7 +17,7 @@ export interface Technology {
   category: TechnologyCategory
   category_display: string
   label: string
-  value: string
+  value: string[]
   description: string | null
 }
 
@@ -39,7 +39,7 @@ export interface TechnologyGrouped {
 // ─── POST / PUT / PATCH Request Types ────────────────────────────────────────
 
 export interface TechnologyRequest {
-  value: string
+  value: string[]
   label?: string
   category?: TechnologyCategory
   description?: string | null

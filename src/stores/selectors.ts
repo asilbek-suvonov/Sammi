@@ -1,7 +1,6 @@
 import { useShallow } from 'zustand/react/shallow'
 import { useAuthStore } from './auth-store'
 import { useProfileStore } from './profile-store'
-import { useUserStore } from './user-store'
 
 // ── Auth store ────────────────────────────────────────────────
 export const useAuthUser = () => useAuthStore((s) => s.auth.user)
@@ -23,13 +22,3 @@ export const useAuthActions = () =>
 export const useProfile = () => useProfileStore((s) => s.profile)
 export const useSetProfile = () => useProfileStore((s) => s.setProfile)
 export const useResetProfile = () => useProfileStore((s) => s.resetProfile)
-
-// ── User store ────────────────────────────────────────────────
-export const useEnrolledCourses = () => useUserStore((s) => s.enrolledCourses)
-export const useUserActions = () =>
-  useUserStore(
-    useShallow((s) => ({
-      enrollCourse: s.enrollCourse,
-      isEnrolled: s.isEnrolled,
-    }))
-  )
