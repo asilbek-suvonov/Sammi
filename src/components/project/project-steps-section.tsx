@@ -2,24 +2,29 @@ import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
   useDeleteProjectStep,
+  useProject,
   useReorderProjectSteps,
 } from '@/api-hooks/projects/use-projects'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { ProjectStep } from '@/service/projects/projects.type'
 import { ProjectStepCard } from './project-step-card'
 import { ProjectStepDialog } from './project-step-dialog'
 
 interface Props {
   projectId: number
-  steps: ProjectStep[]
 }
 
-export function ProjectStepsSection({ projectId, steps }: Props) {
+export function ProjectStepsSection({ projectId }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingStep, setEditingStep] = useState<ProjectStep | undefined>()
 
+  // ✅ Ichkaridan fetch qilamiz
+  const { data, isLoading } = useProject(projectId)
+  const steps: ProjectStep[] = data?.results ?? []
+
   const deleteStep = useDeleteProjectStep()
-  const reorderSteps = useReorderProjectSteps()
+  const reorderSteps = useReorderProjectSteps(projectId)
 
   const sorted = useMemo(
     () => [...steps].sort((a, b) => a.order - b.order),
@@ -49,6 +54,16 @@ export function ProjectStepsSection({ projectId, steps }: Props) {
       project: projectId,
       steps: next.map((s, i) => ({ id: s.id, order: i + 1 })),
     })
+  }
+
+  if (isLoading) {
+    return (
+      <div className='mt-6 space-y-3'>
+        <Skeleton className='h-8 w-48' />
+        <Skeleton className='h-20 w-full' />
+        <Skeleton className='h-20 w-full' />
+      </div>
+    )
   }
 
   return (
@@ -86,9 +101,12 @@ export function ProjectStepsSection({ projectId, steps }: Props) {
               onMoveUp={() => move(i, -1)}
               onMoveDown={() => move(i, 1)}
               onEdit={() => openEdit(step)}
-              onDelete={() => deleteStep.mutate(step.id)}
+              onDelete={() =>
+                // ✅ projectPk kerak, project emas
+                deleteStep.mutate({ projectPk: projectId, id: step.id })
+              }
               isDeleting={
-                deleteStep.isPending && deleteStep.variables === step.id
+                deleteStep.isPending && deleteStep.variables?.id === step.id
               }
               isReordering={reorderSteps.isPending}
             />

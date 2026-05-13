@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
-import { useProject } from '@/api-hooks/projects/use-projects'
+import { useProjects, useProject } from '@/api-hooks/projects/use-projects'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -13,7 +13,14 @@ interface AdminProjectDetailProps {
 }
 
 export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
-  const { data: project, isLoading } = useProject(id)
+  // Project ma'lumotlari (title, image, difficulty va h.k.)
+  const { data: projectsData, isLoading: projectLoading } = useProjects()
+  const project = projectsData?.results.find((p) => String(p.id) === String(id))
+
+  // Steps — useProject ichida fetch qiladi, ProjectStepsSection ga kerak emas
+  const { isLoading: stepsLoading } = useProject(id)
+
+  const isLoading = projectLoading || stepsLoading
 
   if (isLoading) {
     return (
@@ -74,21 +81,26 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
               )}
             </div>
             <h1 className='truncate text-2xl font-bold tracking-tight'>{project.title}</h1>
-            <p className='line-clamp-2 max-w-2xl text-sm text-muted-foreground'>{project.description}</p>
+            <p className='line-clamp-2 max-w-2xl text-sm text-muted-foreground'>
+              {project.description}
+            </p>
           </div>
         </div>
+
         <div className='flex shrink-0 gap-2'>
           {project.github_url && (
             <Button variant='outline' size='sm' asChild>
               <a href={project.github_url} target='_blank' rel='noreferrer'>
-                <ExternalLink className='mr-2 size-4' />GitHub
+                <ExternalLink className='mr-2 size-4' />
+                GitHub
               </a>
             </Button>
           )}
           {project.demo_url && (
             <Button size='sm' asChild>
               <a href={project.demo_url} target='_blank' rel='noreferrer'>
-                <ExternalLink className='mr-2 size-4' />Demo
+                <ExternalLink className='mr-2 size-4' />
+                Demo
               </a>
             </Button>
           )}
@@ -96,8 +108,9 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
       </div>
 
       <Separator className='my-6' />
-      <ProjectStepsSection projectId={project.id} steps={project.steps ?? []} />
 
+      {/* ✅ steps prop kerak emas — ProjectStepsSection ichida useProject ishlatadi */}
+      <ProjectStepsSection projectId={Number(id)} />
     </Main>
   )
 }

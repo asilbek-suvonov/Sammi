@@ -16,7 +16,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 import { EntityTablePage } from '@/components/data-table'
 import { Main } from '@/components/layout/main'
 
-import { getCoursesColumns } from './columns'
+import {getCoursesColumns}  from './columns'
 
 const CourseSheet = lazy(() =>
   import('./course-sheet').then((m) => ({

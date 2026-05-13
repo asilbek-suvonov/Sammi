@@ -5,9 +5,9 @@ import {
   createStep,
   deleteProject,
   deleteStep,
-  getProjectDetail,
   getProjectsList,
   getStepDetail,
+  getStepList,
   patchProject,
   patchStep,
   reorderSteps,
@@ -16,7 +16,6 @@ import {
 } from '@/service/projects/projects.service'
 import type {
   PaginatedResponse,
-  ProjectDetail,
   ProjectFilters,
   ProjectListItem,
   ProjectPatchRequest,
@@ -29,77 +28,69 @@ import type {
 
 export const projectKeys = {
   all: ['projects'] as const,
-  list: (params?: ProjectFilters) => [...projectKeys.all, 'list', params] as const,
-  detail: (id: number | string) => [...projectKeys.all, 'detail', String(id)] as const,
-  steps: () => ['project-steps'] as const,
-  step: (id: number | string) => [...projectKeys.steps(), String(id)] as const,
+  lists: () => [...projectKeys.all, 'list'] as const,
+  list: (params?: ProjectFilters) => [...projectKeys.lists(), params] as const,
+  details: () => [...projectKeys.all, 'detail'] as const,
+  detail: (id: number | string) => [...projectKeys.details(), String(id)] as const,
+  step: (id: number | string) => ['step-detail', String(id)] as const,
 }
 
+// --- Queries ---
 export function useProjects(params?: ProjectFilters) {
   return useQuery<PaginatedResponse<ProjectListItem>, Error>({
     queryKey: projectKeys.list(params),
     queryFn: () => getProjectsList(params),
-    staleTime: 5 * 60 * 1000,
   })
 }
 
-export function useProject(id: number | string | undefined, enabled = true) {
-  return useQuery<ProjectDetail, Error>({
-    queryKey: projectKeys.detail(id ?? ''),
-    queryFn: () => getProjectDetail(id as number | string),
-    enabled: !!id && enabled,
-    staleTime: 5 * 60 * 1000,
+export function useProject(projectPk: number | string | undefined) {
+  return useQuery<PaginatedResponse<ProjectStep>, Error>({
+    queryKey: projectKeys.detail(projectPk ?? ''),
+    queryFn: () => getStepList(projectPk!),
+    enabled: !!projectPk,
   })
 }
 
+export function useStepDetail(projectPk: number | string, id: number | string) {
+  return useQuery<ProjectStep, Error>({
+    queryKey: projectKeys.step(id),
+    queryFn: () => getStepDetail(projectPk, id),
+    enabled: !!id && !!projectPk,
+  })
+}
+
+// --- Project Mutations ---
 export function useCreateProject() {
   const qc = useQueryClient()
-  return useMutation<ProjectDetail, Error, ProjectRequest>({
+  return useMutation<any, Error, ProjectRequest>({
     mutationFn: createProject,
     onSuccess: () => {
-      toast.success('Project created successfully')
-      qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create project')
+      toast.success('Project created')
+      qc.invalidateQueries({ queryKey: projectKeys.lists() })
     },
   })
 }
 
 export function useUpdateProject() {
   const qc = useQueryClient()
-  return useMutation<
-    ProjectDetail,
-    Error,
-    { id: number | string; data: ProjectRequest }
-  >({
+  return useMutation<any, Error, { id: number | string; data: ProjectRequest }>({
     mutationFn: ({ id, data }) => updateProject(id, data),
     onSuccess: (_, vars) => {
-      toast.success('Project updated successfully')
+      toast.success('Project updated')
+      qc.invalidateQueries({ queryKey: projectKeys.lists() })
       qc.invalidateQueries({ queryKey: projectKeys.detail(vars.id) })
-      qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update project')
     },
   })
 }
 
 export function usePatchProject() {
   const qc = useQueryClient()
-  return useMutation<
-    ProjectDetail,
-    Error,
-    { id: number | string; data: ProjectPatchRequest }
-  >({
+  return useMutation<any, Error, { id: number | string; data: ProjectPatchRequest }>({
     mutationFn: ({ id, data }) => patchProject(id, data),
     onSuccess: (_, vars) => {
-      toast.success('Project updated successfully')
+      toast.success('Project updated')
+      qc.invalidateQueries({ queryKey: projectKeys.lists() })
       qc.invalidateQueries({ queryKey: projectKeys.detail(vars.id) })
-      qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update project')
     },
   })
 }
@@ -109,99 +100,68 @@ export function useDeleteProject() {
   return useMutation<void, Error, number | string>({
     mutationFn: deleteProject,
     onSuccess: () => {
-      toast.success('Project deleted successfully')
-      qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to delete project')
+      toast.success('Project deleted')
+      qc.invalidateQueries({ queryKey: projectKeys.lists() })
     },
   })
 }
 
-export function useProjectStep(id: number | string | undefined, enabled = true) {
-  return useQuery<ProjectStep, Error>({
-    queryKey: projectKeys.step(id ?? ''),
-    queryFn: () => getStepDetail(id as number | string),
-    enabled: !!id && enabled,
-    staleTime: 5 * 60 * 1000,
-  })
-}
-
+// --- Step Mutations ---
 export function useCreateProjectStep() {
   const qc = useQueryClient()
-  return useMutation<ProjectStep, Error, StepRequest>({
-    mutationFn: createStep,
-    onSuccess: () => {
-      toast.success('Step created successfully')
-      qc.invalidateQueries({ queryKey: projectKeys.all })
-      qc.invalidateQueries({ queryKey: projectKeys.steps() })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create step')
+  return useMutation<ProjectStep, Error, { projectPk: number | string; data: StepRequest }>({
+    mutationFn: ({ projectPk, data }) => createStep(projectPk, data),
+    onSuccess: (_, vars) => {
+      toast.success('Step created')
+      // ✅ detail key — useProject shu keyni ishlatadi
+      qc.invalidateQueries({ queryKey: projectKeys.detail(vars.projectPk) })
     },
   })
 }
 
 export function useUpdateProjectStep() {
   const qc = useQueryClient()
-  return useMutation<
-    ProjectStep,
-    Error,
-    { id: number | string; data: StepRequest }
-  >({
-    mutationFn: ({ id, data }) => updateStep(id, data),
+  return useMutation<ProjectStep, Error, { projectPk: number | string; id: number | string; data: StepRequest }>({
+    mutationFn: ({ projectPk, id, data }) => updateStep(projectPk, id, data),
     onSuccess: (_, vars) => {
-      toast.success('Step updated successfully')
-      qc.invalidateQueries({ queryKey: projectKeys.all })
+      toast.success('Step updated')
+      qc.invalidateQueries({ queryKey: projectKeys.detail(vars.projectPk) })
+      // step detail cache ni ham tozalaymiz
       qc.invalidateQueries({ queryKey: projectKeys.step(vars.id) })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update step')
     },
   })
 }
 
 export function usePatchProjectStep() {
   const qc = useQueryClient()
-  return useMutation<
-    ProjectStep,
-    Error,
-    { id: number | string; data: StepPatchRequest }
-  >({
-    mutationFn: ({ id, data }) => patchStep(id, data),
+  return useMutation<ProjectStep, Error, { projectPk: number | string; id: number | string; data: StepPatchRequest }>({
+    mutationFn: ({ projectPk, id, data }) => patchStep(projectPk, id, data),
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: projectKeys.all })
+      toast.success('Step updated')
+      qc.invalidateQueries({ queryKey: projectKeys.detail(vars.projectPk) })
       qc.invalidateQueries({ queryKey: projectKeys.step(vars.id) })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update step')
     },
   })
 }
 
 export function useDeleteProjectStep() {
   const qc = useQueryClient()
-  return useMutation<void, Error, number | string>({
-    mutationFn: deleteStep,
-    onSuccess: () => {
+  return useMutation<void, Error, { projectPk: number | string; id: number | string }>({
+    mutationFn: ({ projectPk, id }) => deleteStep(projectPk, id),
+    onSuccess: (_, vars) => {
       toast.success('Step deleted')
-      qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to delete step')
+      qc.invalidateQueries({ queryKey: projectKeys.detail(vars.projectPk) })
     },
   })
 }
 
-export function useReorderProjectSteps() {
+export function useReorderProjectSteps(projectPk: number | string) {
   const qc = useQueryClient()
   return useMutation<ProjectStep[], Error, StepReorderRequest>({
-    mutationFn: reorderSteps,
+    mutationFn: (data) => reorderSteps(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to reorder steps')
+      toast.success('Order updated')
+      qc.invalidateQueries({ queryKey: projectKeys.detail(projectPk) })
     },
   })
 }

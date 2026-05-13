@@ -1,104 +1,145 @@
-import { type ColumnDef } from '@tanstack/react-table'
-import { ExternalLink, ImageIcon } from 'lucide-react'
-
-import type { ProjectListItem } from '@/service/projects/projects.type'
-import { Badge } from '@/components/ui/badge'
 import {
-  DataTableColumnHeader,
-  EntityActionsCell,
-  selectColumn,
-} from '@/components/data-table'
-import { ImagePreview } from '@/components/image-preview'
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CaretSortIcon,
+  EyeNoneIcon,
+} from '@radix-ui/react-icons'
 
-type ProjectsColumnsProps = {
+import { type Column } from '@tanstack/react-table'
+import { useTranslation } from 'react-i18next'
+
+import { cn } from '@/lib/utils'
+
+import { Button } from '@/components/ui/button'
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+type DataTableColumnHeaderProps<TData, TValue> =
+  React.HTMLAttributes<HTMLDivElement> & {
+    column: Column<TData, TValue>
+    title: string
+  }
+
+export function DataTableColumnHeader<TData, TValue>({
+  column,
+  title,
+  className,
+}: DataTableColumnHeaderProps<TData, TValue>) {
+  const { t } = useTranslation()
+
+  if (!column.getCanSort()) {
+    return <div className={cn(className)}>{title}</div>
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex items-center space-x-2',
+        className
+      )}
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant='ghost'
+            size='sm'
+            className='h-8 data-[state=open]:bg-accent'
+          >
+            <span>{title}</span>
+
+            {column.getIsSorted() === 'desc' ? (
+              <ArrowDownIcon className='ms-2 h-4 w-4' />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ArrowUpIcon className='ms-2 h-4 w-4' />
+            ) : (
+              <CaretSortIcon className='ms-2 h-4 w-4' />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align='start'>
+          <DropdownMenuItem
+            onClick={() =>
+              column.toggleSorting(false)
+            }
+          >
+            <ArrowUpIcon className='size-3.5 text-muted-foreground/70' />
+            {t('asc')}
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() =>
+              column.toggleSorting(true)
+            }
+          >
+            <ArrowDownIcon className='size-3.5 text-muted-foreground/70' />
+            {t('desc')}
+          </DropdownMenuItem>
+
+          {column.getCanHide() && (
+            <>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem
+                onClick={() =>
+                  column.toggleVisibility(false)
+                }
+              >
+                <EyeNoneIcon className='size-3.5 text-muted-foreground/70' />
+                {t('hide')}
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}
+
+import { ColumnDef } from '@tanstack/react-table'
+import type { ProjectListItem } from '@/service/projects/projects.type'
+
+interface GetColumnsProps {
   onEdit: (project: ProjectListItem) => void
   onDelete: (project: ProjectListItem) => void
 }
 
-const difficultyVariantMap: Record<string, 'secondary' | 'default' | 'destructive'> = {
-  beginner: 'secondary',
-  intermediate: 'default',
-  advanced: 'destructive',
-}
-
-export function getProjectsColumns({
-  onEdit,
-  onDelete,
-}: ProjectsColumnsProps): ColumnDef<ProjectListItem>[] {
-  return [
-    selectColumn<ProjectListItem>(),
-
-    {
-      accessorKey: 'image_url',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Image' />,
-      cell: ({ row }) =>
-        row.original.image_url ? (
-          <ImagePreview
-            src={row.original.image_url}
-            alt={row.original.title}
-            className='h-8 w-14 rounded object-cover'
-          />
-        ) : (
-          <div className='flex h-8 w-14 items-center justify-center rounded bg-muted'>
-            <ImageIcon className='size-4 text-muted-foreground' />
-          </div>
-        ),
-      size: 90,
-    },
-
-    {
-      accessorKey: 'title',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Title' />,
-      cell: ({ row }) => (
-        <div className='max-w-[260px]'>
-          <span className='block truncate font-medium'>{row.getValue('title')}</span>
-        </div>
-      ),
-    },
-
-    {
-      accessorKey: 'difficulty',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='Difficulty' />,
-      cell: ({ row }) => {
-        const difficulty = row.getValue('difficulty') as string | undefined
-        if (!difficulty) return <span className='text-muted-foreground'>—</span>
-        return (
-          <Badge
-            variant={difficultyVariantMap[difficulty] ?? 'outline'}
-            className='capitalize'
-          >
-            {row.original.difficulty_display || difficulty}
-          </Badge>
-        )
-      },
-      filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
-    },
-
-    {
-      accessorKey: 'github_url',
-      header: ({ column }) => <DataTableColumnHeader column={column} title='GitHub' />,
-      cell: ({ row }) => {
-        const url = row.getValue('github_url') as string | undefined
-        if (!url) return <span className='text-muted-foreground'>—</span>
-        return (
-          <a
-            href={url}
-            target='_blank'
-            rel='noreferrer'
-            className='inline-flex items-center gap-1 text-sm text-blue-500 hover:underline'
-          >
-            Link <ExternalLink className='h-3 w-3' />
-          </a>
-        )
-      },
-    },
-
-    {
-      id: 'actions',
-      enableHiding: false,
-      cell: ({ row }) => (
-        <EntityActionsCell entity={row.original} onEdit={onEdit} onDelete={onDelete} />
-      ),
-    },
-  ]
-}
+export const getProjectsColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<ProjectListItem>[] => [
+  {
+    accessorKey: 'title',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Project" />,
+    cell: ({ row }) => <span className="max-w-[200px] truncate font-medium">{row.getValue('title')}</span>,
+  },
+  {
+    accessorKey: 'difficulty',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Difficulty" />,
+    cell: ({ row }) => <span className="capitalize">{row.getValue('difficulty')}</span>,
+  },
+  {
+    accessorKey: 'technologies',
+    header: 'Technologies',
+    cell: ({ row }) => (
+      <div className="flex flex-wrap gap-1">
+        {((row.getValue('technologies') as any[]) || []).slice(0, 3).map((t: any) => (
+          <span key={t.id} className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{t.label}</span>
+        ))}
+      </div>
+    ),
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <button onClick={(e) => { e.stopPropagation(); onEdit(row.original); }} className="text-sm text-blue-600 hover:underline">Edit</button>
+        <button onClick={(e) => { e.stopPropagation(); onDelete(row.original); }} className="text-sm text-red-600 hover:underline">Delete</button>
+      </div>
+    ),
+  },
+]

@@ -2,7 +2,6 @@ import api from '@/api'
 import API_ENDPOINTS from '@/endpoints/api_endpoints'
 import type {
   PaginatedResponse,
-  ProjectDetail,
   ProjectFilters,
   ProjectListItem,
   ProjectPatchRequest,
@@ -13,23 +12,20 @@ import type {
   StepRequest,
 } from './projects.type'
 
-// ─── FormData builder ─────────────────────────────────────────────────────────
+const multipart = { headers: { 'Content-Type': 'multipart/form-data' } }
 
-type AnyRequest =
-  | Partial<ProjectRequest>
-  | Partial<StepRequest>
-  | StepPatchRequest
-
-const buildFormData = (payload: AnyRequest): FormData => {
+const buildFormData = (payload: Record<string, any>): FormData => {
   const fd = new FormData()
   for (const [key, value] of Object.entries(payload)) {
     if (value === undefined || value === null) continue
     if (Array.isArray(value)) {
-      value.forEach((v) => fd.append(key, String(v)))
+      value.forEach((v) => fd.append(key, v instanceof File ? v : String(v)))
     } else if (value instanceof File) {
       fd.append(key, value)
     } else if (typeof value === 'boolean') {
       fd.append(key, value ? 'true' : 'false')
+    } else if (typeof value === 'object') {
+      continue
     } else {
       fd.append(key, String(value))
     }
@@ -37,50 +33,35 @@ const buildFormData = (payload: AnyRequest): FormData => {
   return fd
 }
 
-const hasFile = (payload: AnyRequest): boolean =>
-  Object.values(payload).some((v) => v instanceof File)
-
-// ─── Service ──────────────────────────────────────────────────────────────────
+const hasProjectFile = (data: ProjectRequest | ProjectPatchRequest): boolean =>
+  data.image instanceof File
 
 export class ProjectsService {
+  // --- Projects ---
   static list(params?: ProjectFilters): Promise<PaginatedResponse<ProjectListItem>> {
-    return api.get<PaginatedResponse<ProjectListItem>>(API_ENDPOINTS.PROJECTS.LIST, { params })
+    return api.get(API_ENDPOINTS.PROJECTS.LIST, { params })
   }
 
-  static detail(id: number | string): Promise<ProjectDetail> {
-    const url = API_ENDPOINTS.PROJECTS.DETAIL.replace(':id', String(id))
-    return api.get<ProjectDetail>(url)
+  static detail(projectPk: number | string): Promise<PaginatedResponse<ProjectStep>> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_LIST.replace(':project_pk', String(projectPk))
+    return api.get(url)
   }
 
-  static create(data: ProjectRequest): Promise<ProjectDetail> {
-    if (hasFile(data)) {
-      return api.post<ProjectDetail>(
-        API_ENDPOINTS.PROJECTS.CREATE,
-        buildFormData(data),
-        { headers: { 'Content-Type': undefined } }
-      )
-    }
-    return api.post<ProjectDetail>(API_ENDPOINTS.PROJECTS.CREATE, data)
+  static create(data: ProjectRequest): Promise<any> {
+    return api.post(
+      API_ENDPOINTS.PROJECTS.CREATE,
+      hasProjectFile(data) ? buildFormData(data) : data,
+    )
   }
 
-  static update(id: number | string, data: ProjectRequest): Promise<ProjectDetail> {
+  static update(id: number | string, data: ProjectRequest): Promise<any> {
     const url = API_ENDPOINTS.PROJECTS.UPDATE.replace(':id', String(id))
-    if (hasFile(data)) {
-      return api.put<ProjectDetail>(url, buildFormData(data), {
-        headers: { 'Content-Type': undefined },
-      })
-    }
-    return api.put<ProjectDetail>(url, data)
+    return api.put(url, hasProjectFile(data) ? buildFormData(data) : data)
   }
 
-  static patch(id: number | string, data: ProjectPatchRequest): Promise<ProjectDetail> {
+  static patch(id: number | string, data: ProjectPatchRequest): Promise<any> {
     const url = API_ENDPOINTS.PROJECTS.PATCH.replace(':id', String(id))
-    if (hasFile(data)) {
-      return api.patch<ProjectDetail>(url, buildFormData(data), {
-        headers: { 'Content-Type': undefined },
-      })
-    }
-    return api.patch<ProjectDetail>(url, data)
+    return api.patch(url, hasProjectFile(data) ? buildFormData(data) : data)
   }
 
   static delete(id: number | string): Promise<void> {
@@ -88,52 +69,62 @@ export class ProjectsService {
     return api.delete(url)
   }
 
-  static stepDetail(id: number | string): Promise<ProjectStep> {
-    const url = API_ENDPOINTS.PROJECTS.STEP_DETAIL.replace(':id', String(id))
-    return api.get<ProjectStep>(url)
+  // --- Steps ---
+
+  // GET /projects/:project_pk/steps/
+  static stepList(projectPk: number | string): Promise<PaginatedResponse<ProjectStep>> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_LIST.replace(':project_pk', String(projectPk))
+    return api.get(url)
   }
 
-  static createStep(data: StepRequest): Promise<ProjectStep> {
-    if (hasFile(data)) {
-      return api.post<ProjectStep>(
-        API_ENDPOINTS.PROJECTS.STEP_CREATE,
-        buildFormData(data),
-        { headers: { 'Content-Type': undefined } }
-      )
-    }
-    return api.post<ProjectStep>(API_ENDPOINTS.PROJECTS.STEP_CREATE, data)
+  // GET /projects/:project_pk/steps/:id/
+  static stepDetail(projectPk: number | string, id: number | string): Promise<ProjectStep> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_DETAIL
+      .replace(':project_pk', String(projectPk))
+      .replace(':id', String(id))
+    return api.get(url)
   }
 
-  static updateStep(id: number | string, data: StepRequest): Promise<ProjectStep> {
-    const url = API_ENDPOINTS.PROJECTS.STEP_UPDATE.replace(':id', String(id))
-    if (hasFile(data)) {
-      return api.put<ProjectStep>(url, buildFormData(data), {
-        headers: { 'Content-Type': undefined },
-      })
-    }
-    return api.put<ProjectStep>(url, data)
+  // POST /projects/:project_pk/steps/create/
+  static createStep(projectPk: number | string, data: StepRequest): Promise<ProjectStep> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_CREATE.replace(':project_pk', String(projectPk))
+    return api.post(url, buildFormData(data), multipart)
   }
 
-  static patchStep(id: number | string, data: StepPatchRequest): Promise<ProjectStep> {
-    const url = API_ENDPOINTS.PROJECTS.STEP_PATCH.replace(':id', String(id))
-    if (hasFile(data)) {
-      return api.patch<ProjectStep>(url, buildFormData(data), {
-        headers: { 'Content-Type': undefined },
-      })
-    }
-    return api.patch<ProjectStep>(url, data)
+  // PUT /projects/:project_pk/steps/:id/update/
+  static updateStep(
+    projectPk: number | string,
+    id: number | string,
+    data: StepRequest,
+  ): Promise<ProjectStep> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_UPDATE
+      .replace(':project_pk', String(projectPk))
+      .replace(':id', String(id))
+    return api.put(url, buildFormData(data), multipart)
   }
 
-  static deleteStep(id: number | string): Promise<void> {
-    const url = API_ENDPOINTS.PROJECTS.STEP_DELETE.replace(':id', String(id))
+  // PATCH /projects/:project_pk/steps/:id/update/
+  static patchStep(
+    projectPk: number | string,
+    id: number | string,
+    data: StepPatchRequest,
+  ): Promise<ProjectStep> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_PATCH
+      .replace(':project_pk', String(projectPk))
+      .replace(':id', String(id))
+    return api.patch(url, buildFormData(data), multipart)
+  }
+
+  // DELETE /projects/:project_pk/steps/:id/delete/
+  static deleteStep(projectPk: number | string, id: number | string): Promise<void> {
+    const url = API_ENDPOINTS.PROJECTS.STEP_DELETE
+      .replace(':project_pk', String(projectPk))
+      .replace(':id', String(id))
     return api.delete(url)
   }
 
   static reorderSteps(data: StepReorderRequest): Promise<ProjectStep[]> {
-    return api.post<ProjectStep[], StepReorderRequest>(
-      API_ENDPOINTS.PROJECTS.STEP_REORDER,
-      data,
-    )
+    return api.post(API_ENDPOINTS.PROJECTS.STEP_REORDER, data)
   }
 }
 
@@ -144,6 +135,7 @@ export const {
   update: updateProject,
   patch: patchProject,
   delete: deleteProject,
+  stepList: getStepList,
   stepDetail: getStepDetail,
   createStep,
   updateStep,
@@ -151,5 +143,3 @@ export const {
   deleteStep,
   reorderSteps,
 } = ProjectsService
-
-export default ProjectsService

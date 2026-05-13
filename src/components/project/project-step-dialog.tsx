@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import type { ProjectStep } from '@/service/projects/projects.type'
 
@@ -23,7 +22,6 @@ interface Props {
   onOpenChange: (open: boolean) => void
   projectId: number
   step?: ProjectStep
-  /** Next available order (used when creating a new step) */
   nextOrder?: number
 }
 
@@ -88,8 +86,8 @@ function StepFormBody({ projectId, step, nextOrder, onClose }: BodyProps) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [title, setTitle] = useState(step?.title ?? '')
-  const [description, setDescription] = useState(step?.description ?? '')
   const [duration, setDuration] = useState<number>(step?.duration ?? 0)
+  const [order, setOrder] = useState<number>(step?.order ?? nextOrder)
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState('')
 
@@ -111,36 +109,35 @@ function StepFormBody({ projectId, step, nextOrder, onClose }: BodyProps) {
     e.preventDefault()
     if (!title.trim()) return
 
-    const trimmedDesc = description.trim()
-
     if (isEdit && step) {
       updateStep.mutate(
         {
+          projectPk: projectId,        // ✅ hook { projectPk, id, data } kutadi
           id: step.id,
           data: {
-            project: projectId,
             title: title.trim(),
-            description: trimmedDesc || undefined,
-            video: videoFile ?? undefined,
             duration: duration > 0 ? duration : undefined,
-            order: step.order,
+            order,
+            ...(videoFile ? { video: videoFile } : {}), // ✅ faqat yangi file bo'lsa
           },
         },
-        { onSuccess: onClose }
+        { onSuccess: onClose },
       )
       return
     }
 
-    const createPayload: Parameters<typeof createStep.mutate>[0] = {
-      project: projectId,
-      title: title.trim(),
-    }
-    if (trimmedDesc) createPayload.description = trimmedDesc
-    if (videoFile) createPayload.video = videoFile
-    if (duration > 0) createPayload.duration = duration
-    if (nextOrder > 0) createPayload.order = nextOrder
-
-    createStep.mutate(createPayload, { onSuccess: onClose })
+    createStep.mutate(
+      {
+        projectPk: projectId,          // ✅ hook { projectPk, data } kutadi
+        data: {
+          title: title.trim(),
+          duration: duration > 0 ? duration : undefined,
+          order,
+          ...(videoFile ? { video: videoFile } : {}),
+        },
+      },
+      { onSuccess: onClose },
+    )
   }
 
   return (
@@ -162,17 +159,6 @@ function StepFormBody({ projectId, step, nextOrder, onClose }: BodyProps) {
         </div>
 
         <div className='space-y-2'>
-          <Label htmlFor='step-desc'>Description</Label>
-          <Textarea
-            id='step-desc'
-            rows={3}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder='Optional'
-          />
-        </div>
-
-        <div className='space-y-2'>
           <Label>
             Video{' '}
             {isEdit && (
@@ -190,7 +176,7 @@ function StepFormBody({ projectId, step, nextOrder, onClose }: BodyProps) {
               'flex w-full cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-5 transition-colors',
               fileName
                 ? 'border-primary/40 bg-primary/5'
-                : 'border-input hover:border-primary/60 hover:bg-muted/30'
+                : 'border-input hover:border-primary/60 hover:bg-muted/30',
             )}
           >
             {fileName ? (
@@ -202,12 +188,10 @@ function StepFormBody({ projectId, step, nextOrder, onClose }: BodyProps) {
               title={fileName}
               className={cn(
                 'text-center text-xs',
-                fileName ? 'font-medium text-primary' : 'text-muted-foreground'
+                fileName ? 'font-medium text-primary' : 'text-muted-foreground',
               )}
             >
-              {fileName
-                ? formatFileName(fileName)
-                : 'Click to select a video file'}
+              {fileName ? formatFileName(fileName) : 'Click to select a video file'}
             </p>
           </div>
           <input
@@ -230,13 +214,19 @@ function StepFormBody({ projectId, step, nextOrder, onClose }: BodyProps) {
           />
         </div>
 
+        <div className='space-y-2'>
+          <Label htmlFor='step-order'>Order</Label>
+          <Input
+            id='step-order'
+            type='number'
+            min={1}
+            value={order}
+            onChange={(e) => setOrder(Number(e.target.value) || 1)}
+          />
+        </div>
+
         <DialogFooter className='gap-2 sm:gap-0'>
-          <Button
-            type='button'
-            variant='outline'
-            onClick={onClose}
-            disabled={isPending}
-          >
+          <Button type='button' variant='outline' onClick={onClose} disabled={isPending}>
             Cancel
           </Button>
           <Button type='submit' disabled={isPending || !title.trim()}>
