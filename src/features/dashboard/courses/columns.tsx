@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Course } from '@/service/course/course.types'
-import { DataTableColumnHeader } from '../sources/columns'
+import { DataTableColumnHeader, EntityActionsCell } from '@/components/data-table'
 
 interface GetColumnsProps {
   onEdit: (course: Course) => void
@@ -14,34 +14,31 @@ export const getCoursesColumns = ({
   {
     accessorKey: 'title',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Kurs nomi" />
+      <DataTableColumnHeader column={column} title='Kurs nomi' />
     ),
-    cell: ({ row }) => <span className="max-w-[200px] truncate font-medium">{row.getValue('title')}</span>,
+    cell: ({ row }) => (
+      <span className='max-w-[200px] truncate font-medium'>
+        {row.getValue('title')}
+      </span>
+    ),
   },
   {
     accessorKey: 'level',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Daraja" />
+      <DataTableColumnHeader column={column} title='Daraja' />
     ),
   },
   {
     id: 'actions',
     header: 'Amallar',
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <button 
-          onClick={(e) => { e.stopPropagation(); onEdit(row.original); }}
-          className="text-sm text-blue-600 hover:underline"
-        >
-          Tahrirlash
-        </button>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onDelete(row.original); }}
-          className="text-sm text-red-600 hover:underline"
-        >
-          O'chirish
-        </button>
-      </div>
+      <EntityActionsCell
+        entity={row.original}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     ),
+    enableSorting: false,
+    enableHiding: false,
   },
 ]

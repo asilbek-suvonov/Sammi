@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
-import { useProjects, useProject } from '@/api-hooks/projects/use-projects'
+import { useProjects, useProjectSteps } from '@/api-hooks/projects/use-projects'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -18,8 +18,8 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
   const { data: projectsData, isLoading: projectLoading } = useProjects()
   const project = projectsData?.results.find((p) => String(p.id) === String(id))
 
-  // Steps — useProject ichida fetch qiladi, ProjectStepsSection ga kerak emas
-  const { isLoading: stepsLoading } = useProject(id)
+  // Steps — useProjectSteps ichida fetch qiladi, ProjectStepsSection ga kerak emas
+  const { isLoading: stepsLoading } = useProjectSteps(id)
 
   const isLoading = projectLoading || stepsLoading
 
@@ -110,7 +110,7 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
 
       <Separator className='my-6' />
 
-      {/* ✅ steps prop kerak emas — ProjectStepsSection ichida useProject ishlatadi */}
+      {/* ✅ steps prop kerak emas — ProjectStepsSection ichida useProjectSteps ishlatadi */}
       <ProjectStepsSection projectId={Number(id)} />
     </Main>
   )

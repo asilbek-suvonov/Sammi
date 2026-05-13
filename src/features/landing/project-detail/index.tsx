@@ -1,16 +1,26 @@
-import { useProject } from '@/api-hooks/projects/use-projects'
+import { useProjects, useProjectSteps } from '@/api-hooks/projects/use-projects'
 import { ProjectSideCard } from '@/components/project/project-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
 import { PageLoader } from '@/components/shared/loader'
 import { Badge } from '@/components/ui/badge'
-import { Check, Clock3, FolderGit2, Layers3, PlayCircle } from 'lucide-react'
+import { Clock3, FolderGit2, Layers3, PlayCircle } from 'lucide-react'
+import { useMemo } from 'react'
 
 interface Props { id: string }
 
 export function ProjectDetailPage({ id }: Props) {
-  const { data: project, isLoading } = useProject(id)
+  const { data: listData, isLoading: listLoading } = useProjects()
+  const project = useMemo(
+    () => listData?.results.find((p) => String(p.id) === String(id)),
+    [listData, id],
+  )
+
+  const { data: stepsData, isLoading: stepsLoading } = useProjectSteps(id)
+  const steps = stepsData?.results ?? []
+
+  const isLoading = listLoading || stepsLoading
 
   if (isLoading) {
     return <PageLoader fullScreen />
@@ -61,32 +71,11 @@ export function ProjectDetailPage({ id }: Props) {
               />
             </div>
 
-            {project.features.length > 0 && (
-              <div className='space-y-3'>
-                <h2 className='text-xl font-semibold'>What You&apos;ll Build</h2>
-                <ul className='space-y-2'>
-                  {[...project.features]
-                    .sort((a, b) => a.order - b.order)
-                    .map((feature) => (
-                      <li
-                        key={feature.id}
-                        className='flex items-center gap-3 text-sm text-muted-foreground'
-                      >
-                        <span className='flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10'>
-                          <Check className='size-3 text-primary' />
-                        </span>
-                        {feature.text}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
-
-            {project.steps.length > 0 && (
+            {steps.length > 0 && (
               <div className='space-y-3'>
                 <h2 className='text-xl font-semibold'>Steps</h2>
                 <ul className='space-y-2'>
-                  {[...project.steps]
+                  {[...steps]
                     .sort((a, b) => a.order - b.order)
                     .map((step) => (
                       <li

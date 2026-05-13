@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
   useDeleteProjectStep,
-  useProject,
+  useProjectSteps,
   useReorderProjectSteps,
 } from '@/api-hooks/projects/use-projects'
 import { Button } from '@/components/ui/button'
@@ -20,7 +20,7 @@ export function ProjectStepsSection({ projectId }: Props) {
   const [editingStep, setEditingStep] = useState<ProjectStep | undefined>()
 
   // ✅ Ichkaridan fetch qilamiz
-  const { data, isLoading } = useProject(projectId)
+  const { data, isLoading } = useProjectSteps(projectId)
   const steps: ProjectStep[] = data?.results ?? []
 
   const deleteStep = useDeleteProjectStep()

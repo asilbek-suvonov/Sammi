@@ -32,6 +32,8 @@ export interface ProjectStep {
   id: number
   project: number
   title: string
+  /** Optional (API may include it, UI uses it) */
+  description?: string | null
   video_url: string | null
   duration: number
   order: number

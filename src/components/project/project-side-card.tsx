@@ -1,8 +1,8 @@
 import { ContactDialog } from '@/components/contact-dialog'
 import { Button } from '@/components/ui/button'
-import type { ProjectDetail } from '@/service/projects/projects.type'
+import type { ProjectListItem } from '@/service/projects/projects.type'
 
-export function ProjectSideCard({ project }: { project: ProjectDetail }) {
+export function ProjectSideCard({ project }: { project: ProjectListItem }) {
   const hasLinks = Boolean(project.demo_url || project.github_url)
 
   const handleGetProject = () => {

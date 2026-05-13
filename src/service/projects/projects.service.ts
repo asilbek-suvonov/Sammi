@@ -42,26 +42,31 @@ export class ProjectsService {
     return api.get(API_ENDPOINTS.PROJECTS.LIST, { params })
   }
 
-  static detail(projectPk: number | string): Promise<PaginatedResponse<ProjectStep>> {
-    const url = API_ENDPOINTS.PROJECTS.STEP_LIST.replace(':project_pk', String(projectPk))
-    return api.get(url)
+  static create(data: ProjectRequest): Promise<ProjectListItem> {
+    if (hasProjectFile(data)) {
+      return api.post<ProjectListItem>(
+        API_ENDPOINTS.PROJECTS.CREATE,
+        buildFormData(data),
+        multipart,
+      )
+    }
+    return api.post<ProjectListItem>(API_ENDPOINTS.PROJECTS.CREATE, data)
   }
 
-  static create(data: ProjectRequest): Promise<any> {
-    return api.post(
-      API_ENDPOINTS.PROJECTS.CREATE,
-      hasProjectFile(data) ? buildFormData(data) : data,
-    )
-  }
-
-  static update(id: number | string, data: ProjectRequest): Promise<any> {
+  static update(id: number | string, data: ProjectRequest): Promise<ProjectListItem> {
     const url = API_ENDPOINTS.PROJECTS.UPDATE.replace(':id', String(id))
-    return api.put(url, hasProjectFile(data) ? buildFormData(data) : data)
+    if (hasProjectFile(data)) {
+      return api.put<ProjectListItem>(url, buildFormData(data), multipart)
+    }
+    return api.put<ProjectListItem>(url, data)
   }
 
-  static patch(id: number | string, data: ProjectPatchRequest): Promise<any> {
+  static patch(id: number | string, data: ProjectPatchRequest): Promise<ProjectListItem> {
     const url = API_ENDPOINTS.PROJECTS.PATCH.replace(':id', String(id))
-    return api.patch(url, hasProjectFile(data) ? buildFormData(data) : data)
+    if (hasProjectFile(data)) {
+      return api.patch<ProjectListItem>(url, buildFormData(data), multipart)
+    }
+    return api.patch<ProjectListItem>(url, data)
   }
 
   static delete(id: number | string): Promise<void> {
@@ -130,7 +135,6 @@ export class ProjectsService {
 
 export const {
   list: getProjectsList,
-  detail: getProjectDetail,
   create: createProject,
   update: updateProject,
   patch: patchProject,
