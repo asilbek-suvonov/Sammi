@@ -3,7 +3,6 @@ import {
   AtSign,
   CalendarDays,
   IdCard,
-  Loader2,
   Pencil,
   UserRound,
 } from 'lucide-react'
@@ -12,6 +11,7 @@ import type { Profile } from '@/service/profile/profile.types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { PageLoader } from '@/components/shared/loader'
 
 function formatDate(iso?: string) {
   if (!iso) return '—'
@@ -145,11 +145,7 @@ export function SettingsProfile() {
   const { data, isLoading, isError, refetch } = useProfile()
 
   if (isLoading) {
-    return (
-      <div className='flex h-64 items-center justify-center'>
-        <Loader2 className='size-5 animate-spin text-muted-foreground' />
-      </div>
-    )
+    return <PageLoader />
   }
 
   if (isError || !data) {

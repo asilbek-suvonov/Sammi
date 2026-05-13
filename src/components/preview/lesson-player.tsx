@@ -3,8 +3,6 @@ import { CheckCircle, ChevronLeft, ChevronRight, VideoOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Lesson } from '@/service/lessons/lessons.types'
 
-// Backend often returns relative paths like /media/lessons/video.mp4.
-// Prepend the API origin so the browser can load them from the correct server.
 const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 
 function resolveMediaUrl(url: string | null | undefined): string {
@@ -36,19 +34,14 @@ export function LessonPlayer({
   onNext,
   onMarkDone,
 }: Props) {
-  // When a lesson is selected, only use that lesson's video (don't fall back to preview).
-  // When no lesson is selected, show the course preview video.
   const lessonSrc = lesson ? resolveMediaUrl(lesson.video_url) : ''
   const src = lessonSrc || (lesson ? '' : resolveMediaUrl(previewUrl))
-
   const hasNoVideo = !!lesson && !lessonSrc
-
-  // Re-mount ReactPlayer whenever the lesson changes so the new video loads cleanly.
   const playerKey = lesson ? `lesson-${lesson.id}` : 'preview'
 
   return (
-    <div className='flex flex-col gap-4'>
-      <div className='relative aspect-video w-full overflow-hidden rounded-xl border bg-black shadow-sm'>
+    <div className='flex w-full flex-col gap-4 sm:gap-5'>
+      <div className='relative aspect-video w-full overflow-hidden rounded-xl border bg-black shadow-lg shadow-black/10 ring-1 ring-black/5 dark:ring-white/5'>
         {hasNoVideo ? (
           <div className='absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/50'>
             <VideoOff className='size-8' />
@@ -70,21 +63,37 @@ export function LessonPlayer({
         )}
       </div>
 
-      {lesson?.title && (
-        <h2 className='text-base font-semibold leading-snug'>{lesson.title}</h2>
+      {lesson?.title ? (
+        <div className='space-y-1'>
+          <h2 className='text-lg font-semibold leading-snug sm:text-xl'>
+            {lesson.title}
+          </h2>
+          {lesson.duration_formatted && (
+            <p className='text-xs text-muted-foreground'>
+              Davomiyligi: {lesson.duration_formatted}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className='space-y-1'>
+          <h2 className='text-lg font-semibold leading-snug sm:text-xl text-muted-foreground'>
+            Kursni boshlash uchun darsni tanlang
+          </h2>
+        </div>
       )}
 
       {lesson && (
-        <div className='flex w-full items-center justify-between gap-2'>
+        <div className='grid grid-cols-3 gap-2 rounded-xl border bg-card p-2 shadow-sm sm:flex sm:items-center sm:justify-between sm:p-3'>
           <Button
             variant='outline'
             size='sm'
             disabled={!hasPrev}
             onClick={onPrev}
-            className='gap-1.5'
+            className='gap-1.5 sm:min-w-28'
           >
             <ChevronLeft className='size-4' />
-            Oldingi
+            <span className='hidden sm:inline'>Oldingi</span>
+            <span className='sm:hidden'>Oldin</span>
           </Button>
 
           <Button
@@ -92,10 +101,12 @@ export function LessonPlayer({
             size='sm'
             onClick={onMarkDone}
             disabled={isCompleted}
-            className='gap-1.5'
+            className='gap-1.5 sm:min-w-48'
           >
             <CheckCircle className='size-4' />
-            {isCompleted ? "Ko'rildi" : "Ko'rildi deb belgilash"}
+            <span className='truncate'>
+              {isCompleted ? "Ko'rildi" : "Ko'rildi deb belgilash"}
+            </span>
           </Button>
 
           <Button
@@ -103,9 +114,10 @@ export function LessonPlayer({
             size='sm'
             disabled={!hasNext}
             onClick={onNext}
-            className='gap-1.5'
+            className='gap-1.5 sm:min-w-28'
           >
-            Keyingi
+            <span className='hidden sm:inline'>Keyingi</span>
+            <span className='sm:hidden'>Keyin</span>
             <ChevronRight className='size-4' />
           </Button>
         </div>

@@ -113,7 +113,6 @@ export function useCreateProjectStep() {
     mutationFn: ({ projectPk, data }) => createStep(projectPk, data),
     onSuccess: (_, vars) => {
       toast.success('Step created')
-      // ✅ detail key — useProject shu keyni ishlatadi
       qc.invalidateQueries({ queryKey: projectKeys.detail(vars.projectPk) })
     },
   })
@@ -126,7 +125,6 @@ export function useUpdateProjectStep() {
     onSuccess: (_, vars) => {
       toast.success('Step updated')
       qc.invalidateQueries({ queryKey: projectKeys.detail(vars.projectPk) })
-      // step detail cache ni ham tozalaymiz
       qc.invalidateQueries({ queryKey: projectKeys.step(vars.id) })
     },
   })

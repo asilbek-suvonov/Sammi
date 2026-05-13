@@ -3,9 +3,9 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import { AxiosError } from 'axios'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
 import { useAuthActions } from '@/stores/selectors'
 import { cn } from '@/lib/utils'
 import { msFromNow } from '@/lib/time'
@@ -21,8 +21,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { useAuthLogin } from '@/api-hooks/auth/index';
-
-const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
 
 const formSchema = z.object({
   email: z.email('Please enter a valid email'),
@@ -48,7 +46,7 @@ export function AdminAuthForm({
     try {
       const { access, refresh } = await login({ email: data.email, password: data.password })
 
-      localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
+      useAuthStore.getState().auth.setRefreshToken(refresh)
       setAccessToken(access)
       setUser({
         accountNo: 'ADMIN001',
@@ -61,14 +59,11 @@ export function AdminAuthForm({
 
       toast.success('Welcome back, Admin!')
       navigate({ to: '/dashboard/overview', replace: true })
-    } catch (error) {
-      const message =
-        error instanceof AxiosError
-          ? error.response?.data?.message ?? error.message
-          : 'Could not sign in — please try again'
+    } catch {
+      // Server error toast is emitted by the global axios interceptor.
+      // Mirror it onto the form fields so the inputs visually invalidate.
       form.setError('email', { message: '' })
-      form.setError('password', { message })
-      toast.error(message)
+      form.setError('password', { message: ' ' })
     } finally {
       setIsLoading(false)
     }

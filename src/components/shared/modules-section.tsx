@@ -27,11 +27,11 @@ export function ModulesSection({ courseId }: Props) {
   }
 
   return (
-    <div className='mx-auto mt-6 max-w-7xl px-4'>
+    <div className='mx-auto mt-6 max-w-7xl sm:px-4'>
       <div className='mb-6 flex items-end justify-between border-b pb-4'>
-        <div>
-          <h2 className='text-2xl font-bold tracking-tight'>Kurs modullari</h2>
-          <p className='text-sm text-muted-foreground'>
+        <div className="flex sm:flex-col items-start justify-between">
+          <h2 className=' hidden sm:block text-xl sm:text-2xl font-bold tracking-tight'>Kurs modullari</h2>
+          <p className='text-sm text-muted-foreground hidden sm:block '>
             Ushbu kurs uchun jami {courseModules.length} ta modul yaratilgan
           </p>
         </div>

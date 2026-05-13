@@ -1,6 +1,7 @@
 import { Main } from '@/components/layout/main'
 import { useSources } from '@/api-hooks/sources/useSources'
 import { SourceCard } from '@/components/cards/source-card'
+import { PageLoader } from '@/components/shared/loader'
 import { Separator } from '@/components/ui/separator'
 
 const UserSources = () => {
@@ -19,9 +20,7 @@ const UserSources = () => {
       <Separator className='my-4' />
 
       {isLoading ? (
-        <div className='py-12 text-center text-sm text-muted-foreground'>
-          Yuklanmoqda...
-        </div>
+        <PageLoader />
       ) : (
         <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
           {sources.map((source) => (

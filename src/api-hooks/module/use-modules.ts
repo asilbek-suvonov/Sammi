@@ -41,6 +41,8 @@ export function useModule(id: number | string | undefined, enabled = true) {
   })
 }
 
+// Error toasts are emitted globally by the axios interceptor.
+
 // Modul yaratish
 export function useCreateModule() {
   const qc = useQueryClient()
@@ -49,9 +51,6 @@ export function useCreateModule() {
     onSuccess: () => {
       toast.success('Modul muvaffaqiyatli yaratildi')
       qc.invalidateQueries({ queryKey: moduleKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Modul yaratishda xatolik')
     },
   })
 }
@@ -70,9 +69,6 @@ export function useUpdateModule() {
       qc.invalidateQueries({ queryKey: moduleKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: moduleKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Yangilashda xatolik yuz berdi')
-    },
   })
 }
 
@@ -84,9 +80,6 @@ export function useDeleteModule() {
     onSuccess: () => {
       toast.success("Modul o'chirib tashlandi")
       qc.invalidateQueries({ queryKey: moduleKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || "Modulni o'chirishda xatolik")
     },
   })
 }

@@ -4,8 +4,8 @@ import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/(auth)/admin-login')({
   beforeLoad: () => {
-    const { accessToken } = useAuthStore.getState().auth
-    if (accessToken) {
+    const { accessToken, user } = useAuthStore.getState().auth
+    if (accessToken || user) {
       throw redirect({ to: '/dashboard/overview' })
     }
   },

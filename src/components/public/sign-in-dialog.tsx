@@ -62,8 +62,8 @@ export function SignInDialog({
   }
 
   const google = useGoogleSignIn(closeAndForward)
-  const github = useGithubSignIn(closeAndForward)
-  const signingIn = google.signingIn || github.signingIn
+  const github = useGithubSignIn()
+  const signingIn = google.signingIn
 
   const { mutate: sendOtp, isPending: isSendingOtp } = useSendOtp({
     onSuccess: () => {
@@ -117,7 +117,7 @@ export function SignInDialog({
               />
             </div>
 
-            {/* GitHub Login Section */}
+            {/* GitHub Login Section — full-page redirect to github.com */}
             <Button
               variant="outline"
               className="w-full gap-2"
@@ -125,7 +125,7 @@ export function SignInDialog({
               disabled={signingIn}
             >
               <IconGithub className="size-4" />
-              {github.signingIn ? 'Signing in...' : 'Continue with GitHub'}
+              Continue with GitHub
             </Button>
 
             <div className="relative w-full py-1">

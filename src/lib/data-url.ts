@@ -18,7 +18,6 @@ export async function dataUrlToFile(value: string, name = 'file'): Promise<File 
     const ext = blob.type.split('/')[1] ?? 'bin'
     return new File([blob], `${name}.${ext}`, { type: blob.type })
   }
-  // blob: URL — read via XHR (no fetch).
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest()
     xhr.open('GET', value, true)

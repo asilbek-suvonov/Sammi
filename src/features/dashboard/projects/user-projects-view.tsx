@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { Clock, Layers3, SearchIcon } from 'lucide-react'
 import { useProjects } from '@/api-hooks/projects/use-projects'
 import { Main } from '@/components/layout/main'
+import { PageLoader } from '@/components/shared/loader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,7 +44,7 @@ const UserProjectsView = () => {
       </div>
 
       {isLoading ? (
-        <div className='py-12 text-center text-sm text-muted-foreground'>Yuklanmoqda...</div>
+        <PageLoader />
       ) : projects.length === 0 ? (
         <div className='flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center'>
           <SearchIcon className='mb-3 size-10 text-muted-foreground/50' />

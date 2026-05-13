@@ -5,15 +5,14 @@ import {
   usePatchLessonProgress,
 } from '@/api-hooks/lesson-progress/use-progress'
 import type { Lesson } from '@/service/lessons/lessons.types'
-import { useAccessToken } from '@/stores/selectors'
+import { useIsAuthed } from '@/stores/selectors'
 
 interface Options {
   flatLessons: Lesson[]
 }
 
 export function useLessonTracking({ flatLessons }: Options) {
-  const token = useAccessToken()
-  const isLoggedIn = !!token
+  const isLoggedIn = useIsAuthed()
 
   const { data: progressData } = useLessonProgressList(undefined, {
     enabled: isLoggedIn,
@@ -53,6 +52,9 @@ export function useLessonTracking({ flatLessons }: Options) {
   const markDone = (lessonId: number) => {
     setLocalCompleted((prev) => new Set([...prev, lessonId]))
 
+    // Both JWT (admin/OTP) and social (Google/GitHub session cookie) flows
+    // can persist progress — `withCredentials: true` sends cookies on every
+    // request, so session-authed users hit the same endpoint successfully.
     if (!isLoggedIn) return
 
     const existing = progressMap.get(lessonId)

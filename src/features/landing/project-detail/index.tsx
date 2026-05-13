@@ -3,6 +3,7 @@ import { ProjectSideCard } from '@/components/project/project-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
+import { PageLoader } from '@/components/shared/loader'
 import { Badge } from '@/components/ui/badge'
 import { Check, Clock3, FolderGit2, Layers3, PlayCircle } from 'lucide-react'
 
@@ -12,30 +13,26 @@ export function ProjectDetailPage({ id }: Props) {
   const { data: project, isLoading } = useProject(id)
 
   if (isLoading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center text-sm text-muted-foreground'>
-        Yuklanmoqda...
-      </div>
-    )
+    return <PageLoader fullScreen />
   }
 
   if (!project) {
     return (
-      <div className='flex min-h-screen items-center justify-center'>
+      <div className='flex min-h-svh items-center justify-center px-4 text-center'>
         <p className='text-muted-foreground'>Project not found.</p>
       </div>
     )
   }
 
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className='min-h-svh bg-background text-foreground'>
       <PublicHeader logoAsLink right={<PublicNavRight />} />
 
-      <main className='mx-auto max-w-6xl px-4 py-10 md:px-6'>
+      <main className='mx-auto max-w-6xl px-4 py-6 sm:py-10 md:px-6'>
         <PageBreadcrumb label={project.title} />
-        <div className='grid gap-10 lg:grid-cols-[1fr_340px]'>
-          <div className='space-y-8'>
-            <div className='space-y-4'>
+        <div className='grid gap-6 lg:grid-cols-[1fr_340px] lg:gap-8'>
+          <div className='space-y-6 sm:space-y-8'>
+            <div className='space-y-3 sm:space-y-4'>
               <div className='flex flex-wrap gap-1'>
                 <Badge variant='outline' className='capitalize'>
                   {project.difficulty_display || project.difficulty}
@@ -44,8 +41,8 @@ export function ProjectDetailPage({ id }: Props) {
                   <Badge key={t.id} variant='secondary'>{t.label}</Badge>
                 ))}
               </div>
-              <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>{project.title}</h1>
-              <p className='text-xs leading-relaxed text-muted-foreground'>{project.description}</p>
+              <h1 className='text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl'>{project.title}</h1>
+              <p className='text-sm leading-relaxed text-muted-foreground'>{project.description}</p>
               <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
                 <span className='flex items-center gap-1.5'>
                   <Layers3 className='size-4' /> {project.total_steps} steps
@@ -60,7 +57,7 @@ export function ProjectDetailPage({ id }: Props) {
               <img
                 src={project.image_url ?? undefined}
                 alt={project.title}
-                className='h-64 w-full object-cover md:h-80'
+                className='aspect-video w-full object-cover'
               />
             </div>
 

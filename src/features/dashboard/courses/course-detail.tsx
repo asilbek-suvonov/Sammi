@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { Main } from '@/components/layout/main'
 import { DashboardBreadcrumb } from '@/components/layout/dashboard-breadcrumb'
 import { ModulesSection } from '@/components/shared/modules-section'
+import { PageLoader } from '@/components/shared/loader'
 
 interface AdminCourseDetailProps {
   id: string
@@ -18,7 +19,7 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
   if (isLoading) {
     return (
       <Main>
-        <div className='py-12 text-center text-sm text-muted-foreground'>Yuklanmoqda...</div>
+        <PageLoader />
       </Main>
     )
   }
@@ -48,25 +49,39 @@ export function AdminCourseDetail({ id }: AdminCourseDetailProps) {
           { label: course.title },
         ]}
       />
+<div className='flex flex-col sm:flex-row min-w-0 items-start gap-4'>
+  {course.image_url && (
+    <img
+      src={course.image_url}
+      alt={course.title}
+      className='h-[160px] sm:h-full w-full sm:w-[200px] shrink-0 rounded-md border object-cover'
+    />
+  )}
 
-      <div className='flex min-w-0 items-start gap-4'>
-        {course.image_url && (
-          <img
-            src={course.image_url}
-            alt={course.title}
-            className='h-full w-[200px] shrink-0 rounded-md border object-cover'
-          />
-        )}
-        <div className='min-w-0 space-y-2'>
-          <div className='flex flex-wrap items-center gap-2'>
-            <Badge variant='outline' className='capitalize'>{course.level}</Badge>
-            {course.category_name && <Badge variant='secondary'>{course.category_name}</Badge>}
-            {course.is_free && <Badge>Free</Badge>}
-          </div>
-          <h1 className='truncate text-2xl font-bold tracking-tight'>{course.title}</h1>
-          <p className='line-clamp-3 max-w-2xl text-sm text-muted-foreground'>{course.description}</p>
-        </div>
-      </div>
+  <div className='min-w-0 space-y-2'>
+    <div className='flex flex-wrap items-center gap-2 mt-3 sm:mt-0'>
+      <Badge variant='outline' className='capitalize'>
+        {course.level}
+      </Badge>
+
+      {course.category_name && (
+        <Badge variant='secondary'>
+          {course.category_name}
+        </Badge>
+      )}
+
+      {course.is_free && <Badge>Free</Badge>}
+    </div>
+
+    <h1 className='truncate text-2xl font-bold tracking-tight'>
+      {course.title}
+    </h1>
+
+    <p className='line-clamp-3 max-w-2xl text-sm text-muted-foreground'>
+      {course.description}
+    </p>
+  </div>
+</div>
 
       <Separator className='my-6' />
 

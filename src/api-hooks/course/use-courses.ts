@@ -15,6 +15,9 @@ import type {
   CourseRequest,
 } from '@/service/course/course.types'
 
+// Error toasts are emitted globally by the axios interceptor. Per-hook
+// onError handlers would duplicate them — only success toasts here.
+
 export const courseKeys = {
   all: ['courses'] as const,
   list: (params?: CourseQueryParams) => [...courseKeys.all, 'list', params] as const,
@@ -57,9 +60,6 @@ export function useCreateCourse() {
       toast.success('Course created successfully')
       qc.invalidateQueries({ queryKey: courseKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create course')
-    },
   })
 }
 
@@ -75,9 +75,6 @@ export function useUpdateCourse() {
       toast.success('Course updated successfully')
       qc.invalidateQueries({ queryKey: courseKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: courseKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update course')
     },
   })
 }
@@ -95,9 +92,6 @@ export function usePatchCourse() {
       qc.invalidateQueries({ queryKey: courseKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: courseKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update course')
-    },
   })
 }
 
@@ -108,9 +102,6 @@ export function useDeleteCourse() {
     onSuccess: () => {
       toast.success('Course deleted successfully')
       qc.invalidateQueries({ queryKey: courseKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to delete course')
     },
   })
 }

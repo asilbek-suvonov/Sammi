@@ -1,5 +1,5 @@
-import { Loader2 } from 'lucide-react'
 import { useProfile } from '@/api-hooks/profile/use-profile'
+import { PageLoader } from '@/components/shared/loader'
 import { Separator } from '@/components/ui/separator'
 import { AvatarSection } from './avatar-section'
 import { PasswordForm } from './password-form'
@@ -9,11 +9,7 @@ export function SettingsAccount() {
   const { data, isLoading, isError, refetch } = useProfile()
 
   if (isLoading) {
-    return (
-      <div className='flex h-64 items-center justify-center'>
-        <Loader2 className='size-5 animate-spin text-muted-foreground' />
-      </div>
-    )
+    return <PageLoader />
   }
 
   if (isError || !data) {

@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { Main } from '@/components/layout/main'
 import { DashboardBreadcrumb } from '@/components/layout/dashboard-breadcrumb'
 import { ProjectStepsSection } from '@/components/project/project-steps-section'
+import { PageLoader } from '@/components/shared/loader'
 
 interface AdminProjectDetailProps {
   id: string
@@ -25,7 +26,7 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
   if (isLoading) {
     return (
       <Main>
-        <div className='py-12 text-center text-sm text-muted-foreground'>Yuklanmoqda...</div>
+        <PageLoader />
       </Main>
     )
   }

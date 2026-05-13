@@ -13,23 +13,28 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SignOutDialog } from '@/components/sign-out-dialog'
-import { useAuthUser, useProfile } from '@/stores/selectors'
+import { useProfile } from '@/api-hooks/profile/use-profile'
+import { useAuthUser } from '@/stores/selectors'
 
 export function ProfileDropdown() {
   const [open, setOpen] = useDialogState()
   const user = useAuthUser()
-  const profile = useProfile()
+  const { data: profile } = useProfile()
 
-  const avatarUrl = profile?.avatarUrl || user?.avatarUrl || ''
-  
-  // Safely build display name with fallbacks
-  const firstName = user?.firstName || ''
-  const lastName = user?.lastName || ''
+  const avatarUrl = profile?.avatar_url || user?.avatarUrl || ''
+
+  const firstName = profile?.first_name || user?.firstName || ''
+  const lastName = profile?.last_name || user?.lastName || ''
   const fullName = user?.fullName || ''
-  const email = user?.email || ''
+  const email = profile?.email || user?.email || ''
   const nickname = profile?.nickname || ''
-  
-  const displayName = nickname || fullName || `${firstName} ${lastName}`.trim() || email.split('@')[0] || 'User'
+
+  const displayName =
+    nickname ||
+    `${firstName} ${lastName}`.trim() ||
+    fullName ||
+    email.split('@')[0] ||
+    'User'
   const initials = (displayName[0] || 'U').toUpperCase()
 
   return (
@@ -48,7 +53,7 @@ export function ProfileDropdown() {
             <div className='flex flex-col gap-1.5'>
               <p className='text-sm leading-none font-medium'>{displayName}</p>
               <p className='text-xs leading-none text-muted-foreground'>
-                {user?.email}
+                {email}
               </p>
             </div>
           </DropdownMenuLabel>

@@ -16,6 +16,9 @@ import type {
   CategoryRequest,
 } from '@/service/category/category.types'
 
+// Error toasts are emitted globally by the axios interceptor — no per-hook
+// onError needed.
+
 export const categoryKeys = {
   all: ['categories'] as const,
   list: (params?: CategoryQueryParams) => [...categoryKeys.all, 'list', params] as const,
@@ -46,9 +49,6 @@ export function useCreateCategory() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: categoryKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create category')
-    },
   })
 }
 
@@ -60,9 +60,6 @@ export function useUpdateCategory() {
       toast.success('Category updated successfully')
       qc.invalidateQueries({ queryKey: categoryKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: categoryKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update category')
     },
   })
 }
@@ -80,9 +77,6 @@ export function usePatchCategory() {
       qc.invalidateQueries({ queryKey: categoryKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: categoryKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update category')
-    },
   })
 }
 
@@ -93,9 +87,6 @@ export function useDeleteCategory() {
     onSuccess: () => {
       toast.success('Category deleted successfully')
       qc.invalidateQueries({ queryKey: categoryKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to delete category')
     },
   })
 }
