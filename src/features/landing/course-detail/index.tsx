@@ -10,6 +10,7 @@ import { SignInDialog } from '@/components/public/sign-in-dialog'
 import { Badge } from '@/components/ui/badge'
 import { levelVariant } from '@/lib/variants'
 import { useAccessToken, useIsAuthed } from '@/stores/selectors'
+import { PageLoader } from '@/components/shared/loader'
 
 interface Props { id: string }
 
@@ -31,11 +32,7 @@ export function CourseDetailPage({ id }: Props) {
   }, [course, progressData])
 
   if (isLoading) {
-    return (
-      <div className='flex min-h-svh items-center justify-center text-sm text-muted-foreground'>
-        Yuklanmoqda...
-      </div>
-    )
+    return <PageLoader fullScreen />
   }
 
   if (!course) {

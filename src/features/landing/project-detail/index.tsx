@@ -3,6 +3,7 @@ import { ProjectSideCard } from '@/components/project/project-side-card'
 import { PageBreadcrumb } from '@/components/public/page-breadcrumb'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
+import { PageLoader } from '@/components/shared/loader'
 import { Badge } from '@/components/ui/badge'
 import { Check, Clock3, FolderGit2, Layers3, PlayCircle } from 'lucide-react'
 
@@ -12,11 +13,7 @@ export function ProjectDetailPage({ id }: Props) {
   const { data: project, isLoading } = useProject(id)
 
   if (isLoading) {
-    return (
-      <div className='flex min-h-svh items-center justify-center text-sm text-muted-foreground'>
-        Yuklanmoqda...
-      </div>
-    )
+    return <PageLoader fullScreen />
   }
 
   if (!project) {

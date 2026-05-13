@@ -5,7 +5,7 @@ import {
   usePatchLessonProgress,
 } from '@/api-hooks/lesson-progress/use-progress'
 import type { Lesson } from '@/service/lessons/lessons.types'
-import { useAccessToken, useIsAuthed } from '@/stores/selectors'
+import { useIsAuthed } from '@/stores/selectors'
 
 interface Options {
   flatLessons: Lesson[]
@@ -13,9 +13,6 @@ interface Options {
 
 export function useLessonTracking({ flatLessons }: Options) {
   const isLoggedIn = useIsAuthed()
-  // Mutation gating: server only accepts progress writes when JWT is present.
-  // Social-only sessions can be "logged in" yet have no token.
-  const canWriteProgress = !!useAccessToken()
 
   const { data: progressData } = useLessonProgressList(undefined, {
     enabled: isLoggedIn,
@@ -55,7 +52,10 @@ export function useLessonTracking({ flatLessons }: Options) {
   const markDone = (lessonId: number) => {
     setLocalCompleted((prev) => new Set([...prev, lessonId]))
 
-    if (!canWriteProgress) return
+    // Both JWT (admin/OTP) and social (Google/GitHub session cookie) flows
+    // can persist progress — `withCredentials: true` sends cookies on every
+    // request, so session-authed users hit the same endpoint successfully.
+    if (!isLoggedIn) return
 
     const existing = progressMap.get(lessonId)
     if (existing) {

@@ -1,8 +1,14 @@
 import { create } from 'zustand'
+import { getCookie, removeCookie, setCookie } from '@/lib/cookies'
 
 const ACCESS_TOKEN_KEY = 'sammi_access_token'
 const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
 const AUTH_USER_KEY = 'sammi_auth_user'
+
+// Older builds persisted these keys in localStorage. Migrate any leftover
+// values to cookies once, then strip them out so the JS heap stops carrying
+// the secrets.
+const LEGACY_LS_KEYS = [ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, AUTH_USER_KEY] as const
 
 export interface AuthUser {
   id?: number
@@ -48,35 +54,41 @@ interface AuthState {
 
 const isBrowser = typeof window !== 'undefined'
 
-const readString = (key: string): string => {
-  if (!isBrowser) return ''
+function migrateLegacy(): void {
+  if (!isBrowser) return
   try {
-    return localStorage.getItem(key) ?? ''
+    for (const key of LEGACY_LS_KEYS) {
+      const legacy = localStorage.getItem(key)
+      if (legacy && !getCookie(key)) setCookie(key, legacy)
+      if (legacy) localStorage.removeItem(key)
+    }
   } catch {
-    return ''
+    /* localStorage may be disabled; nothing to migrate */
   }
 }
 
+migrateLegacy()
+
+const readString = (key: string): string => getCookie(key) ?? ''
+
 const readUser = (): AuthUser | null => {
-  if (!isBrowser) return null
+  const raw = getCookie(AUTH_USER_KEY)
+  if (!raw) return null
   try {
-    const raw = localStorage.getItem(AUTH_USER_KEY)
-    return raw ? (JSON.parse(raw) as AuthUser) : null
+    return JSON.parse(raw) as AuthUser
   } catch {
     return null
   }
 }
 
 const writeString = (key: string, value: string) => {
-  if (!isBrowser) return
-  if (value) localStorage.setItem(key, value)
-  else localStorage.removeItem(key)
+  if (value) setCookie(key, value)
+  else removeCookie(key)
 }
 
 const writeUser = (user: AuthUser | null) => {
-  if (!isBrowser) return
-  if (user) localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
-  else localStorage.removeItem(AUTH_USER_KEY)
+  if (user) setCookie(AUTH_USER_KEY, JSON.stringify(user))
+  else removeCookie(AUTH_USER_KEY)
 }
 
 export const useAuthStore = create<AuthState>()((set) => ({
@@ -97,8 +109,6 @@ export const useAuthStore = create<AuthState>()((set) => ({
         writeString(ACCESS_TOKEN_KEY, accessToken)
         return { auth: { ...state.auth, accessToken } }
       }),
-
-      
 
     setRefreshToken: (refreshToken) =>
       set((state) => {

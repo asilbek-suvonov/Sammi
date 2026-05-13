@@ -37,18 +37,40 @@ function getCSRFToken(): string | undefined {
     ?.split('=')[1]
 }
 
-function extractErrorMessage(data: Record<string, unknown>): string {
-  if (typeof data.message === 'string') return data.message
-  if (typeof data.detail === 'string') return data.detail
-  if (Array.isArray(data.non_field_errors) && data.non_field_errors.length > 0) {
-    return String(data.non_field_errors[0])
-  }
-  for (const value of Object.values(data)) {
-    if (Array.isArray(value) && value.length > 0) {
-      return String(value[0])
+// Never let a credential-looking string ride to the toast UI. Backend error
+// payloads occasionally echo back the offending token (e.g. JWT validation
+// failures, OAuth state mismatches) — strip those before showing.
+const SENSITIVE_KEYS = /^(token|access|refresh|password|new_password|current_password|confirm_password|secret|credential|otp|code)$/i
+const JWT_PATTERN = /\beyJ[A-Za-z0-9_-]+?\.[A-Za-z0-9_-]+?\.[A-Za-z0-9_-]+\b/g
+const LONG_OPAQUE_TOKEN = /\b[A-Za-z0-9_-]{40,}\b/g
+
+function sanitizeToastText(raw: string): string {
+  return raw
+    .replace(JWT_PATTERN, '[redacted]')
+    .replace(LONG_OPAQUE_TOKEN, '[redacted]')
+    .trim()
+}
+
+function pickFirstString(data: Record<string, unknown>): string | undefined {
+  for (const [key, value] of Object.entries(data)) {
+    if (SENSITIVE_KEYS.test(key)) continue
+    if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'string') {
+      return value[0]
     }
   }
-  return JSON.stringify(data)
+  return undefined
+}
+
+function extractErrorMessage(data: Record<string, unknown>): string {
+  const candidate =
+    (typeof data.message === 'string' && data.message) ||
+    (typeof data.detail === 'string' && data.detail) ||
+    (Array.isArray(data.non_field_errors) &&
+      data.non_field_errors.length > 0 &&
+      String(data.non_field_errors[0])) ||
+    pickFirstString(data) ||
+    ''
+  return candidate ? sanitizeToastText(candidate) : ''
 }
 
 

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
 import { useAuthActions } from '@/stores/selectors'
 import { cn } from '@/lib/utils'
 import { msFromNow } from '@/lib/time'
@@ -20,8 +21,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { useAuthLogin } from '@/api-hooks/auth/index';
-
-const REFRESH_TOKEN_KEY = 'sammi_refresh_token'
 
 const formSchema = z.object({
   email: z.email('Please enter a valid email'),
@@ -47,7 +46,7 @@ export function AdminAuthForm({
     try {
       const { access, refresh } = await login({ email: data.email, password: data.password })
 
-      localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
+      useAuthStore.getState().auth.setRefreshToken(refresh)
       setAccessToken(access)
       setUser({
         accountNo: 'ADMIN001',

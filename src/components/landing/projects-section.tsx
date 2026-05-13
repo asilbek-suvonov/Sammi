@@ -3,6 +3,7 @@ import { useProjects } from '@/api-hooks/projects/use-projects'
 import { ProjectCard } from '@/components/cards/project-card'
 import { SectionHeader } from '@/components/landing/section-header'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
+import { PageLoader } from '@/components/shared/loader'
 import { useIsAuthed } from '@/stores/selectors'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -25,11 +26,7 @@ export function ProjectsSection() {
   }
 
   if (isLoading) {
-    return (
-      <div className='flex h-40 items-center justify-center text-sm text-muted-foreground'>
-        Yuklanmoqda...
-      </div>
-    )
+    return <PageLoader />
   }
 
   return (

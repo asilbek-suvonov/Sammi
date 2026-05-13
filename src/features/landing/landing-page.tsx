@@ -1,22 +1,26 @@
+import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CoursesSection } from '@/components/landing/courses-section'
 import HeroSection from '@/components/landing/hero-section'
 import { LandingFooter } from '@/components/landing/landing-footer'
+import { LandingMobileNav } from '@/components/landing/landing-mobile-nav'
 import { ProjectsSection } from '@/components/landing/projects-section'
 import { SourcesSection } from '@/components/landing/sources-section'
 import { PublicHeader } from '@/components/public/public-header'
 import { PublicNavRight } from '@/components/public/public-nav-right'
-import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 export function LandingPage() {
   const [active, setActive] = useState('courses')
   const { t } = useTranslation()
 
-  const navLinks = [
-    { id: 'courses', label: t('navCourses') },
-    { id: 'projects', label: t('navProjects') },
-    { id: 'sources', label: t('navSources') },
-  ]
+  const navLinks = useMemo(
+    () => [
+      { id: 'courses', label: t('navCourses') },
+      { id: 'projects', label: t('navProjects') },
+      { id: 'sources', label: t('navSources') },
+    ],
+    [t]
+  )
 
   const linkClass = useMemo(
     () => (id: string) =>
@@ -34,7 +38,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className='min-h-svh bg-background text-foreground'>
       <PublicHeader
         center={
           <nav className='hidden items-center gap-0.5 md:flex'>
@@ -50,11 +54,20 @@ export function LandingPage() {
             ))}
           </nav>
         }
-        right={<PublicNavRight />}
+        right={
+          <>
+            <PublicNavRight />
+            <LandingMobileNav
+              links={navLinks}
+              activeId={active}
+              onSelect={scrollTo}
+            />
+          </>
+        }
       />
 
       <div className='border-b' />
-        <HeroSection />
+      <HeroSection />
       <main className='mx-auto flex w-full max-w-6xl flex-col gap-20 px-4 py-16 md:px-6'>
         <CoursesSection />
         <ProjectsSection />

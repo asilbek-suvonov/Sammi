@@ -5,6 +5,7 @@ import { useCourse } from '@/api-hooks/course/use-courses'
 import { Button } from '@/components/ui/button'
 import { CurriculumSheet } from '@/components/preview/curriculum-sheet'
 import { LessonPlayer } from '@/components/preview/lesson-player'
+import { PageLoader } from '@/components/shared/loader'
 import { useCourseCurriculum } from '@/hooks/course/use-course-curriculum'
 import { useLessonTracking } from '@/hooks/course/use-lesson-tracking'
 import type { Lesson } from '@/service/lessons/lessons.types'
@@ -40,11 +41,7 @@ export function CoursePreviewPage({ courseId }: Props) {
   const hasNext = canNavigate && currentIdx < flatLessons.length - 1
 
   if (isLoading) {
-    return (
-      <div className='flex min-h-svh items-center justify-center text-sm text-muted-foreground'>
-        Yuklanmoqda...
-      </div>
-    )
+    return <PageLoader fullScreen />
   }
 
   if (!course) {

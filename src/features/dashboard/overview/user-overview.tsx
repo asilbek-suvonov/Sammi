@@ -3,11 +3,12 @@ import { Link } from '@tanstack/react-router'
 import { BookOpen } from 'lucide-react'
 import { useCourses } from '@/api-hooks/course/use-courses'
 import { useLessonProgressList } from '@/api-hooks/lesson-progress/use-progress'
+import { useProfile } from '@/api-hooks/profile/use-profile'
 import type { Course } from '@/service/course/course.types'
 import { Main } from '@/components/layout/main'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useAuthUser, useProfile } from '@/stores/selectors'
+import { useAuthUser, useIsAuthed } from '@/stores/selectors'
 
 interface CourseProgress {
   course: Course
@@ -16,8 +17,8 @@ interface CourseProgress {
 }
 
 function ProgressCard({ course, completed, started }: CourseProgress) {
-  const total = Math.max(started, completed)
-  const percent = total > 0 ? Math.round((completed / total) * 100) : 0
+  const total = Math.max(started, completed, 1)
+  const percent = Math.round((completed / total) * 100)
 
   return (
     <Link
@@ -46,7 +47,7 @@ function ProgressCard({ course, completed, started }: CourseProgress) {
 
         <div className='space-y-1'>
           <div className='flex items-center justify-between text-xs text-muted-foreground'>
-            <span>{completed} / {total} lessons</span>
+            <span>{completed} / {started} darslar</span>
             <span className='font-medium text-foreground'>{percent}%</span>
           </div>
           <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
@@ -63,10 +64,11 @@ function ProgressCard({ course, completed, started }: CourseProgress) {
 
 const UserOverview = () => {
   const user = useAuthUser()
-  const profile = useProfile()
+  const isAuthed = useIsAuthed()
+  const { data: profile } = useProfile()
 
   const { data: progressData, isLoading: progressLoading } =
-    useLessonProgressList()
+    useLessonProgressList(undefined, { enabled: isAuthed })
   const { data: courses = [], isLoading: coursesLoading } = useCourses()
 
   const isLoading = progressLoading || coursesLoading
@@ -92,7 +94,8 @@ const UserOverview = () => {
   }, [progressData, courses])
 
   const displayName =
-    profile.nickname ||
+    profile?.nickname ||
+    profile?.first_name ||
     user?.firstName ||
     user?.email?.split('@')[0] ||
     'Learner'

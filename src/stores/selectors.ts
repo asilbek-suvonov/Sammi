@@ -19,6 +19,7 @@ export const useAuthActions = () =>
     useShallow((s) => ({
       setUser: s.auth.setUser,
       setAccessToken: s.auth.setAccessToken,
+      setRefreshToken: s.auth.setRefreshToken,
       resetAccessToken: s.auth.resetAccessToken,
       reset: s.auth.reset,
     }))

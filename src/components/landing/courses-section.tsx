@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { CourseCard } from '@/components/cards/course-card'
 import { SectionHeader } from '@/components/landing/section-header'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
+import { PageLoader } from '@/components/shared/loader'
 import { useIsAuthed } from '@/stores/selectors'
 import { useCourses } from '@/api-hooks/course/use-courses'
 import { useNavigate } from '@tanstack/react-router'
@@ -23,7 +24,8 @@ export function CoursesSection() {
     }
   }
 
-  if (isLoading) return <div className="h-40 flex items-center justify-center">Yuklanmoqda...</div>
+  if (isLoading) return <PageLoader />
+
 
   return (
     <>

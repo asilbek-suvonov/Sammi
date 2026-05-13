@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CheckCircle2, ChevronDown, Loader2, VideoOff } from 'lucide-react'
+import { CheckCircle2, ChevronDown, VideoOff } from 'lucide-react'
 import {
   Collapsible,
   CollapsibleContent,
@@ -11,6 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { Spinner } from '@/components/shared/loader'
 import { cn } from '@/lib/utils'
 import type { CurriculumModule } from '@/hooks/course/use-course-curriculum'
 import type { Lesson } from '@/service/lessons/lessons.types'
@@ -55,8 +56,7 @@ function ModuleItem({
       <CollapsibleContent>
         {mod.isLoading ? (
           <div className='flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground'>
-            <Loader2 className='size-3 animate-spin' />
-            Yuklanmoqda...
+            <Spinner size='sm' />
           </div>
         ) : mod.lessons.length === 0 ? (
           <div className='flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground'>
@@ -143,9 +143,8 @@ export function CurriculumSheet({
         </SheetHeader>
 
         {isLoading ? (
-          <div className='flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground'>
-            <Loader2 className='size-4 animate-spin' />
-            Yuklanmoqda...
+          <div className='flex flex-1 items-center justify-center'>
+            <Spinner />
           </div>
         ) : modules.length === 0 ? (
           <div className='flex flex-1 items-center justify-center text-sm text-muted-foreground'>
