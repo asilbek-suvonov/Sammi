@@ -48,8 +48,5 @@ export function useDeleteLesson() {
       qc.invalidateQueries({ queryKey: lessonKeys.all })
       toast.success("Dars o'chirildi")
     },
-    onError: () => {
-      toast.error("Darsni o'chirishda xatolik yuz berdi")
-    }
   })
 }

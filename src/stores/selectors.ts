@@ -8,6 +8,12 @@ export const useAuthRole = () =>
   useAuthStore((s) => s.auth.user?.role ?? 'user')
 export const useAccessToken = () => useAuthStore((s) => s.auth.accessToken)
 
+// True when a user is signed in via ANY flow: JWT (admin/OTP) OR
+// social session (Google/GitHub return user only — no token).
+// Always use this for "is signed in" UI gates, not raw accessToken.
+export const useIsAuthed = () =>
+  useAuthStore((s) => !!(s.auth.accessToken || s.auth.user))
+
 export const useAuthActions = () =>
   useAuthStore(
     useShallow((s) => ({

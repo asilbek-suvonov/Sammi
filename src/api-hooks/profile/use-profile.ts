@@ -11,7 +11,7 @@ import type {
   Profile,
   ProfileUpdateRequest,
 } from '@/service/profile/profile.types'
-import { useAccessToken } from '@/stores/selectors'
+import { useIsAuthed } from '@/stores/selectors'
 
 export const profileKeys = {
   all: ['profile'] as const,
@@ -19,15 +19,18 @@ export const profileKeys = {
 }
 
 export function useProfile() {
-  const accessToken = useAccessToken()
+  // Enable for any signed-in flow (JWT or social session cookie).
+  // The endpoint accepts either Bearer or session auth.
+  const isAuthed = useIsAuthed()
   return useQuery<Profile, Error>({
     queryKey: profileKeys.me(),
     queryFn: getProfile,
-    enabled: !!accessToken,
+    enabled: isAuthed,
     staleTime: 5 * 60 * 1000,
   })
 }
 
+// Error toasts are emitted globally by the axios interceptor.
 export function useUpdateProfile() {
   const qc = useQueryClient()
   return useMutation<Profile, Error, ProfileUpdateRequest>({
@@ -36,9 +39,6 @@ export function useUpdateProfile() {
       qc.setQueryData(profileKeys.me(), data)
       qc.invalidateQueries({ queryKey: profileKeys.all })
       toast.success('Profile updated successfully')
-    },
-    onError: (err) => {
-      toast.error(err.message || 'Failed to update profile')
     },
   })
 }
@@ -52,9 +52,6 @@ export function usePatchProfile() {
       qc.invalidateQueries({ queryKey: profileKeys.all })
       toast.success('Profile updated successfully')
     },
-    onError: (err) => {
-      toast.error(err.message || 'Failed to update profile')
-    },
   })
 }
 
@@ -63,9 +60,6 @@ export function useChangePassword() {
     mutationFn: changePassword,
     onSuccess: () => {
       toast.success('Password changed successfully')
-    },
-    onError: (err) => {
-      toast.error(err.message || 'Failed to change password')
     },
   })
 }

@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import { AxiosError } from 'axios'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthActions } from '@/stores/selectors'
@@ -61,14 +60,11 @@ export function AdminAuthForm({
 
       toast.success('Welcome back, Admin!')
       navigate({ to: '/dashboard/overview', replace: true })
-    } catch (error) {
-      const message =
-        error instanceof AxiosError
-          ? error.response?.data?.message ?? error.message
-          : 'Could not sign in — please try again'
+    } catch {
+      // Server error toast is emitted by the global axios interceptor.
+      // Mirror it onto the form fields so the inputs visually invalidate.
       form.setError('email', { message: '' })
-      form.setError('password', { message })
-      toast.error(message)
+      form.setError('password', { message: ' ' })
     } finally {
       setIsLoading(false)
     }

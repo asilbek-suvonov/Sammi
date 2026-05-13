@@ -11,7 +11,10 @@ export function Main({ fixed, className, fluid, ...props }: MainProps) {
     <main
       data-layout={fixed ? 'fixed' : 'auto'}
       className={cn(
-        'px-4 py-6',
+        // Fill remaining space below the 4rem dashboard header so short pages
+        // don't leave a big blank strip on mobile (100svh on phones changes
+        // with the URL bar — using svh keeps the page tight without overflow).
+        'flex-1 px-4 py-6 min-h-[calc(100svh-4rem)]',
 
         // If layout is fixed, make the main container flex and grow
         fixed && 'flex grow flex-col overflow-hidden',

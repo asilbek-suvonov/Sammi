@@ -3,13 +3,13 @@ import { useProjects } from '@/api-hooks/projects/use-projects'
 import { ProjectCard } from '@/components/cards/project-card'
 import { SectionHeader } from '@/components/landing/section-header'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
-import { useAccessToken } from '@/stores/selectors'
+import { useIsAuthed } from '@/stores/selectors'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 export function ProjectsSection() {
   const { t } = useTranslation()
-  const accessToken = useAccessToken()
+  const isAuthed = useIsAuthed()
   const navigate = useNavigate()
   const [signInOpen, setSignInOpen] = useState(false)
 
@@ -17,7 +17,7 @@ export function ProjectsSection() {
   const projects = data?.results ?? []
 
   const handleViewAll = () => {
-    if (accessToken) {
+    if (isAuthed) {
       navigate({ to: '/dashboard/projects' })
     } else {
       setSignInOpen(true)

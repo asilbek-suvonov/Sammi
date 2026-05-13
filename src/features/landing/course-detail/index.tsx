@@ -9,28 +9,30 @@ import { PublicNavRight } from '@/components/public/public-nav-right'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
 import { Badge } from '@/components/ui/badge'
 import { levelVariant } from '@/lib/variants'
-import { useAccessToken } from '@/stores/selectors'
+import { useAccessToken, useIsAuthed } from '@/stores/selectors'
 
 interface Props { id: string }
 
 export function CourseDetailPage({ id }: Props) {
   const navigate = useNavigate()
+  const isAuthed = useIsAuthed()
   const accessToken = useAccessToken()
-  const isAuthed = !!accessToken
   const { data: course, isLoading } = useCourse(id)
+  // Progress endpoint requires JWT — skip for social-only sessions to
+  // avoid an inevitable 401 that the global interceptor would surface.
   const { data: progressData } = useLessonProgressList(undefined, {
-    enabled: isAuthed,
+    enabled: !!accessToken,
   })
   const [loginOpen, setLoginOpen] = useState(false)
 
   const enrolled = useMemo(() => {
-    if (!isAuthed || !course || !progressData?.results) return false
+    if (!course || !progressData?.results) return false
     return progressData.results.some((p) => p.course_title === course.title)
-  }, [isAuthed, course, progressData])
+  }, [course, progressData])
 
   if (isLoading) {
     return (
-      <div className='flex min-h-screen items-center justify-center text-sm text-muted-foreground'>
+      <div className='flex min-h-svh items-center justify-center text-sm text-muted-foreground'>
         Yuklanmoqda...
       </div>
     )
@@ -38,7 +40,7 @@ export function CourseDetailPage({ id }: Props) {
 
   if (!course) {
     return (
-      <div className='flex min-h-screen items-center justify-center'>
+      <div className='flex min-h-svh items-center justify-center px-4 text-center'>
         <p className='text-muted-foreground'>Course not found.</p>
       </div>
     )
@@ -59,14 +61,14 @@ export function CourseDetailPage({ id }: Props) {
   }
 
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className='min-h-svh bg-background text-foreground'>
       <PublicHeader logoAsLink right={<PublicNavRight />} />
 
-      <main className='mx-auto max-w-6xl px-4 py-10 md:px-6'>
+      <main className='mx-auto max-w-6xl px-4 py-6 sm:py-10 md:px-6'>
         <PageBreadcrumb label={course.title} />
-        <div className='grid gap-5 lg:grid-cols-[1fr_340px]'>
-          <div className='space-y-8'>
-            <div className='space-y-4'>
+        <div className='grid gap-6 lg:grid-cols-[1fr_340px] lg:gap-8'>
+          <div className='space-y-6 sm:space-y-8'>
+            <div className='space-y-3 sm:space-y-4'>
               <div className='flex flex-wrap gap-1'>
                 <Badge variant={levelVariant(course.level)} className='capitalize'>
                   {course.level}
@@ -77,10 +79,10 @@ export function CourseDetailPage({ id }: Props) {
                 {course.is_free && <Badge>Free</Badge>}
                 {course.is_new && <Badge>New</Badge>}
               </div>
-              <h1 className='mb-1 text-3xl font-bold tracking-tight md:text-4xl'>
+              <h1 className='text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl'>
                 {course.title}
               </h1>
-              <p className='text-xs leading-relaxed text-muted-foreground'>
+              <p className='text-sm leading-relaxed text-muted-foreground'>
                 {course.description}
               </p>
               {course.technologies_list?.length > 0 && (
@@ -97,7 +99,7 @@ export function CourseDetailPage({ id }: Props) {
               <img
                 src={course.image_url ?? undefined}
                 alt={course.title}
-                className='h-64 w-full object-cover md:h-80'
+                className='aspect-video w-full object-cover'
               />
             </div>
           </div>

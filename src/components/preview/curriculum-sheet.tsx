@@ -132,9 +132,14 @@ export function CurriculumSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side='right' className='flex w-80 flex-col gap-0 p-0 sm:w-96'>
-        <SheetHeader className='border-b px-4 py-3'>
-          <SheetTitle className='text-sm'>Kurs qismlari</SheetTitle>
+      <SheetContent
+        side='right'
+        className='flex w-full max-w-full flex-col gap-0 p-0 sm:w-96 sm:max-w-[24rem]'
+      >
+        <SheetHeader className='border-b px-4 py-3.5'>
+          <SheetTitle className='text-sm font-semibold'>
+            Kurs qismlari
+          </SheetTitle>
         </SheetHeader>
 
         {isLoading ? (

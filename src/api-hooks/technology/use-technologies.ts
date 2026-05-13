@@ -17,6 +17,8 @@ import type {
   TechnologyRequest,
 } from '@/service/technology/technology.types'
 
+// Error toasts are emitted globally by the axios interceptor.
+
 export const technologyKeys = {
   all: ['technologies'] as const,
   list: (params?: TechnologyQueryParams) => [...technologyKeys.all, 'list', params] as const,
@@ -67,9 +69,6 @@ export function useCreateTechnology() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: technologyKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create technology')
-    },
   })
 }
 
@@ -81,9 +80,6 @@ export function useUpdateTechnology() {
       toast.success('Technology updated successfully')
       qc.invalidateQueries({ queryKey: technologyKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: technologyKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update technology')
     },
   })
 }
@@ -101,9 +97,6 @@ export function usePatchTechnology() {
       qc.invalidateQueries({ queryKey: technologyKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: technologyKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update technology')
-    },
   })
 }
 
@@ -114,9 +107,6 @@ export function useDeleteTechnology() {
     onSuccess: () => {
       toast.success('Technology deleted successfully')
       qc.invalidateQueries({ queryKey: technologyKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to delete technology')
     },
   })
 }

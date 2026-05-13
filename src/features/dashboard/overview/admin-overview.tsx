@@ -106,8 +106,8 @@ const AdminOverview = () => {
           </Link>
         </div>
 
-        <div className='overflow-hidden rounded-xl border'>
-          <table className='w-full text-sm'>
+        <div className='overflow-x-auto rounded-xl border'>
+          <table className='w-full min-w-[480px] text-sm'>
             <thead className='bg-muted/50'>
               <tr>
                 <th className='px-4 py-2 text-left font-medium text-muted-foreground'>

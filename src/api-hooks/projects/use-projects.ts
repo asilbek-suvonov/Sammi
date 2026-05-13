@@ -27,6 +27,8 @@ import type {
   StepRequest,
 } from '@/service/projects/projects.type'
 
+// Error toasts are emitted globally by the axios interceptor.
+
 export const projectKeys = {
   all: ['projects'] as const,
   list: (params?: ProjectFilters) => [...projectKeys.all, 'list', params] as const,
@@ -60,9 +62,6 @@ export function useCreateProject() {
       toast.success('Project created successfully')
       qc.invalidateQueries({ queryKey: projectKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create project')
-    },
   })
 }
 
@@ -78,9 +77,6 @@ export function useUpdateProject() {
       toast.success('Project updated successfully')
       qc.invalidateQueries({ queryKey: projectKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update project')
     },
   })
 }
@@ -98,9 +94,6 @@ export function usePatchProject() {
       qc.invalidateQueries({ queryKey: projectKeys.detail(vars.id) })
       qc.invalidateQueries({ queryKey: projectKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update project')
-    },
   })
 }
 
@@ -111,9 +104,6 @@ export function useDeleteProject() {
     onSuccess: () => {
       toast.success('Project deleted successfully')
       qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to delete project')
     },
   })
 }
@@ -136,9 +126,6 @@ export function useCreateProjectStep() {
       qc.invalidateQueries({ queryKey: projectKeys.all })
       qc.invalidateQueries({ queryKey: projectKeys.steps() })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create step')
-    },
   })
 }
 
@@ -155,9 +142,6 @@ export function useUpdateProjectStep() {
       qc.invalidateQueries({ queryKey: projectKeys.all })
       qc.invalidateQueries({ queryKey: projectKeys.step(vars.id) })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update step')
-    },
   })
 }
 
@@ -173,9 +157,6 @@ export function usePatchProjectStep() {
       qc.invalidateQueries({ queryKey: projectKeys.all })
       qc.invalidateQueries({ queryKey: projectKeys.step(vars.id) })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update step')
-    },
   })
 }
 
@@ -187,9 +168,6 @@ export function useDeleteProjectStep() {
       toast.success('Step deleted')
       qc.invalidateQueries({ queryKey: projectKeys.all })
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to delete step')
-    },
   })
 }
 
@@ -199,9 +177,6 @@ export function useReorderProjectSteps() {
     mutationFn: reorderSteps,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: projectKeys.all })
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to reorder steps')
     },
   })
 }

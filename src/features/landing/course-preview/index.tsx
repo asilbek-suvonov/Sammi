@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { BookOpen, GraduationCap } from 'lucide-react'
+import { BookOpen, ChevronRight, Home } from 'lucide-react'
 import { useCourse } from '@/api-hooks/course/use-courses'
 import { Button } from '@/components/ui/button'
 import { CurriculumSheet } from '@/components/preview/curriculum-sheet'
@@ -20,11 +20,9 @@ export function CoursePreviewPage({ courseId }: Props) {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null)
   const firstSet = useRef(false)
 
-  // Always load curriculum — not lazily — so first lesson can auto-play
   const { modules, flatLessons, isLoading: curriculumLoading } =
     useCourseCurriculum(courseId, !!courseId && courseId !== '0')
 
-  // Auto-select the very first lesson once curriculum finishes loading
   useEffect(() => {
     if (firstSet.current || curriculumLoading || flatLessons.length === 0) return
     firstSet.current = true
@@ -43,7 +41,7 @@ export function CoursePreviewPage({ courseId }: Props) {
 
   if (isLoading) {
     return (
-      <div className='flex h-screen items-center justify-center text-sm text-muted-foreground'>
+      <div className='flex min-h-svh items-center justify-center text-sm text-muted-foreground'>
         Yuklanmoqda...
       </div>
     )
@@ -51,7 +49,7 @@ export function CoursePreviewPage({ courseId }: Props) {
 
   if (!course) {
     return (
-      <div className='flex h-screen flex-col items-center justify-center gap-4'>
+      <div className='flex min-h-svh flex-col items-center justify-center gap-4 px-4 text-center'>
         <p className='text-muted-foreground'>Kurs topilmadi.</p>
         <Button asChild variant='outline'>
           <Link to='/'>Bosh sahifa</Link>
@@ -67,37 +65,45 @@ export function CoursePreviewPage({ courseId }: Props) {
   }
 
   return (
-    <div className='flex h-screen flex-col overflow-hidden bg-background text-foreground'>
-      <header className='shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-        <div className='mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6'>
-          <Link
-            to='/'
-            className='text-sm font-bold tracking-tight text-foreground transition-opacity hover:opacity-70'
+    <div className='flex min-h-svh flex-col bg-background text-foreground'>
+      <header className='sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+        <div className='mx-auto flex h-14 max-w-5xl items-center gap-2 px-3 sm:px-5'>
+          <nav
+            aria-label='Breadcrumb'
+            className='flex min-w-0 flex-1 items-center gap-1.5 text-sm text-muted-foreground'
           >
-            Sammi
-          </Link>
-
-          <div className='flex min-w-0 flex-1 items-center justify-center px-6'>
-            <div className='flex min-w-0 items-center gap-2 text-sm'>
-              <GraduationCap className='size-4 shrink-0 text-muted-foreground' />
-              <span className='truncate font-medium'>{course.title}</span>
-            </div>
-          </div>
+            <Link
+              to='/'
+              className='inline-flex items-center gap-1 rounded-md px-1.5 py-1 transition-colors hover:bg-muted hover:text-foreground'
+            >
+              <Home className='size-3.5' />
+              <span className='hidden sm:inline'>Home</span>
+            </Link>
+            <ChevronRight className='size-3.5 shrink-0' />
+            <Link
+              to='/course/$id'
+              params={{ id: courseId }}
+              className='truncate rounded-md px-1.5 py-1 text-foreground/80 transition-colors hover:bg-muted hover:text-foreground'
+            >
+              {course.title}
+            </Link>
+          </nav>
 
           <Button
-            variant='ghost'
+            variant='default'
             size='sm'
             onClick={() => setSheetOpen(true)}
-            className='shrink-0 gap-1.5'
+            className='shrink-0 gap-1.5 shadow-sm'
           >
             <BookOpen className='size-4' />
-            <span className='hidden text-xs sm:inline'>Kurs qismlari</span>
+            <span className='hidden sm:inline'>Course Module</span>
+            <span className='sm:hidden'>Module</span>
           </Button>
         </div>
       </header>
 
-      <main className='flex-1 overflow-y-auto'>
-        <div className='mx-auto max-w-4xl px-4 py-6 md:px-6'>
+      <main className='flex-1'>
+        <div className='mx-auto w-full max-w-5xl px-3 py-4 sm:px-5 sm:py-8'>
           <LessonPlayer
             lesson={currentLesson}
             previewUrl={course.preview_video_url_full}

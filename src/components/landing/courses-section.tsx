@@ -2,21 +2,21 @@ import { useState } from 'react'
 import { CourseCard } from '@/components/cards/course-card'
 import { SectionHeader } from '@/components/landing/section-header'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
-import { useAccessToken } from '@/stores/selectors'
+import { useIsAuthed } from '@/stores/selectors'
 import { useCourses } from '@/api-hooks/course/use-courses'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 export function CoursesSection() {
   const { t } = useTranslation()
-  const accessToken = useAccessToken()
+  const isAuthed = useIsAuthed()
   const navigate = useNavigate()
   const [signInOpen, setSignInOpen] = useState(false)
 
   const { data: courses = [], isLoading } = useCourses()
 
   const handleViewAll = () => {
-    if (accessToken) {
+    if (isAuthed) {
       navigate({ to: '/dashboard/courses' })
     } else {
       setSignInOpen(true)

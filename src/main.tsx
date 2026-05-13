@@ -7,10 +7,8 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { toast } from 'sonner'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { useAuthStore } from '@/stores/auth-store'
-import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
@@ -27,47 +25,50 @@ if (!GOOGLE_CLIENT_ID) {
   )
 }
 
+// Single source of truth for error toasts: the axios interceptor in
+// `src/api/index.ts` already toasts a server-extracted message for every
+// failed response. The query client only handles SIDE EFFECTS here
+// (session reset, navigation) — it must NOT toast, otherwise users see
+// duplicate notifications (interceptor + onError + per-hook onError).
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
-        if (failureCount >= 0 && import.meta.env.DEV) return false
-        if (failureCount > 3 && import.meta.env.PROD) return false
-
-        return !(
+        // No retries in dev — surface real failures immediately.
+        if (import.meta.env.DEV) return false
+        // Never retry auth errors — they won't resolve on retry and would
+        // just amplify server load.
+        if (
           error instanceof AxiosError &&
-          [401, 403].includes(error.response?.status ?? 0)
-        )
+          [400, 401, 403, 404].includes(error.response?.status ?? 0)
+        ) {
+          return false
+        }
+        // One retry in prod for transient 5xx / network blips.
+        return failureCount < 1
       },
       refetchOnWindowFocus: import.meta.env.PROD,
-      staleTime: 10 * 1000, 
-    },
-    mutations: {
-      onError: (error) => {
-        handleServerError(error)
-
-        if (error instanceof AxiosError) {
-          if (error.response?.status === 304) {
-            toast.error('Content not modified!')
-          }
-        }
-      },
+      refetchOnMount: false,
+      staleTime: 60 * 1000,
     },
   },
   queryCache: new QueryCache({
     onError: (error) => {
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
-          toast.error('Session expired!')
+      const status =
+        error instanceof AxiosError
+          ? error.response?.status
+          : (error as { status?: number } | null)?.status
+      if (status === 401) {
+        // Only reset if a real token existed; social-only sessions get 401s
+        // from JWT-only endpoints without losing their session cookie.
+        const hadToken = useAuthStore.getState().auth.accessToken
+        if (hadToken) {
           useAuthStore.getState().auth.reset()
           router.navigate({ to: '/' })
         }
-        if (error.response?.status === 500) {
-          toast.error('Internal Server Error!')
-          if (import.meta.env.PROD) {
-            router.navigate({ to: '/500' })
-          }
-        }
+      }
+      if (status === 500 && import.meta.env.PROD) {
+        router.navigate({ to: '/500' })
       }
     },
   }),
@@ -77,7 +78,9 @@ const router = createRouter({
   routeTree,
   context: { queryClient },
   defaultPreload: 'intent',
-  defaultPreloadStaleTime: 0,
+  // Cache hover-preload results long enough that follow-up navigations
+  // reuse them instead of refetching when the user actually clicks.
+  defaultPreloadStaleTime: 30 * 1000,
 })
 
 declare module '@tanstack/react-router' {
