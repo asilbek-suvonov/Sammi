@@ -48,7 +48,7 @@ export function useGoogleSignIn(onDone?: () => void) {
 
       toast.success(`Xush kelibsiz, ${user.firstName || user.fullName || 'Sammi'}!`)
       onDone?.()
-      navigate({ to: '/dashboard' })
+      navigate({ to: '/dashboard/overview' })
     } catch {
       // Backend error toast is already shown by the global axios interceptor
       // (DRF-shaped `{ token: [message] }` is unwrapped in `src/api/index.ts`).

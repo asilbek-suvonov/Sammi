@@ -2,9 +2,9 @@ import { redirect } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/auth-store'
 
 export const requireAuth = () => {
-  const { accessToken } = useAuthStore.getState().auth
+  const { accessToken, user } = useAuthStore.getState().auth
 
-  if (!accessToken) {
+  if (!accessToken && !user) {
     throw redirect({ to: '/' })
   }
 }

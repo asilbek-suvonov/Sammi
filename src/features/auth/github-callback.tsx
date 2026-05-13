@@ -7,6 +7,7 @@ import type { AuthResponse } from '@/service/auth/github/github.type'
 import { useAuthStore, type AuthUser } from '@/stores/auth-store'
 
 const GITHUB_STATE_KEY = 'sammi_github_oauth_state'
+const GITHUB_CONSUMED_KEY = 'sammi_github_consumed_code'
 
 const responseToUser = (data: AuthResponse): AuthUser => ({
   id: data.id,
@@ -18,6 +19,22 @@ const responseToUser = (data: AuthResponse): AuthUser => ({
   isNewUser: data.is_new_user,
   role: 'user',
 })
+
+const isConsumed = (code: string): boolean => {
+  try {
+    return sessionStorage.getItem(GITHUB_CONSUMED_KEY) === code
+  } catch {
+    return false
+  }
+}
+
+const markConsumed = (code: string): void => {
+  try {
+    sessionStorage.setItem(GITHUB_CONSUMED_KEY, code)
+  } catch {
+    /* sessionStorage unavailable — guard degrades, ref + URL strip still cover */
+  }
+}
 
 export function GithubCallbackPage() {
   const navigate = useNavigate()
@@ -33,7 +50,7 @@ export function GithubCallbackPage() {
         user,
       })
       toast.success(`Xush kelibsiz, ${user.fullName || user.email}!`)
-      navigate({ to: '/dashboard' })
+      navigate({ to: '/dashboard/overview' })
     },
     onError: () => {
       // Backend 400 / network / 5xx toasts are emitted by the global axios
@@ -43,18 +60,17 @@ export function GithubCallbackPage() {
   })
 
   useEffect(() => {
-    // StrictMode guard: this effect must run its body at most once per mount.
+    // 1) StrictMode guard: at most one body execution per mount.
     if (handledRef.current) return
     handledRef.current = true
 
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
     const state = params.get('state')
-    const oauthError =
-      params.get('error_description') || params.get('error')
+    const oauthError = params.get('error_description') || params.get('error')
 
-    // Strip OAuth params from the URL synchronously, before the mutation fires.
-    // A refresh or remount after this point will no longer see the `code`.
+    // 2) Strip OAuth params synchronously, BEFORE the mutation fires.
+    //    A refresh / remount after this point no longer sees the code.
     window.history.replaceState({}, '', window.location.pathname)
 
     if (oauthError) {
@@ -76,6 +92,15 @@ export function GithubCallbackPage() {
       return
     }
 
+    // 3) Consumed-code guard: even across tab refreshes / back-forward cache,
+    //    the same code is never sent to the backend more than once.
+    if (isConsumed(code)) {
+      navigate({ to: '/' })
+      return
+    }
+    markConsumed(code)
+
+    // 4) Mutation-based exchange (TanStack Query — no retry by default).
     exchange({ code })
   }, [exchange, navigate])
 

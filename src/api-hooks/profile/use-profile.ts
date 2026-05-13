@@ -11,6 +11,7 @@ import type {
   Profile,
   ProfileUpdateRequest,
 } from '@/service/profile/profile.types'
+import { useAccessToken } from '@/stores/selectors'
 
 export const profileKeys = {
   all: ['profile'] as const,
@@ -18,9 +19,11 @@ export const profileKeys = {
 }
 
 export function useProfile() {
+  const accessToken = useAccessToken()
   return useQuery<Profile, Error>({
     queryKey: profileKeys.me(),
     queryFn: getProfile,
+    enabled: !!accessToken,
     staleTime: 5 * 60 * 1000,
   })
 }

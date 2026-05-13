@@ -148,10 +148,18 @@ apiClient.interceptors.response.use(
           }
           break
         }
-        case 401:
-          useAuthStore.getState().auth.reset()
-          toast.error('Sessiya tugadi. Iltimos, qayta kiring.')
+        case 401: {
+          // Only treat 401 as "session expired" if we actually had a token.
+          // For sessions without a JWT (e.g. Google users — backend returns
+          // user object only), a 401 just means the endpoint requires auth
+          // we don't have. Resetting would log them out of UI state too.
+          const hadToken = useAuthStore.getState().auth.accessToken
+          if (hadToken) {
+            useAuthStore.getState().auth.reset()
+            if (!silent) toast.error('Sessiya tugadi. Iltimos, qayta kiring.')
+          }
           break
+        }
         case 403:
           if (!silent) {
             toast.error("Bu amalni bajarish uchun ruxsat yo'q.")
