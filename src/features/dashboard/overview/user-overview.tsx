@@ -4,7 +4,6 @@ import { BookOpen } from 'lucide-react'
 import { useQueries } from '@tanstack/react-query'
 import { courseKeys, useCourses } from '@/api-hooks/course/use-courses'
 import { useLessonProgressList } from '@/api-hooks/lesson-progress/use-progress'
-import { useProfile } from '@/api-hooks/profile/use-profile'
 import { getCourseDetail } from '@/service/course/course.service'
 import type { Course, CourseDetail } from '@/service/course/course.types'
 import { Main } from '@/components/layout/main'
@@ -68,7 +67,6 @@ function ProgressCard({ course, completed, started, totalLessons }: CourseProgre
 const UserOverview = () => {
   const user = useAuthUser()
   const isAuthed = useIsAuthed()
-  const { data: profile } = useProfile()
   const localCourseProgress = useMemo(() => {
     try {
       const prefix = 'sammi_course_preview_completed:'
@@ -155,8 +153,6 @@ const UserOverview = () => {
   })
 
   const displayName =
-    profile?.nickname ||
-    profile?.first_name ||
     user?.firstName ||
     user?.email?.split('@')[0] ||
     'Learner'

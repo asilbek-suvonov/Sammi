@@ -11,10 +11,11 @@ export const contactKeys = {
     [...contactKeys.all, 'list', params] as const,
 }
 
-export function useContacts(params?: IContactQueryParams) {
+export function useContacts(params?: IContactQueryParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: contactKeys.list(params),
     queryFn: () => ContactService.get({ ordering: '-created_at', ...params }),
+    enabled: options?.enabled ?? true,
     placeholderData: (prev) => prev,
     staleTime: 60_000,
   })

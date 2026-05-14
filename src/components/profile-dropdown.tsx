@@ -13,26 +13,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SignOutDialog } from '@/components/sign-out-dialog'
-import { useProfile } from '@/api-hooks/profile/use-profile'
 import { useAuthUser } from '@/stores/selectors'
 
 export function ProfileDropdown() {
   const [open, setOpen] = useDialogState()
   const user = useAuthUser()
-  const { data: profile } = useProfile()
-
-  const avatarUrl = profile?.avatar_url || user?.avatarUrl || ''
-
-  const firstName = profile?.first_name || user?.firstName || ''
-  const lastName = profile?.last_name || user?.lastName || ''
-  const fullName = user?.fullName || ''
-  const email = profile?.email || user?.email || ''
-  const nickname = profile?.nickname || ''
-
+  const avatarUrl = user?.avatarUrl || ''
+  const email = user?.email || ''
   const displayName =
-    nickname ||
-    `${firstName} ${lastName}`.trim() ||
-    fullName ||
+    user?.fullName ||
+    [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() ||
     email.split('@')[0] ||
     'User'
   const initials = (displayName[0] || 'U').toUpperCase()

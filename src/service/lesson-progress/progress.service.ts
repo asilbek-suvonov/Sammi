@@ -30,6 +30,24 @@ export class LessonProgressService {
     )
   }
 
+  /**
+   * Create a progress row if missing; if it already exists, fall back to patching it.
+   * Keeps progress persistence reliable even when the client doesn't have the row id yet.
+   */
+  static async upsertCompleted(lessonId: number): Promise<LessonProgressShortResponse> {
+    try {
+      return await LessonProgressService.create({ lesson: lessonId, is_completed: true })
+    } catch {
+      const list = await LessonProgressService.list()
+      const found = list.results.find((p) => {
+        const id = typeof p.lesson === 'number' ? p.lesson : p.lesson.id
+        return id === lessonId
+      })
+      if (!found) throw new Error('Lesson progress row not found')
+      return LessonProgressService.patch(found.id, { is_completed: true })
+    }
+  }
+
   static update(
     id: number | string,
     data: LessonProgressRequest,

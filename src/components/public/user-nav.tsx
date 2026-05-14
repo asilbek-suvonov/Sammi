@@ -9,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useProfile } from '@/api-hooks/profile/use-profile'
 import { useAuthActions, useAuthUser } from '@/stores/selectors'
 import { useNavigate } from '@tanstack/react-router'
 import { LayoutDashboard, LogOut, Shield } from 'lucide-react'
@@ -22,7 +21,6 @@ interface UserNavProps {
 export function UserNav({ onSignIn }: UserNavProps) {
   const user = useAuthUser()
   const { reset } = useAuthActions()
-  const { data: profile } = useProfile()
   const navigate = useNavigate()
   const { t } = useTranslation()
 
@@ -35,25 +33,18 @@ export function UserNav({ onSignIn }: UserNavProps) {
   }
 
   const isAdmin = user.role === 'admin'
-
-  const apiFullName = [profile?.first_name, profile?.last_name]
-    .filter(Boolean)
-    .join(' ')
-    .trim()
   const localFullName = [user.firstName, user.lastName]
     .filter(Boolean)
     .join(' ')
     .trim()
   const displayName =
-    profile?.nickname ||
-    apiFullName ||
     user.fullName ||
     localFullName ||
     user.email?.split('@')[0] ||
     'User'
 
-  const avatarUrl = profile?.avatar_url || user.avatarUrl || ''
-  const email = profile?.email || user.email
+  const avatarUrl = user.avatarUrl || ''
+  const email = user.email
   const initials = (displayName[0] ?? 'U').toUpperCase()
 
   return (

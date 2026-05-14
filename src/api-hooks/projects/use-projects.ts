@@ -37,10 +37,11 @@ export const projectKeys = {
 }
 
 // --- Queries ---
-export function useProjects(params?: ProjectFilters) {
+export function useProjects(params?: ProjectFilters, options?: { enabled?: boolean }) {
   return useQuery<PaginatedResponse<ProjectListItem>, Error>({
     queryKey: projectKeys.list(params),
     queryFn: () => getProjectsList(params),
+    enabled: options?.enabled ?? true,
   })
 }
 

@@ -52,3 +52,14 @@ export function usePatchLessonProgress() {
     },
   })
 }
+
+// Upsert helper (create or patch if exists)
+export function useUpsertLessonProgressCompleted() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (lessonId: number) => LessonProgressService.upsertCompleted(lessonId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: progressKeys.all })
+    },
+  })
+}

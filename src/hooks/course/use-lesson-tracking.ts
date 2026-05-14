@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  useCreateLessonProgress,
   useLessonProgressList,
   usePatchLessonProgress,
+  useUpsertLessonProgressCompleted,
 } from '@/api-hooks/lesson-progress/use-progress'
 import type { Lesson } from '@/service/lessons/lessons.types'
 import { useIsAuthed } from '@/stores/selectors'
@@ -81,8 +81,8 @@ export function useLessonTracking({ flatLessons, courseId }: Options) {
     [apiCompleted, localCompleted]
   )
 
-  const { mutate: createProgress } = useCreateLessonProgress()
   const { mutate: patchProgress } = usePatchLessonProgress()
+  const { mutate: upsertCompleted } = useUpsertLessonProgressCompleted()
 
   const markDone = (lessonId: number) => {
     setLocalCompleted((prev) => new Set([...prev, lessonId]))
@@ -96,7 +96,7 @@ export function useLessonTracking({ flatLessons, courseId }: Options) {
     if (existing) {
       patchProgress({ id: existing.progressId, data: { is_completed: true } })
     } else {
-      createProgress({ lesson: lessonId, is_completed: true })
+      upsertCompleted(lessonId)
     }
   }
 

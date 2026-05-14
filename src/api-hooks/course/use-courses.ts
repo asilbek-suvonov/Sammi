@@ -25,13 +25,14 @@ export const courseKeys = {
   detail: (id: number | string) => [...courseKeys.all, 'detail', String(id)] as const,
 }
 
-export function useCourses(params?: CourseQueryParams) {
+export function useCourses(params?: CourseQueryParams, options?: { enabled?: boolean }) {
   return useQuery<Course[], Error>({
     queryKey: courseKeys.list(params),
     queryFn: async () => {
       const res = await getCourseList(params)
       return res.results
     },
+    enabled: options?.enabled ?? true,
     staleTime: 5 * 60 * 1000,
   })
 }

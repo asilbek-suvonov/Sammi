@@ -23,8 +23,8 @@ export function CommandMenu() {
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
   const user = useAuthUser()
-  const { data: courses = [] } = useCourses()
-  const { data: projectData } = useProjects()
+  const { data: courses = [] } = useCourses(undefined, { enabled: open })
+  const { data: projectData } = useProjects(undefined, { enabled: open })
   const projects = projectData?.results ?? []
   const role = user?.role ?? 'user'
   const email = user?.email ?? 'member@sammi.local'

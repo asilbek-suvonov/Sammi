@@ -3,7 +3,6 @@ import { BookOpen, Briefcase, FolderGit2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useCourses } from '@/api-hooks/course/use-courses'
-import { useProfile } from '@/api-hooks/profile/use-profile'
 import { useProjects } from '@/api-hooks/projects/use-projects'
 import { useSources } from '@/api-hooks/sources/useSources'
 
@@ -37,7 +36,6 @@ const AdminOverview = () => {
   const { t } = useTranslation()
 
   const user = useAuthUser()
-  const { data: profile } = useProfile()
 
   const { data: courses = [] } = useCourses()
   const { data: projectData } = useProjects()
@@ -47,8 +45,6 @@ const AdminOverview = () => {
   const sources = sourceData?.results ?? []
 
   const displayName =
-    profile?.nickname ||
-    profile?.first_name ||
     user?.firstName ||
     user?.email?.split('@')[0] ||
     'Admin'

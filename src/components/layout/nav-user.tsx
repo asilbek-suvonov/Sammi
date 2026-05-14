@@ -15,7 +15,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import useDialogState from '@/hooks/use-dialog-state'
-import { useProfile } from '@/api-hooks/profile/use-profile'
 import { Link } from '@tanstack/react-router'
 import { ChevronsUpDown, LogOut, Settings } from 'lucide-react'
 
@@ -30,15 +29,9 @@ type NavUserProps = {
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
   const [open, setOpen] = useDialogState()
-  const { data: profile } = useProfile()
-
-  const apiFullName = [profile?.first_name, profile?.last_name]
-    .filter(Boolean)
-    .join(' ')
-    .trim()
-  const avatarUrl = profile?.avatar_url || user.avatar
-  const displayName = profile?.nickname || apiFullName || user.name
-  const email = profile?.email || user.email
+  const avatarUrl = user.avatar
+  const displayName = user.name
+  const email = user.email
   const initials = (displayName?.[0] ?? 'U').toUpperCase()
 
   return (

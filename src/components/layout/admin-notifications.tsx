@@ -18,7 +18,7 @@ import { ContactNotificationItem } from './contact-notification-item'
 
 export function AdminNotifications() {
   const [open, setOpen] = useState(false)
-  const { data, isLoading, isError, refetch } = useContacts()
+  const { data, isLoading, isError, refetch } = useContacts(undefined, { enabled: open })
   const contacts = useMemo(() => data?.results ?? [], [data])
 
   const readIds = useContactReadStore((s) => s.readIds)
