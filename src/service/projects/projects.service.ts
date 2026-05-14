@@ -14,9 +14,9 @@ import type {
 
 const multipart = { headers: { 'Content-Type': 'multipart/form-data' } }
 
-const buildFormData = (payload: Record<string, any>): FormData => {
+const buildFormData = (payload: object): FormData => {
   const fd = new FormData()
-  for (const [key, value] of Object.entries(payload)) {
+  for (const [key, value] of Object.entries(payload as Record<string, unknown>)) {
     if (value === undefined || value === null) continue
     if (Array.isArray(value)) {
       value.forEach((v) => fd.append(key, v instanceof File ? v : String(v)))

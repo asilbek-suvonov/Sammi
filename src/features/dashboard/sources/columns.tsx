@@ -1,4 +1,4 @@
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 
 import { DataTableColumnHeader, EntityActionsCell } from '@/components/data-table'
 
@@ -25,21 +25,26 @@ export const getSourcesColumns = ({
     ),
   },
   {
-    accessorKey: 'slug',
+    accessorKey: 'github_url',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Slug' />
+      <DataTableColumnHeader column={column} title='GitHub URL' />
     ),
-  },
-  {
-    accessorKey: 'created_at',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Created' />
-    ),
-    cell: ({ row }) => (
-      <span className='text-xs text-muted-foreground'>
-        {row.getValue('created_at')}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const url = row.getValue('github_url') as string
+      if (!url) return <span className='text-xs text-muted-foreground'>—</span>
+      return (
+        <a
+          href={url}
+          target='_blank'
+          rel='noreferrer'
+          className='max-w-[320px] truncate text-sm text-primary underline-offset-2 hover:underline'
+          title={url}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {url}
+        </a>
+      )
+    },
   },
   {
     id: 'actions',
@@ -55,4 +60,3 @@ export const getSourcesColumns = ({
     enableHiding: false,
   },
 ]
-

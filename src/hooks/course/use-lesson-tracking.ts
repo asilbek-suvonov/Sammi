@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   useCreateLessonProgress,
   useLessonProgressList,
@@ -9,9 +9,10 @@ import { useIsAuthed } from '@/stores/selectors'
 
 interface Options {
   flatLessons: Lesson[]
+  courseId?: number | string
 }
 
-export function useLessonTracking({ flatLessons }: Options) {
+export function useLessonTracking({ flatLessons, courseId }: Options) {
   const isLoggedIn = useIsAuthed()
 
   const { data: progressData } = useLessonProgressList(undefined, {
@@ -27,7 +28,41 @@ export function useLessonTracking({ flatLessons }: Options) {
     return map
   }, [progressData])
 
-  const [localCompleted, setLocalCompleted] = useState<Set<number>>(new Set())
+  const [localCompleted, setLocalCompleted] = useState<Set<number>>(() => {
+    const key =
+      courseId === undefined || courseId === null || courseId === '' || courseId === '0'
+        ? null
+        : `sammi_course_preview_completed:${String(courseId)}`
+
+    if (!key) return new Set()
+
+    try {
+      const raw = localStorage.getItem(key)
+      if (!raw) return new Set()
+      const parsed = JSON.parse(raw) as unknown
+      if (!Array.isArray(parsed)) return new Set()
+      const ids = parsed
+        .filter((x) => Number.isFinite(Number(x)))
+        .map((x) => Number(x))
+      return new Set(ids)
+    } catch {
+      return new Set()
+    }
+  })
+  const courseKey = useMemo(() => {
+    if (courseId === undefined || courseId === null || courseId === '' || courseId === '0') return null
+    return `sammi_course_preview_completed:${String(courseId)}`
+  }, [courseId])
+
+  // Persist locally as a fallback for unauthenticated flows (and as a UX cache for authed).
+  useEffect(() => {
+    if (!courseKey) return
+    try {
+      localStorage.setItem(courseKey, JSON.stringify([...localCompleted]))
+    } catch {
+      /* ignore */
+    }
+  }, [courseKey, localCompleted])
 
   const apiCompleted = useMemo(() => {
     const courseLessonIds = new Set(flatLessons.map((l) => l.id))

@@ -9,7 +9,7 @@ import { Header } from './header'
 export function DashboardHeader() {
   const role = useAuthRole()
   return (
-    <Header>
+    <Header fixed>
       <Search />
       <div className='ms-auto flex items-center gap-4'>
         {role === 'admin' && <AdminNotifications />}

@@ -1,4 +1,4 @@
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 
 import { DataTableColumnHeader, EntityActionsCell } from '@/components/data-table'
 
@@ -13,6 +13,28 @@ export const getProjectsColumns = ({
   onEdit,
   onDelete,
 }: GetColumnsProps): ColumnDef<ProjectListItem>[] => [
+  {
+    accessorKey: 'image_url',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Image' />
+    ),
+    cell: ({ row }) => {
+      const url = row.getValue('image_url') as string | null
+      const title = row.original.title
+      return url ? (
+        <img
+          src={url}
+          alt={title}
+          className='h-9 w-14 shrink-0 rounded-md border object-cover'
+          loading='lazy'
+        />
+      ) : (
+        <div className='h-9 w-14 shrink-0 rounded-md border bg-muted' />
+      )
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: 'title',
     header: ({ column }) => (
@@ -34,22 +56,26 @@ export const getProjectsColumns = ({
     ),
   },
   {
-    accessorKey: 'technologies',
-    header: 'Technologies',
-    cell: ({ row }) => (
-      <div className='flex flex-wrap gap-1'>
-        {((row.getValue('technologies') as any[]) || [])
-          .slice(0, 3)
-          .map((t: any) => (
-            <span
-              key={t.id}
-              className='rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground'
-            >
-              {t.label}
-            </span>
-          ))}
-      </div>
+    accessorKey: 'github_url',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='GitHub URL' />
     ),
+    cell: ({ row }) => {
+      const url = row.getValue('github_url') as string
+      if (!url) return <span className='text-xs text-muted-foreground'>—</span>
+      return (
+        <a
+          href={url}
+          target='_blank'
+          rel='noreferrer'
+          className='max-w-[260px] truncate text-sm text-primary underline-offset-2 hover:underline'
+          title={url}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {url}
+        </a>
+      )
+    },
   },
   {
     id: 'actions',
@@ -65,4 +91,3 @@ export const getProjectsColumns = ({
     enableHiding: false,
   },
 ]
-

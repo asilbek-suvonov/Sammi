@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { BookOpen } from 'lucide-react'
-import { useCourses } from '@/api-hooks/course/use-courses'
+import { useQueries } from '@tanstack/react-query'
+import { courseKeys, useCourses } from '@/api-hooks/course/use-courses'
 import { useLessonProgressList } from '@/api-hooks/lesson-progress/use-progress'
 import { useProfile } from '@/api-hooks/profile/use-profile'
-import type { Course } from '@/service/course/course.types'
+import { getCourseDetail } from '@/service/course/course.service'
+import type { Course, CourseDetail } from '@/service/course/course.types'
 import { Main } from '@/components/layout/main'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -14,11 +16,12 @@ interface CourseProgress {
   course: Course
   completed: number
   started: number
+  totalLessons: number
 }
 
-function ProgressCard({ course, completed, started }: CourseProgress) {
-  const total = Math.max(started, completed, 1)
-  const percent = Math.round((completed / total) * 100)
+function ProgressCard({ course, completed, started, totalLessons }: CourseProgress) {
+  const total = Math.max(totalLessons, started, completed, 1)
+  const percent = Math.min(100, Math.round((completed / total) * 100))
 
   return (
     <Link
@@ -47,7 +50,7 @@ function ProgressCard({ course, completed, started }: CourseProgress) {
 
         <div className='space-y-1'>
           <div className='flex items-center justify-between text-xs text-muted-foreground'>
-            <span>{completed} / {started} darslar</span>
+            <span>{completed} / {total} darslar</span>
             <span className='font-medium text-foreground'>{percent}%</span>
           </div>
           <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
@@ -66,6 +69,27 @@ const UserOverview = () => {
   const user = useAuthUser()
   const isAuthed = useIsAuthed()
   const { data: profile } = useProfile()
+  const localCourseProgress = useMemo(() => {
+    try {
+      const prefix = 'sammi_course_preview_completed:'
+      const items: { courseId: number; completed: number }[] = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (!key || !key.startsWith(prefix)) continue
+        const courseId = Number(key.slice(prefix.length))
+        if (!Number.isFinite(courseId) || courseId <= 0) continue
+        const raw = localStorage.getItem(key)
+        if (!raw) continue
+        const parsed = JSON.parse(raw) as unknown
+        if (!Array.isArray(parsed)) continue
+        const completed = parsed.filter((x) => Number.isFinite(Number(x))).length
+        if (completed > 0) items.push({ courseId, completed })
+      }
+      return items
+    } catch {
+      return []
+    }
+  }, [])
 
   const { data: progressData, isLoading: progressLoading } =
     useLessonProgressList(undefined, { enabled: isAuthed })
@@ -78,20 +102,57 @@ const UserOverview = () => {
     const stats = new Map<string, { started: number; completed: number }>()
 
     for (const p of records) {
-      if (!p.course_title) continue
-      const cur = stats.get(p.course_title) ?? { started: 0, completed: 0 }
+      const title =
+        p.course_title ||
+        (typeof p.lesson === 'number' ? undefined : p.lesson.course_title) ||
+        ''
+      if (!title) continue
+
+      const cur = stats.get(title) ?? { started: 0, completed: 0 }
       cur.started += 1
       if (p.is_completed) cur.completed += 1
-      stats.set(p.course_title, cur)
+      stats.set(title, cur)
     }
 
     return Array.from(stats.entries())
       .map(([title, counts]) => {
         const course = courses.find((c) => c.title === title)
-        return course ? { course, ...counts } : null
+        return course ? { course, ...counts, totalLessons: 0 } : null
       })
       .filter((x): x is CourseProgress => !!x)
   }, [progressData, courses])
+
+  const courseProgressMerged = useMemo<CourseProgress[]>(() => {
+    if (courseProgress.length > 0) return courseProgress
+    if (localCourseProgress.length === 0) return []
+
+    return localCourseProgress
+      .map((p) => {
+        const course = courses.find((c) => c.id === p.courseId)
+        if (!course) return null
+        return {
+          course,
+          completed: p.completed,
+          started: p.completed,
+          totalLessons: 0,
+        } satisfies CourseProgress
+      })
+      .filter((x): x is CourseProgress => !!x)
+  }, [courseProgress, localCourseProgress, courses])
+
+  const detailQueries = useQueries({
+    queries: courseProgressMerged.map((cp) => ({
+      queryKey: courseKeys.detail(cp.course.id),
+      queryFn: () => getCourseDetail(cp.course.id),
+      staleTime: 5 * 60 * 1000,
+      enabled: courseProgressMerged.length > 0,
+    })),
+  })
+  const courseProgressWithTotals = courseProgressMerged.map((cp, i) => {
+    const detail = detailQueries[i]?.data as CourseDetail | undefined
+    const totalLessons = detail?.lessons_count ?? cp.started
+    return { ...cp, totalLessons }
+  })
 
   const displayName =
     profile?.nickname ||
@@ -145,7 +206,7 @@ const UserOverview = () => {
         </div>
       ) : (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-          {courseProgress.map((cp) => (
+          {courseProgressWithTotals.map((cp) => (
             <ProgressCard key={cp.course.id} {...cp} />
           ))}
         </div>

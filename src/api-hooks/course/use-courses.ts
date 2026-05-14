@@ -10,6 +10,7 @@ import {
 } from '@/service/course/course.service'
 import type {
   Course,
+  CourseDetail,
   CourseListResponse,
   CourseQueryParams,
   CourseRequest,
@@ -44,7 +45,7 @@ export function useCoursesPaginated(params?: CourseQueryParams) {
 }
 
 export function useCourse(id: number | string | undefined, enabled = true) {
-  return useQuery<Course, Error>({
+  return useQuery<CourseDetail, Error>({
     queryKey: courseKeys.detail(id ?? ''),
     queryFn: () => getCourseDetail(id as number | string),
     enabled: !!id && enabled,

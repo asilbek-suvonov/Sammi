@@ -9,7 +9,7 @@ import { PublicNavRight } from '@/components/public/public-nav-right'
 import { SignInDialog } from '@/components/public/sign-in-dialog'
 import { Badge } from '@/components/ui/badge'
 import { levelVariant } from '@/lib/variants'
-import { useAccessToken, useIsAuthed } from '@/stores/selectors'
+import { useIsAuthed } from '@/stores/selectors'
 import { PageLoader } from '@/components/shared/loader'
 
 interface Props { id: string }
@@ -17,18 +17,21 @@ interface Props { id: string }
 export function CourseDetailPage({ id }: Props) {
   const navigate = useNavigate()
   const isAuthed = useIsAuthed()
-  const accessToken = useAccessToken()
   const { data: course, isLoading } = useCourse(id)
   // Progress endpoint requires JWT — skip for social-only sessions to
   // avoid an inevitable 401 that the global interceptor would surface.
-  const { data: progressData } = useLessonProgressList(undefined, {
-    enabled: !!accessToken,
-  })
+  const { data: progressData } = useLessonProgressList(undefined, { enabled: isAuthed })
   const [loginOpen, setLoginOpen] = useState(false)
 
   const enrolled = useMemo(() => {
     if (!course || !progressData?.results) return false
-    return progressData.results.some((p) => p.course_title === course.title)
+    return progressData.results.some((p) => {
+      const title =
+        p.course_title ||
+        (typeof p.lesson === 'number' ? undefined : p.lesson.course_title) ||
+        ''
+      return title === course.title
+    })
   }, [course, progressData])
 
   if (isLoading) {
