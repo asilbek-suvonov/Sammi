@@ -18,7 +18,7 @@ export interface VerifyOtpResponse {
   id?: number
   email: string
   full_name?: string
-  avatar_url?: string
+  avatar_url?: string | null
   country?: string
   language_code?: string
   is_new_user?: boolean

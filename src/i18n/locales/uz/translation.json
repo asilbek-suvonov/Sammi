@@ -69,5 +69,15 @@
   "noSourcesFound": "Manbalar topilmadi.",
   "source": "Manba",
   "deleteSource": "Manbani o‘chirish",
-  "deleteSourceConfirm": "Haqiqatan ham manbani o‘chirmoqchimisiz:"
+  "deleteSourceConfirm": "Haqiqatan ham manbani o‘chirmoqchimisiz:",
+  "lastfooterDescription": "Dasturlashni o‘rganishning zamonaviy platformasi. Kurslar, loyihalar va amaliy manbalar bir joyda.",
+  "platform": "Platforma",
+  "support": "Yordam",
+  "legal": "Huquqiy",
+  "codeSources": "Kod manbalari",
+  "helpCenter": "Yordam markazi",
+  "documentation": "Hujjatlar",
+  "community": "Hamjamiyat",
+  "termsOfService": "Foydalanish shartlari",
+  "privacyPolicy": "Maxfiylik siyosati"
 }

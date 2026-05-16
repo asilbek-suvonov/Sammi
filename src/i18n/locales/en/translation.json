@@ -69,5 +69,15 @@
   "noSourcesFound": "No sources found.",
   "source": "Source",
   "deleteSource": "Delete Source",
-  "deleteSourceConfirm": "Are you sure you want to delete"
+  "deleteSourceConfirm": "Are you sure you want to delete",
+  "lastfooterDescription": "A modern platform for learning programming. Courses, projects, and practical resources in one place.",
+  "platform": "Platform",
+  "support": "Support",
+  "legal": "Legal",
+  "codeSources": "Code Sources",
+  "helpCenter": "Help Center",
+  "documentation": "Documentation",
+  "community": "Community",
+  "termsOfService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy"
 }
