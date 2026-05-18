@@ -55,7 +55,7 @@ const toAuthUser = (data: VerifyOtpResponse): AuthUser => {
     firstName,
     lastName,
     fullName: data.full_name,
-    avatarUrl: data.avatar_url,
+    // avatarUrl: data.avatar_url || null,
     country: data.country,
     languageCode: data.language_code,
     isNewUser: data.is_new_user,
