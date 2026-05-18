@@ -30,12 +30,12 @@ export function useEntityCrud<T>() {
 
   const confirmDelete = useCallback(
     (handler: (entity: T) => void) => {
-      setDeletePending((current) => {
-        if (current) handler(current)
-        return null
-      })
+      const current = deletePending
+      if (!current) return
+      setDeletePending(null)
+      handler(current)
     },
-    []
+    [deletePending]
   )
 
   return {

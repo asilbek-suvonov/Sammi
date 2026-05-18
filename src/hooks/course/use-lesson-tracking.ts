@@ -13,10 +13,13 @@ interface Options {
 }
 
 export function useLessonTracking({ flatLessons, courseId }: Options) {
-  const isLoggedIn = useIsAuthed()
+  // Fire the request for any authenticated user (JWT or cookie session) so
+  // Google/GitHub users get their progress persisted on the backend too.
+  // 401s for unsupported auth combos are handled silently by the interceptor.
+  const isAuthed = useIsAuthed()
 
   const { data: progressData } = useLessonProgressList(undefined, {
-    enabled: isLoggedIn,
+    enabled: isAuthed,
   })
 
   const progressMap = useMemo(() => {
@@ -87,10 +90,7 @@ export function useLessonTracking({ flatLessons, courseId }: Options) {
   const markDone = (lessonId: number) => {
     setLocalCompleted((prev) => new Set([...prev, lessonId]))
 
-    // Both JWT (admin/OTP) and social (Google/GitHub session cookie) flows
-    // can persist progress — `withCredentials: true` sends cookies on every
-    // request, so session-authed users hit the same endpoint successfully.
-    if (!isLoggedIn) return
+    if (!isAuthed) return
 
     const existing = progressMap.get(lessonId)
     if (existing) {

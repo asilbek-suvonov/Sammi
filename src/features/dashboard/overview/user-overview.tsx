@@ -66,6 +66,8 @@ function ProgressCard({ course, completed, started, totalLessons }: CourseProgre
 
 const UserOverview = () => {
   const user = useAuthUser()
+  // Fetch progress for any authenticated user (JWT or cookie session) and fall
+  // back to local-storage data below when the API returns nothing.
   const isAuthed = useIsAuthed()
   const localCourseProgress = useMemo(() => {
     try {

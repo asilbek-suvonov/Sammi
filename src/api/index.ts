@@ -103,6 +103,13 @@ apiClient.interceptors.request.use(
       config.headers.set('Authorization', `Bearer ${accessToken}`)
     }
 
+    // FormData uploads need `multipart/form-data; boundary=...` which the
+    // browser sets automatically. The default `application/json` would
+    // override that and the backend returns 415 — drop it for FormData.
+    if (config.data instanceof FormData) {
+      config.headers.delete('Content-Type')
+    }
+
     const csrfToken = getCSRFToken()
     if (csrfToken) {
       config.headers.set('X-CSRFToken', csrfToken)
