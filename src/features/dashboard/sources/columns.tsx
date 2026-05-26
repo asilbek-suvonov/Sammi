@@ -27,7 +27,7 @@ export const getSourcesColumns = ({
   {
     accessorKey: 'github_url',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='GitHub URL' />
+      <DataTableColumnHeader column={column} title='Repository URL' />
     ),
     cell: ({ row }) => {
       const url = row.getValue('github_url') as string

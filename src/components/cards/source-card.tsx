@@ -1,4 +1,3 @@
-import { IconGithub } from '@/assets/brand-icons'
 import { Card } from '@/components/ui/card'
 import type { SourceCode } from '@/service/sources/sources.type'
 import { ExternalLink, FolderGit2 } from 'lucide-react'
@@ -34,13 +33,7 @@ export function SourceCard({ source }: { source: SourceCode }) {
             </div>
           </div>
 
-          <div className='flex items-center gap-3'>
-            <div className='flex h-9 w-9 items-center justify-center rounded-full border  bg-neutral-200'>
-              <IconGithub className='size-4 text-neutral-700' />
-            </div>
-
-            <ExternalLink className='size-4 text-neutral-500 transition-colors group-hover:text-foreground' />
-          </div>
+          <ExternalLink className='size-4 text-neutral-500 transition-colors group-hover:text-foreground' />
         </div>
       </Card>
     </a>

@@ -1,8 +1,6 @@
-import { GitHubLogoIcon } from '@radix-ui/react-icons'
 import {
   BookOpen,
   FolderGit2,
-  GitCommit,
   FileText,
   ShieldCheck,
   LifeBuoy,
@@ -49,21 +47,21 @@ const FOOTER_COLS = [
       {
         label: 'helpCenter',
         type: 'link',
-        value: 'https://github.com/BekjonUz',
+        value: '#',
         icon: LifeBuoy,
       },
 
       {
         label: 'documentation',
         type: 'link',
-        value: 'https://github.com/asilbek-suvonov',
+        value: '#',
         icon: FileText,
       },
 
       {
         label: 'community',
         type: 'link',
-        value: 'https://github.com/Temurprogram77',
+        value: '#',
         icon: Users,
       },
     ],
@@ -76,14 +74,14 @@ const FOOTER_COLS = [
       {
         label: 'termsOfService',
         type: 'link',
-        value: 'https://github.com/SardorbekCoder07',
+        value: '#',
         icon: ScrollText,
       },
 
       {
         label: 'privacyPolicy',
         type: 'link',
-        value: 'https://github.com/ismat-dev',
+        value: '#',
         icon: ShieldCheck,
       },
     ],
@@ -127,25 +125,6 @@ export function LandingFooter() {
               {t('footerDescription')}
             </p>
 
-            <div className='flex items-center gap-3'>
-              <a
-                href='https://github.com'
-                target='_blank'
-                rel='noreferrer'
-                className='flex size-9 items-center justify-center rounded-lg border bg-background transition-colors hover:bg-accent'
-              >
-                <GitHubLogoIcon className='size-4' />
-              </a>
-
-              <a
-                href='https://github.com'
-                target='_blank'
-                rel='noreferrer'
-                className='flex size-9 items-center justify-center rounded-lg border bg-background transition-colors hover:bg-accent'
-              >
-                <GitCommit className='size-4' />
-              </a>
-            </div>
           </div>
 
           {FOOTER_COLS.map((col) => (

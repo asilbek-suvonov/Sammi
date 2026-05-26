@@ -1,6 +1,5 @@
 export const API_ENDPOINTS = {
   AUTH: {
-    GITHUB: '/auth/github/',
     GOOGLE: '/auth/google/',
     LOGIN: '/login/',
   },

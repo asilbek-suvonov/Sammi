@@ -14,7 +14,7 @@ interface Options {
 
 export function useLessonTracking({ flatLessons, courseId }: Options) {
   // Fire the request for any authenticated user (JWT or cookie session) so
-  // Google/GitHub users get their progress persisted on the backend too.
+  // Google OAuth users get their progress persisted on the backend too.
   // 401s for unsupported auth combos are handled silently by the interceptor.
   const isAuthed = useIsAuthed()
 

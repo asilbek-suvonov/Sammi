@@ -88,7 +88,6 @@ const isPublicAuthEndpoint = (url?: string) => {
   if (!url) return false
   return (
     url.includes('/auth/google') ||
-    url.includes('/auth/github') ||
     url.includes('/login') ||
     url.includes('/send-otp') ||
     url.includes('/verify-otp')

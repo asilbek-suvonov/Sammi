@@ -3,7 +3,6 @@ import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { GoogleLogin } from '@react-oauth/google'
 
-import { IconGithub } from '@/assets/brand-icons'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,7 +15,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 
-import { useGithubSignIn } from '@/hooks/auth/use-github-signin'
 import { useGoogleSignIn } from '@/hooks/auth/use-google-signin'
 import { useSendOtp } from '@/api-hooks/auth/userOTP/use-OTP'
 
@@ -62,7 +60,6 @@ export function SignInDialog({
   }
 
   const google = useGoogleSignIn(closeAndForward)
-  const github = useGithubSignIn()
   const signingIn = google.signingIn
 
   const { mutate: sendOtp, isPending: isSendingOtp } = useSendOtp({
@@ -116,17 +113,6 @@ export function SignInDialog({
                 size="large"
               />
             </div>
-
-            {/* GitHub Login Section — full-page redirect to github.com */}
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={() => github.start()}
-              disabled={signingIn}
-            >
-              <IconGithub className="size-4" />
-              Continue with GitHub
-            </Button>
 
             <div className="relative w-full py-1">
               <Separator />

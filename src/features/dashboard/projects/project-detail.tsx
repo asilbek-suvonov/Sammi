@@ -93,7 +93,7 @@ export function AdminProjectDetail({ id }: AdminProjectDetailProps) {
             <Button variant='outline' size='sm' asChild>
               <a href={project.github_url} target='_blank' rel='noreferrer'>
                 <ExternalLink className='mr-2 size-4' />
-                GitHub
+                Repository
               </a>
             </Button>
           )}

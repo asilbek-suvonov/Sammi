@@ -109,9 +109,9 @@ export function SourceDialog({ open, onOpenChange, source }: SourceDialogProps) 
               name='github_url'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>GitHub URL</FormLabel>
+                  <FormLabel>Repository URL</FormLabel>
                   <FormControl>
-                    <Input placeholder='https://github.com/...' {...field} />
+                    <Input placeholder='https://example.com/repo' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
